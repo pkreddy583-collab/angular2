@@ -1,0 +1,102 @@
+<main class="container mx-auto p-4 sm:p-6 lg:p-8">
+  <header class="mb-8 flex justify-between items-center">
+    <div>
+      <h1 class="text-3xl font-bold text-slate-100">Manage Incidents</h1>
+      <p class="mt-1 text-slate-400">Add, edit, or remove incidents to simulate data changes.</p>
+    </div>
+    <button (click)="openAddModal()"
+      class="bg-cyan-500 hover:bg-cyan-600 text-white font-bold py-2 px-4 rounded-lg transition-colors flex items-center">
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+        <path fill-rule="evenodd"
+          d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z"
+          clip-rule="evenodd" />
+      </svg>
+      Add New Incident
+    </button>
+  </header>
+
+  <div class="bg-slate-800 rounded-lg shadow-lg overflow-hidden">
+    <div class="overflow-x-auto">
+      <table class="min-w-full text-sm text-left text-slate-300">
+        <thead class="text-xs text-slate-400 uppercase bg-slate-700/50">
+          <tr>
+            <th scope="col" class="px-6 py-3">Incident ID</th>
+            <th scope="col" class="px-6 py-3">Title</th>
+            <th scope="col" class="px-6 py-3">Priority</th>
+            <th scope="col" class="px-6 py-3">Assigned To</th>
+            <th scope="col" class="px-6 py-3">SLA Breach Date</th>
+            <th scope="col" class="px-6 py-3 text-right">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (incident of incidents(); track incident.id) {
+          <tr class="border-b border-slate-700 hover:bg-slate-700/30">
+            <td class="px-6 py-4 font-mono text-xs">{{ incident.id }}</td>
+            <th scope="row" class="px-6 py-4 font-medium text-slate-50 whitespace-nowrap">{{ incident.title }}</th>
+            <td class="px-6 py-4">{{ incident.priority }}</td>
+            <td class="px-6 py-4">{{ incident.assignedTo }}</td>
+            <td class="px-6 py-4">{{ incident.slaBreachDate | date:'medium' }}</td>
+            <td class="px-6 py-4 text-right space-x-2">
+              <button (click)="openEditModal(incident)" class="font-medium text-cyan-400 hover:underline">Edit</button>
+              <button (click)="onDelete(incident.id)" class="font-medium text-red-500 hover:underline">Delete</button>
+            </td>
+          </tr>
+          } @empty {
+          <tr>
+            <td colspan="6" class="text-center py-8 text-slate-400">No incidents found.</td>
+          </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  </div>
+</main>
+
+<!-- Modal -->
+@if (isModalOpen()) {
+<div class="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4" (click)="closeModal()">
+  <div class="bg-slate-800 rounded-lg shadow-2xl w-full max-w-lg border border-slate-700" (click)="$event.stopPropagation()">
+    <form [formGroup]="incidentForm" (ngSubmit)="onSubmit()">
+      <div class="p-6">
+        <h3 class="text-xl font-semibold text-slate-100 mb-4">{{ modalTitle() }}</h3>
+        <div class="space-y-4">
+          <div>
+            <label for="title" class="block mb-2 text-sm font-medium text-slate-300">Title</label>
+            <input type="text" id="title" formControlName="title"
+                   class="bg-slate-700 border border-slate-600 text-slate-100 text-sm rounded-lg focus:ring-cyan-500 focus:border-cyan-500 block w-full p-2.5"
+                   placeholder="e.g., Production server unresponsive">
+          </div>
+          <div>
+            <label for="assignedTo" class="block mb-2 text-sm font-medium text-slate-300">Assigned To</label>
+            <input type="text" id="assignedTo" formControlName="assignedTo"
+                   class="bg-slate-700 border border-slate-600 text-slate-100 text-sm rounded-lg focus:ring-cyan-500 focus:border-cyan-500 block w-full p-2.5"
+                   placeholder="e.g., Alice">
+          </div>
+          <div class="grid grid-cols-2 gap-4">
+            <div>
+              <label for="priority" class="block mb-2 text-sm font-medium text-slate-300">Priority</label>
+              <select id="priority" formControlName="priority"
+                      class="bg-slate-700 border border-slate-600 text-slate-100 text-sm rounded-lg focus:ring-cyan-500 focus:border-cyan-500 block w-full p-2.5">
+                <option value="P1">P1</option>
+                <option value="P2">P2</option>
+                <option value="P3">P3</option>
+              </select>
+            </div>
+            <div>
+              <label for="slaBreachDate" class="block mb-2 text-sm font-medium text-slate-300">SLA Breach Date</label>
+              <input type="datetime-local" id="slaBreachDate" formControlName="slaBreachDate"
+                     class="bg-slate-700 border border-slate-600 text-slate-100 text-sm rounded-lg focus:ring-cyan-500 focus:border-cyan-500 block w-full p-2.5">
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="bg-slate-700/50 px-6 py-3 flex justify-end space-x-3 rounded-b-lg">
+        <button type="button" (click)="closeModal()"
+                class="py-2 px-4 text-sm font-medium text-slate-300 bg-slate-600 rounded-lg hover:bg-slate-500 transition-colors">Cancel</button>
+        <button type="submit" [disabled]="incidentForm.invalid"
+                class="py-2 px-4 text-sm font-medium text-white bg-cyan-600 rounded-lg hover:bg-cyan-700 transition-colors disabled:bg-slate-500 disabled:cursor-not-allowed">Save</button>
+      </div>
+    </form>
+  </div>
+</div>
+}

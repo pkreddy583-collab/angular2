@@ -1,0 +1,5 @@
+{
+  "name": "SLA Breach Priority Incidents ang2",
+  "description": "A simple dashboard to track high-priority incidents that are close to breaching their Service Level Agreement (SLA). Incidents are color-coded based on their proximity to the breach time.",
+  "requestFramePermissions": []
+}
