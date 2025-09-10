@@ -1,9 +1,9 @@
 import { Routes } from '@angular/router';
 import { DashboardComponent } from './components/dashboard/dashboard.component';
-import { ManageIncidentsComponent } from './components/manage-incidents/manage-incidents.component';
+import { IncidentDetailsComponent } from './components/incident-details/incident-details.component';
 
 export const routes: Routes = [
   { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
   { path: 'dashboard', component: DashboardComponent },
-  { path: 'manage', component: ManageIncidentsComponent },
+  { path: 'incident/:id', component: IncidentDetailsComponent },
 ];

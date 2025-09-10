@@ -5,4 +5,7 @@ export interface Incident {
   assignedTo: string;
   createdDate: Date;
   slaBreachDate: Date;
+  description: string;
+  affectedServices: string[];
+  lastUpdate: string;
 }

@@ -1,11 +1,12 @@
 import { Component, ChangeDetectionStrategy, input, signal, computed, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { RouterLink } from '@angular/router';
 import { Incident } from '../../models/incident.model';
 
 @Component({
   selector: 'app-incident-card',
   templateUrl: './incident-card.component.html',
-  imports: [CommonModule],
+  imports: [CommonModule, RouterLink],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class IncidentCardComponent implements OnDestroy {
@@ -36,11 +37,11 @@ export class IncidentCardComponent implements OnDestroy {
 
   statusColorClass = computed(() => {
     const hours = this.timeRemainingHours();
-    if (hours <= 0) return { border: 'border-gray-500', text: 'text-gray-400', bg: 'bg-gray-800/30' };
-    if (hours < 1) return { border: 'border-red-500', text: 'text-red-400', bg: 'bg-red-500/10' };
-    if (hours < 8) return { border: 'border-orange-500', text: 'text-orange-400', bg: 'bg-orange-500/10' };
-    if (hours < 24) return { border: 'border-yellow-500', text: 'text-yellow-400', bg: 'bg-yellow-500/10' };
-    return { border: 'border-green-500', text: 'text-green-400', bg: 'bg-green-500/10' };
+    if (hours <= 0) return { border: 'border-gray-300', text: 'text-gray-500', bg: 'bg-gray-50' };
+    if (hours < 1) return { border: 'border-red-400', text: 'text-red-600', bg: 'bg-red-50' };
+    if (hours < 8) return { border: 'border-orange-400', text: 'text-orange-600', bg: 'bg-orange-50' };
+    if (hours < 24) return { border: 'border-yellow-400', text: 'text-yellow-600', bg: 'bg-yellow-50' };
+    return { border: 'border-green-400', text: 'text-green-600', bg: 'bg-green-50' };
   });
 
   formattedTimeRemaining = computed(() => {
