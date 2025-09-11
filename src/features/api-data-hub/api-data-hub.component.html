@@ -1,0 +1,146 @@
+<main class="container mx-auto p-4 sm:p-6 lg:p-8">
+  <!-- Header -->
+  <header class="mb-8">
+    <div class="flex flex-wrap items-center justify-between gap-4">
+      <div>
+        <h1 class="text-3xl font-bold text-gray-800 flex items-center">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 mr-3 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
+          </svg>
+          API & Data Hub
+        </h1>
+        <p class="mt-1 text-gray-500">Your single source of truth for backend integration.</p>
+      </div>
+    </div>
+  </header>
+
+  <!-- Info Banner -->
+  <div class="bg-blue-50 border-l-4 border-blue-400 p-4 rounded-md mb-8">
+    <div class="flex">
+      <div class="flex-shrink-0">
+        <svg class="h-5 w-5 text-blue-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+          <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd" />
+        </svg>
+      </div>
+      <div class="ml-3">
+        <p class="text-sm text-blue-700">
+          This hub provides the specifications for the API endpoints and Databricks SQL queries needed to power the dashboards. The backend team should implement these specifications to ensure seamless data flow.
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <div class="flex flex-col md:flex-row gap-8">
+    <!-- Navigation Sidebar -->
+    <aside class="md:w-1/4">
+      <h2 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">Data Modules</h2>
+      <nav class="space-y-1">
+        <button (click)="selectSection('incidents')" [class]="activeSection() === 'incidents' ? 'bg-blue-100 text-blue-700' : 'text-gray-600 hover:bg-gray-100'" class="w-full flex items-center px-3 py-2 text-sm font-medium rounded-md text-left">
+          SLA Incidents
+        </button>
+        <button (click)="selectSection('serviceJourney')" [class]="activeSection() === 'serviceJourney' ? 'bg-blue-100 text-blue-700' : 'text-gray-600 hover:bg-gray-100'" class="w-full flex items-center px-3 py-2 text-sm font-medium rounded-md text-left">
+          Service Journey Details
+        </button>
+        <button (click)="selectSection('slaCompliance')" [class]="activeSection() === 'slaCompliance' ? 'bg-blue-100 text-blue-700' : 'text-gray-600 hover:bg-gray-100'" class="w-full flex items-center px-3 py-2 text-sm font-medium rounded-md text-left">
+          SLA Compliance Details
+        </button>
+      </nav>
+    </aside>
+
+    <!-- Content Area -->
+    <div class="flex-1">
+      <!-- Incidents Section -->
+      @if (activeSection() === 'incidents' && configs().incidents; as config) {
+        <div class="bg-white rounded-lg shadow-md overflow-hidden">
+          <div class="p-5">
+            <h2 class="text-xl font-bold text-gray-800">{{ config.title }}</h2>
+            <p class="mt-1 text-sm text-gray-600">{{ config.description }}</p>
+          </div>
+          <div class="border-b border-gray-200 px-5">
+            <nav class="-mb-px flex space-x-6" aria-label="Tabs">
+              <button (click)="selectTab('incidents', 'api')" [class]="activeTab()['incidents'] === 'api' ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'" class="whitespace-nowrap py-3 px-1 border-b-2 font-medium text-sm">API Endpoint</button>
+              <button (click)="selectTab('incidents', 'json')" [class]="activeTab()['incidents'] === 'json' ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'" class="whitespace-nowrap py-3 px-1 border-b-2 font-medium text-sm">JSON Response</button>
+              <button (click)="selectTab('incidents', 'sql')" [class]="activeTab()['incidents'] === 'sql' ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'" class="whitespace-nowrap py-3 px-1 border-b-2 font-medium text-sm">Databricks SQL</button>
+            </nav>
+          </div>
+          <div class="relative bg-gray-800 p-4">
+            @if(activeTab()['incidents'] === 'api') {
+              <pre><code class="language-bash text-sm text-gray-300 whitespace-pre-wrap">HTTP Method: GET\nAPI Endpoint: /api/incidents</code></pre>
+            }
+            @if(activeTab()['incidents'] === 'json') {
+              @let content = prettyPrintJson(incidentSample());
+              <pre><code class="language-json text-sm text-gray-300 whitespace-pre-wrap">{{ content }}</code></pre>
+              <button (click)="copyToClipboard('incidentsJson', content)" class="absolute top-3 right-3 bg-gray-700 text-gray-300 hover:bg-gray-600 px-3 py-1 rounded text-xs font-medium">{{ copied() === 'incidentsJson' ? 'Copied!' : 'Copy' }}</button>
+            }
+            @if(activeTab()['incidents'] === 'sql') {
+              <pre><code class="language-sql text-sm text-gray-300 whitespace-pre-wrap">{{ config.query }}</code></pre>
+              <button (click)="copyToClipboard('incidentsSql', config.query)" class="absolute top-3 right-3 bg-gray-700 text-gray-300 hover:bg-gray-600 px-3 py-1 rounded text-xs font-medium">{{ copied() === 'incidentsSql' ? 'Copied!' : 'Copy' }}</button>
+            }
+          </div>
+        </div>
+      }
+
+      <!-- Service Journey Section -->
+      @if (activeSection() === 'serviceJourney' && configs().serviceJourney; as config) {
+        <div class="bg-white rounded-lg shadow-md overflow-hidden">
+          <div class="p-5">
+            <h2 class="text-xl font-bold text-gray-800">{{ config.title }}</h2>
+            <p class="mt-1 text-sm text-gray-600">{{ config.description }}</p>
+          </div>
+          <div class="border-b border-gray-200 px-5">
+            <nav class="-mb-px flex space-x-6" aria-label="Tabs">
+              <button (click)="selectTab('serviceJourney', 'api')" [class]="activeTab()['serviceJourney'] === 'api' ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'" class="whitespace-nowrap py-3 px-1 border-b-2 font-medium text-sm">API Endpoint</button>
+              <button (click)="selectTab('serviceJourney', 'json')" [class]="activeTab()['serviceJourney'] === 'json' ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'" class="whitespace-nowrap py-3 px-1 border-b-2 font-medium text-sm">JSON Response</button>
+              <button (click)="selectTab('serviceJourney', 'sql')" [class]="activeTab()['serviceJourney'] === 'sql' ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'" class="whitespace-nowrap py-3 px-1 border-b-2 font-medium text-sm">Databricks SQL</button>
+            </nav>
+          </div>
+          <div class="relative bg-gray-800 p-4">
+            @if(activeTab()['serviceJourney'] === 'api') {
+              <pre><code class="language-bash text-sm text-gray-300 whitespace-pre-wrap">HTTP Method: GET\nAPI Endpoint: /api/observability/journey-details</code></pre>
+            }
+            @if(activeTab()['serviceJourney'] === 'json') {
+              @let content = prettyPrintJson(journeySample());
+              <pre><code class="language-json text-sm text-gray-300 whitespace-pre-wrap">{{ content }}</code></pre>
+              <button (click)="copyToClipboard('journeyJson', content)" class="absolute top-3 right-3 bg-gray-700 text-gray-300 hover:bg-gray-600 px-3 py-1 rounded text-xs font-medium">{{ copied() === 'journeyJson' ? 'Copied!' : 'Copy' }}</button>
+            }
+            @if(activeTab()['serviceJourney'] === 'sql') {
+              <pre><code class="language-sql text-sm text-gray-300 whitespace-pre-wrap">{{ config.query }}</code></pre>
+              <button (click)="copyToClipboard('journeySql', config.query)" class="absolute top-3 right-3 bg-gray-700 text-gray-300 hover:bg-gray-600 px-3 py-1 rounded text-xs font-medium">{{ copied() === 'journeySql' ? 'Copied!' : 'Copy' }}</button>
+            }
+          </div>
+        </div>
+      }
+
+      <!-- SLA Compliance Section -->
+      @if (activeSection() === 'slaCompliance' && configs().slaCompliance; as config) {
+        <div class="bg-white rounded-lg shadow-md overflow-hidden">
+          <div class="p-5">
+            <h2 class="text-xl font-bold text-gray-800">{{ config.title }}</h2>
+            <p class="mt-1 text-sm text-gray-600">{{ config.description }}</p>
+          </div>
+          <div class="border-b border-gray-200 px-5">
+            <nav class="-mb-px flex space-x-6" aria-label="Tabs">
+              <button (click)="selectTab('slaCompliance', 'api')" [class]="activeTab()['slaCompliance'] === 'api' ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'" class="whitespace-nowrap py-3 px-1 border-b-2 font-medium text-sm">API Endpoint</button>
+              <button (click)="selectTab('slaCompliance', 'json')" [class]="activeTab()['slaCompliance'] === 'json' ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'" class="whitespace-nowrap py-3 px-1 border-b-2 font-medium text-sm">JSON Response</button>
+              <button (click)="selectTab('slaCompliance', 'sql')" [class]="activeTab()['slaCompliance'] === 'sql' ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'" class="whitespace-nowrap py-3 px-1 border-b-2 font-medium text-sm">Databricks SQL</button>
+            </nav>
+          </div>
+          <div class="relative bg-gray-800 p-4">
+            @if(activeTab()['slaCompliance'] === 'api') {
+              <pre><code class="language-bash text-sm text-gray-300 whitespace-pre-wrap">HTTP Method: GET\nAPI Endpoint: /api/observability/sla-details</code></pre>
+            }
+            @if(activeTab()['slaCompliance'] === 'json') {
+              @let content = prettyPrintJson(slaSample());
+              <pre><code class="language-json text-sm text-gray-300 whitespace-pre-wrap">{{ content }}</code></pre>
+              <button (click)="copyToClipboard('slaJson', content)" class="absolute top-3 right-3 bg-gray-700 text-gray-300 hover:bg-gray-600 px-3 py-1 rounded text-xs font-medium">{{ copied() === 'slaJson' ? 'Copied!' : 'Copy' }}</button>
+            }
+            @if(activeTab()['slaCompliance'] === 'sql') {
+              <pre><code class="language-sql text-sm text-gray-300 whitespace-pre-wrap">{{ config.query }}</code></pre>
+              <button (click)="copyToClipboard('slaSql', config.query)" class="absolute top-3 right-3 bg-gray-700 text-gray-300 hover:bg-gray-600 px-3 py-1 rounded text-xs font-medium">{{ copied() === 'slaSql' ? 'Copied!' : 'Copy' }}</button>
+            }
+          </div>
+        </div>
+      }
+    </div>
+  </div>
+</main>

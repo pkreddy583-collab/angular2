@@ -1,17 +1,27 @@
 <nav class="bg-gray-800 sticky top-0 z-50 border-b border-gray-700">
   <div class="container mx-auto px-4 sm:px-6 lg:px-8">
     <div class="flex items-center justify-between h-16">
+      
       <div class="flex items-center">
-        <a routerLink="/dashboard" class="flex items-center space-x-3 text-white">
-          <div class="bg-green-500 rounded-full p-1.5">
-             <svg class="h-6 w-6 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
-              <line x1="12" y1="5" x2="12" y2="19"></line>
-              <line x1="5" y1="12" x2="19" y2="12"></line>
-            </svg>
+        <div class="flex-shrink-0">
+          <a routerLink="/dashboard">
+            <div class="bg-green-500 rounded-full p-1.5">
+              <svg class="h-6 w-6 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="12" y1="5" x2="12" y2="19"></line>
+                <line x1="5" y1="12" x2="19" y2="12"></line>
+              </svg>
+            </div>
+          </a>
+        </div>
+        <div class="hidden md:block">
+          <div class="ml-10 flex items-baseline space-x-4">
+            <a routerLink="/dashboard" routerLinkActive="bg-gray-900 text-white" [routerLinkActiveOptions]="{exact: true}" class="text-gray-300 hover:bg-gray-700 hover:text-white px-3 py-2 rounded-md text-sm font-medium">SLA Watchtower</a>
+            <a routerLink="/observability" routerLinkActive="bg-gray-900 text-white" class="text-gray-300 hover:bg-gray-700 hover:text-white px-3 py-2 rounded-md text-sm font-medium">Observability</a>
+            <a routerLink="/api-data" routerLinkActive="bg-gray-900 text-white" class="text-gray-300 hover:bg-gray-700 hover:text-white px-3 py-2 rounded-md text-sm font-medium">API &amp; Data</a>
           </div>
-          <span class="text-xl font-semibold">Incident SLA Dashboard</span>
-        </a>
+        </div>
       </div>
+
       <div class="flex items-center">
         <div class="relative">
           <button class="flex items-center bg-gray-900 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-black/50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-800 focus:ring-white">
