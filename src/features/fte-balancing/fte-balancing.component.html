@@ -1,0 +1,150 @@
+<main class="container mx-auto p-4 sm:p-6 lg:p-8">
+  <!-- Header -->
+  <header class="mb-8">
+    <div class="flex flex-wrap items-center justify-between gap-4">
+      <div>
+        <h1 class="text-3xl font-bold text-gray-800 flex items-center">
+           <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 mr-3 text-blue-500" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 3v17.25m0 0c-1.472 0-2.882.265-4.185.75M12 20.25c1.472 0 2.882.265 4.185.75M18.75 4.97A48.416 48.416 0 0012 4.5c-2.291 0-4.545.16-6.75.47m13.5 0c1.01.143 2.01.317 3 .52m-3-.52l2.62 10.726c.122.499-.106 1.028-.589 1.202a5.988 5.988 0 01-2.036.243c-2.132 0-4.14-.354-6.044-.962l-1.532-1.025m11.852 0l-1.532 1.025m-14.486 0L1.623 6.14a2.25 2.25 0 012.15-2.15l10.726 2.62m0 0l2.62 10.726m0 0l2.62 10.726M5.25 6.14l10.726 2.62" />
+          </svg>
+          FTE Heat Map & Balancing
+        </h1>
+        <p class="mt-1 text-gray-500">Visualize and reallocate full-time equivalent resources across towers.</p>
+      </div>
+    </div>
+  </header>
+
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+    <!-- Left column: Heatmap and Balancing Tool -->
+    <div class="lg:col-span-2 space-y-6">
+      <!-- FTE Heat Map -->
+      <div class="bg-white rounded-lg shadow-md p-6">
+        <div class="flex justify-between items-center mb-4">
+          <h2 class="text-xl font-bold text-gray-700">Tower FTE Status Heat Map</h2>
+          <button (click)="exportTowerStatus()" class="p-1 text-gray-500 hover:text-green-600" title="Download CSV">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clip-rule="evenodd" /></svg>
+          </button>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+          @for(tower of towers(); track tower.id) {
+            <div class="rounded-lg border-l-4 p-5 shadow-sm flex flex-col" [class]="getHeatmapClass(tower.status)">
+              <div class="flex justify-between items-start mb-3">
+                <h3 class="text-lg font-bold">{{ tower.name }}</h3>
+                <div class="text-right">
+                  <p class="text-2xl font-mono font-bold">{{ tower.delta >= 0 ? '+' : '' }}{{ tower.delta | number: '1.1-1' }}</p>
+                  <p class="text-xs text-gray-600">Surplus/Deficit</p>
+                </div>
+              </div>
+
+              <div class="mt-auto pt-4 border-t grid grid-cols-2 gap-4 text-sm">
+                <div>
+                  <p class="font-semibold text-gray-700">Required FTE</p>
+                  <p class="text-xl font-bold text-gray-800">{{ tower.requiredFte | number:'1.1-1' }}</p>
+                  @if(tower.requiredFteTrend !== 'same' && tower.requiredFteChange !== null) {
+                    <div class="flex items-center text-xs font-semibold" [class]="tower.requiredFteTrend === 'up' ? 'text-red-600' : 'text-green-600'">
+                      @if(tower.requiredFteTrend === 'up') {
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M5 10l7-7m0 0l7 7m-7-7v18" /></svg>
+                      } @else {
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M19 14l-7 7m0 0l-7-7m7 7V3" /></svg>
+                      }
+                      <span>{{ tower.requiredFteChange | percent:'1.0-0' }} MoM</span>
+                    </div>
+                  } @else {
+                     <div class="text-xs text-gray-500">No Change</div>
+                  }
+                </div>
+                 <div>
+                  <p class="font-semibold text-gray-700">Deployed FTE</p>
+                  <p class="text-xl font-bold text-gray-800">{{ tower.deployedFte | number:'1.1-1' }}</p>
+                   @if(tower.deployedFteTrend !== 'same' && tower.deployedFteChange !== null) {
+                    <div class="flex items-center text-xs font-semibold" [class]="tower.deployedFteTrend === 'up' ? 'text-green-600' : 'text-red-600'">
+                      @if(tower.deployedFteTrend === 'up') {
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M5 10l7-7m0 0l7 7m-7-7v18" /></svg>
+                      } @else {
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M19 14l-7 7m0 0l-7-7m7 7V3" /></svg>
+                      }
+                      <span>{{ tower.deployedFteChange | percent:'1.0-0' }} MoM</span>
+                    </div>
+                  } @else {
+                     <div class="text-xs text-gray-500">No Change</div>
+                  }
+                </div>
+              </div>
+
+            </div>
+          }
+        </div>
+      </div>
+      
+      <!-- Balancing Tool -->
+      <div class="bg-white rounded-lg shadow-md p-6">
+        <h2 class="text-xl font-bold text-gray-700 mb-4">FTE Balancing Tool</h2>
+        <form [formGroup]="balancingForm" (ngSubmit)="commitMovement()" class="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
+          <div class="md:col-span-1">
+            <label for="fromTower" class="block text-sm font-medium text-gray-700">From (Surplus)</label>
+            <select id="fromTower" formControlName="fromTower" class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md bg-white text-gray-900">
+              <option disabled value="">Select source</option>
+              @for(tower of towersWithSurplus(); track tower.id) {
+                <option [value]="tower.id">{{ tower.name }} ({{ tower.delta | number: '1.1-1' }})</option>
+              }
+            </select>
+          </div>
+          <div class="md:col-span-1">
+            <label for="toTower" class="block text-sm font-medium text-gray-700">To (Deficit)</label>
+            <select id="toTower" formControlName="toTower" class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md bg-white text-gray-900">
+              <option disabled value="">Select destination</option>
+              @for(tower of towersWithDeficit(); track tower.id) {
+                <option [value]="tower.id">{{ tower.name }} ({{ tower.delta | number: '1.1-1' }})</option>
+              }
+            </select>
+          </div>
+          <div class="md:col-span-1">
+            <label for="fteAmount" class="block text-sm font-medium text-gray-700">FTE to Move</label>
+            <input type="number" id="fteAmount" formControlName="fteAmount" step="0.1" class="mt-1 focus:ring-blue-500 focus:border-blue-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md bg-white text-gray-900">
+          </div>
+          <div class="md:col-span-1">
+            <button type="submit" [disabled]="balancingForm.invalid" class="w-full inline-flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:bg-gray-400 disabled:cursor-not-allowed">
+              Commit Move
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Right column: Movement History -->
+    <div class="lg:col-span-1">
+      <div class="bg-white rounded-lg shadow-md p-6">
+        <div class="flex justify-between items-center mb-4">
+          <h2 class="text-xl font-bold text-gray-700">Movement History</h2>
+          <div class="flex items-center gap-2">
+            <input type="month" [value]="currentMonth()" (change)="onMonthChange($event)" class="text-sm border-gray-300 rounded-md bg-white text-gray-900">
+            <button (click)="exportMovementHistory()" class="p-1 text-gray-500 hover:text-green-600" title="Download CSV">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clip-rule="evenodd" /></svg>
+            </button>
+          </div>
+        </div>
+        <div class="space-y-3 max-h-96 overflow-y-auto pr-2">
+          @if (filteredHistory().length > 0) {
+            @for(move of filteredHistory(); track move.id) {
+              <div class="bg-gray-50 p-3 rounded-md border-l-4 border-gray-300">
+                <p class="text-sm font-semibold text-gray-800">
+                  Moved {{ move.fteAmount | number: '1.1-1' }} FTE
+                </p>
+                <p class="text-xs text-gray-600">
+                  <span class="font-medium text-red-600">{{ move.fromTower }}</span>
+                  &rarr;
+                  <span class="font-medium text-green-600">{{ move.toTower }}</span>
+                </p>
+                <p class="text-right text-xs text-gray-400 mt-1">
+                  {{ move.date | date: 'shortDate' }}
+                </p>
+              </div>
+            }
+          } @else {
+            <p class="text-sm text-gray-500 text-center py-8">No movements recorded for this month.</p>
+          }
+        </div>
+      </div>
+    </div>
+  </div>
+</main>

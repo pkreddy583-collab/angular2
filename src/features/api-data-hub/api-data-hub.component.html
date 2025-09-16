@@ -44,6 +44,9 @@
         <button (click)="selectSection('slaCompliance')" [class]="activeSection() === 'slaCompliance' ? 'bg-blue-100 text-blue-700' : 'text-gray-600 hover:bg-gray-100'" class="w-full flex items-center px-3 py-2 text-sm font-medium rounded-md text-left">
           SLA Compliance Details
         </button>
+         <button (click)="selectSection('towerReport')" [class]="activeSection() === 'towerReport' ? 'bg-blue-100 text-blue-700' : 'text-gray-600 hover:bg-gray-100'" class="w-full flex items-center px-3 py-2 text-sm font-medium rounded-md text-left">
+          Tower Deep Dive Report
+        </button>
       </nav>
     </aside>
 
@@ -137,6 +140,37 @@
             @if(activeTab()['slaCompliance'] === 'sql') {
               <pre><code class="language-sql text-sm text-gray-300 whitespace-pre-wrap">{{ config.query }}</code></pre>
               <button (click)="copyToClipboard('slaSql', config.query)" class="absolute top-3 right-3 bg-gray-700 text-gray-300 hover:bg-gray-600 px-3 py-1 rounded text-xs font-medium">{{ copied() === 'slaSql' ? 'Copied!' : 'Copy' }}</button>
+            }
+          </div>
+        </div>
+      }
+
+      <!-- Tower Deep Dive Section -->
+      @if (activeSection() === 'towerReport' && configs().towerReport; as config) {
+        <div class="bg-white rounded-lg shadow-md overflow-hidden">
+          <div class="p-5">
+            <h2 class="text-xl font-bold text-gray-800">{{ config.title }}</h2>
+            <p class="mt-1 text-sm text-gray-600">{{ config.description }}</p>
+          </div>
+          <div class="border-b border-gray-200 px-5">
+            <nav class="-mb-px flex space-x-6" aria-label="Tabs">
+              <button (click)="selectTab('towerReport', 'api')" [class]="activeTab()['towerReport'] === 'api' ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'" class="whitespace-nowrap py-3 px-1 border-b-2 font-medium text-sm">API Endpoint</button>
+              <button (click)="selectTab('towerReport', 'json')" [class]="activeTab()['towerReport'] === 'json' ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'" class="whitespace-nowrap py-3 px-1 border-b-2 font-medium text-sm">JSON Response</button>
+              <button (click)="selectTab('towerReport', 'sql')" [class]="activeTab()['towerReport'] === 'sql' ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'" class="whitespace-nowrap py-3 px-1 border-b-2 font-medium text-sm">Databricks SQL</button>
+            </nav>
+          </div>
+          <div class="relative bg-gray-800 p-4">
+            @if(activeTab()['towerReport'] === 'api') {
+              <pre><code class="language-bash text-sm text-gray-300 whitespace-pre-wrap">HTTP Method: GET\nAPI Endpoint: /api/tower-report/deep-dive?month=YYYY-MM&tower=Compute</code></pre>
+            }
+            @if(activeTab()['towerReport'] === 'json') {
+              @let content = prettyPrintJson(towerReportSample());
+              <pre><code class="language-json text-sm text-gray-300 whitespace-pre-wrap">{{ content }}</code></pre>
+              <button (click)="copyToClipboard('towerReportJson', content)" class="absolute top-3 right-3 bg-gray-700 text-gray-300 hover:bg-gray-600 px-3 py-1 rounded text-xs font-medium">{{ copied() === 'towerReportJson' ? 'Copied!' : 'Copy' }}</button>
+            }
+            @if(activeTab()['towerReport'] === 'sql') {
+              <pre><code class="language-sql text-sm text-gray-300 whitespace-pre-wrap">{{ config.query }}</code></pre>
+              <button (click)="copyToClipboard('towerReportSql', config.query)" class="absolute top-3 right-3 bg-gray-700 text-gray-300 hover:bg-gray-600 px-3 py-1 rounded text-xs font-medium">{{ copied() === 'towerReportSql' ? 'Copied!' : 'Copy' }}</button>
             }
           </div>
         </div>

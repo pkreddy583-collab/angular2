@@ -86,6 +86,32 @@ WHERE
 ORDER BY
     service_name;
 `
+    },
+    towerReport: {
+      title: 'Tower Deep Dive Report Data Query',
+      description: 'This query should return the raw data for a specific period to populate the Tower Deep Dive report, including ticket counts and structured activities.',
+      query: `-- This is a placeholder for your Databricks SQL query.
+-- Replace this with a query that aggregates data for the Tower Deep Dive report.
+-- The query should return a JSON object or rows that can be structured into the 'ReportData' model.
+
+-- Example for Ticket-Driven Work:
+SELECT 
+    'Compute' AS tower,
+    'Core Infra / Alpha' AS unit,
+    category,
+    priority,
+    COUNT(*) AS count,
+    AVG(time_to_resolve_minutes) AS avgTime
+FROM 
+    your_ticketing_database.tickets
+WHERE
+    resolved_month = '2025-07' AND tower = 'Compute'
+GROUP BY 
+    tower, unit, category, priority;
+
+-- You would need similar aggregations for structured activities, FTEs, etc.
+-- It might be easier to return a single JSON object from a backend service that does these calculations.
+`
     }
   });
 

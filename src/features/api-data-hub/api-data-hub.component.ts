@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { DataConfigService } from '../../services/data-config.service';
 import { IncidentService } from '../../services/incident.service';
 import { ObservabilityDataService } from '../../services/observability-data.service';
+import { TowerReportService } from '../../services/tower-report.service';
 
 @Component({
   selector: 'app-api-data-hub',
@@ -15,6 +16,7 @@ export class ApiDataHubComponent {
   private dataConfigService = inject(DataConfigService);
   private incidentService = inject(IncidentService);
   private observabilityDataService = inject(ObservabilityDataService);
+  private towerReportService = inject(TowerReportService);
 
   configs = this.dataConfigService.getConfigs();
 
@@ -24,7 +26,8 @@ export class ApiDataHubComponent {
   activeTab = signal<{[key: string]: string}>({
     incidents: 'api',
     serviceJourney: 'api',
-    slaCompliance: 'api'
+    slaCompliance: 'api',
+    towerReport: 'api'
   });
 
   // Example data for JSON response previews
@@ -32,6 +35,19 @@ export class ApiDataHubComponent {
   incidentSample = computed(() => this.incidentService.getIncidents()().slice(0, 2));
   journeySample = computed(() => this.observabilityDataService.getServiceJourneyDetails()().slice(0, 1));
   slaSample = computed(() => this.observabilityDataService.getSlaComplianceDetails()().slice(0, 1));
+  towerReportSample = computed(() => {
+    // We'll return the raw data structure that the API would provide.
+    const reportData = this.towerReportService.reportData();
+    // In a real API, you might not send the calculated sub-properties, just the raw data.
+    // This is a good representation of the API response payload.
+    return {
+      floatingFte: reportData.floatingFte,
+      computeTower: reportData.computeTower,
+      ticketDrivenWork: reportData.ticketDrivenWork,
+      structuredActivities: reportData.structuredActivities,
+      finalWorkload: reportData.finalWorkload
+    };
+  });
 
   // Method to copy code to clipboard
   copyToClipboard(key: string, content: string) {

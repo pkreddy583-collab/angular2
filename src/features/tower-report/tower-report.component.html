@@ -1,0 +1,399 @@
+<div class="container mx-auto p-4 sm:p-6 lg:p-8">
+  <!-- Header -->
+  <header class="mb-8">
+    <h1 class="text-3xl font-bold text-gray-800 flex items-center">
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 mr-3 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+      </svg>
+      Tower Deep Dive Report
+    </h1>
+    <p class="mt-1 text-gray-500">Analyze monthly workload, calculate required FTE, and identify trends in ticket and activity data.</p>
+  </header>
+  
+  <!-- Filters -->
+  <div class="grid grid-cols-1 md:grid-cols-5 gap-4 mb-6">
+    <div
+      class="md:col-span-4 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4"
+    >
+      <div class="bg-white p-3 rounded-md shadow-sm border border-gray-200">
+        <label for="month" class="text-xs text-gray-500">Month</label>
+        <select
+          id="month"
+          class="w-full border-none focus:ring-0 p-0 font-semibold bg-transparent text-gray-900"
+        >
+          <option>July</option>
+        </select>
+      </div>
+      <div class="bg-white p-3 rounded-md shadow-sm border border-gray-200">
+        <label for="tower" class="text-xs text-gray-500">Tower</label>
+        <select
+          id="tower"
+          class="w-full border-none focus:ring-0 p-0 font-semibold bg-transparent text-gray-900"
+        >
+          <option>Compute</option>
+        </select>
+      </div>
+      <div class="bg-white p-3 rounded-md shadow-sm border border-gray-200">
+        <label for="unit" class="text-xs text-gray-500">Unit</label>
+        <select
+          id="unit"
+          class="w-full border-none focus:ring-0 p-0 font-semibold bg-transparent text-gray-900"
+        >
+          <option>All Units</option>
+        </select>
+      </div>
+      <div class="bg-white p-3 rounded-md shadow-sm border border-gray-200">
+        <label for="pillar" class="text-xs text-gray-500">Pillar</label>
+        <select
+          id="pillar"
+          class="w-full border-none focus:ring-0 p-0 font-semibold bg-transparent text-gray-900"
+        >
+          <option>All Pillars</option>
+        </select>
+      </div>
+    </div>
+    <div class="flex items-end">
+      <button
+        class="w-full md:w-auto flex-shrink-0 bg-white p-3 rounded-md shadow-sm border border-gray-200 flex items-center justify-center h-full"
+      >
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          class="h-5 w-5 text-gray-500"
+          viewBox="0 0 20 20"
+          fill="currentColor"
+        >
+          <path
+            fill-rule="evenodd"
+            d="M3 3a1 1 0 011-1h12a1 1 0 011 1v3a1 1 0 01-.293.707L12 11.414V15a1 1 0 01-.293.707l-2 2A1 1 0 018 17v-5.586L3.293 6.707A1 1 0 013 6V3z"
+            clip-rule="evenodd"
+          />
+        </svg>
+      </button>
+    </div>
+  </div>
+
+  <!-- Floating FTE Pool -->
+  <app-collapsible-section title="Floating FTE Pool" [totalFte]="null">
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-6">
+      <div class="bg-white p-4 rounded-lg shadow-sm text-center">
+        <p class="text-sm text-gray-500">Total Floating Capacity</p>
+        <p class="text-3xl font-bold text-gray-800 mt-1">
+          {{ reportData().floatingFte.total | number : "1.1-1" }}
+          <span class="text-xl">FTE</span>
+        </p>
+      </div>
+      <div class="bg-white p-4 rounded-lg shadow-sm text-center">
+        <p class="text-sm text-gray-500">Currently Deployed</p>
+        <p class="text-3xl font-bold text-gray-800 mt-1">
+          {{ reportData().floatingFte.deployed | number : "1.1-1" }}
+          <span class="text-xl">FTE</span>
+        </p>
+      </div>
+      <div class="bg-white p-4 rounded-lg shadow-sm text-center">
+        <p class="text-sm text-gray-500">Available for Deployment</p>
+        <p class="text-3xl font-bold text-gray-800 mt-1">
+          {{ availableFte() | number : "1.1-1" }}
+          <span class="text-xl">FTE</span>
+        </p>
+      </div>
+    </div>
+  </app-collapsible-section>
+
+  <!-- Compute Tower Deep Dive -->
+  <div
+    class="bg-white rounded-lg shadow-sm border border-gray-200 p-4 mb-6"
+  >
+    <div class="flex flex-wrap justify-between items-center">
+      <div>
+        <h2 class="text-xl font-bold text-gray-700">
+          {{ reportData().computeTower.name }}
+        </h2>
+        <p class="text-sm text-gray-500">
+          {{ reportData().computeTower.subName }}
+        </p>
+      </div>
+      <div class="flex gap-8 text-right">
+        <div>
+          <p class="text-sm text-gray-500">Contractual FTE</p>
+          <p class="text-lg font-bold">
+            {{ reportData().computeTower.contractualFte | number : "1.1-1" }}
+          </p>
+        </div>
+        <div>
+          <p class="text-sm text-gray-500">Staffing vs Contract</p>
+          <p class="text-lg font-bold">
+            {{
+              reportData().computeTower.staffingVsContract | number : "1.1-1"
+            }}
+          </p>
+        </div>
+      </div>
+    </div>
+    <hr class="my-4" />
+    <h3 class="text-lg font-semibold text-center mb-2">
+      Workload Composition
+    </h3>
+    <app-doughnut-chart [data]="workloadComposition()" />
+  </div>
+
+  <!-- Act 1: Ticket-Driven Work -->
+  @if(ticketDrivenWork(); as tdw) {
+    <app-collapsible-section title="Act 1: Ticket-Driven Work" [totalFte]="finalTicketDrivenFte()">
+      <div class="flex justify-between items-center -mt-2 mb-2">
+         <div class="flex items-center gap-2">
+            <button (click)="openAnalyticsModal('tickets')" class="p-1 text-gray-500 hover:text-blue-600" title="View Analytics">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path d="M2 11a1 1 0 011-1h2a1 1 0 011 1v5a1 1 0 01-1 1H3a1 1 0 01-1-1v-5zM8 7a1 1 0 011-1h2a1 1 0 011 1v9a1 1 0 01-1 1H9a1 1 0 01-1-1V7zM14 4a1 1 0 011-1h2a1 1 0 011 1v12a1 1 0 01-1 1h-2a1 1 0 01-1-1V4z" /></svg>
+            </button>
+             <button (click)="exportTicketDrivenWork()" class="p-1 text-gray-500 hover:text-green-600" title="Download CSV">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clip-rule="evenodd" /></svg>
+            </button>
+        </div>
+        <span class="text-xs font-semibold px-2.5 py-1 rounded-full bg-blue-100 text-blue-800 border border-blue-200">
+          Using FTE Model: <strong>{{ fteCalculationModel() }}</strong>
+        </span>
+      </div>
+      <div class="overflow-x-auto">
+        <table class="w-full text-sm text-left">
+          <thead class="text-xs text-gray-700 uppercase bg-gray-50 sticky top-0">
+            <tr>
+              <th class="px-4 py-3">Category</th>
+              <th class="px-4 py-3">Priority</th>
+              <th class="px-4 py-3 text-center">Ticket Trend (3mo)</th>
+              <th class="px-4 py-3 text-right">Count</th>
+              <th class="px-4 py-3 text-right">{{ estimatedTimeColumnHeader() }}</th>
+              <th class="px-4 py-3 text-right">Hours</th>
+              <th class="px-4 py-3 text-right">FTE</th>
+              <th class="px-4 py-3 text-center">MoM Trend</th>
+            </tr>
+          </thead>
+          <tbody>
+          @for(item of tdw.items; track item.id) {
+            <tr class="border-b transition-colors text-gray-900" [class]="(item.fte > 1.0 || (item.fteChange && item.fteChange > 0.2 && item.fteChangeDirection === 'up')) ? 'bg-yellow-50 hover:bg-yellow-100' : 'hover:bg-gray-50'">
+              <td class="px-4 py-3 font-medium text-gray-900">{{ item.category }}</td>
+              <td class="px-4 py-3 text-gray-700">{{ item.priority }}</td>
+              <td class="px-4 py-3"><app-sparkline-chart [data]="item.countHistory" /></td>
+              <td class="px-4 py-3 text-right text-gray-700">{{ item.count }}</td>
+              <td class="px-4 py-3 text-right text-gray-700">{{ item.effectiveTime | number: '1.0-0' }}</td>
+              <td class="px-4 py-3 text-right text-gray-700">{{ item.hours | number: '1.2-2' }}</td>
+              <td class="px-4 py-3 text-right font-semibold text-blue-600">{{ item.fte | number: '1.3-3' }}</td>
+              <td class="px-4 py-3 text-center">
+                @if (item.fteChange && item.fteChangeDirection) {
+                  <span class="inline-flex items-center text-xs font-semibold px-2 py-0.5 rounded-full" [class]="item.fteChangeDirection === 'up' ? 'bg-red-100 text-red-800' : 'bg-green-100 text-green-800'">
+                    @if (item.fteChangeDirection === 'up') {
+                      <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M5 10l7-7m0 0l7 7m-7-7v18" /></svg>
+                    } @else {
+                      <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M19 14l-7 7m0 0l-7-7m7 7V3" /></svg>
+                    }
+                    {{ item.fteChange | percent:'1.0-0' }}
+                  </span>
+                } @else {
+                  <span class="text-gray-400">-</span>
+                }
+              </td>
+            </tr>
+          }
+          </tbody>
+          <tfoot>
+            <tr class="font-semibold bg-gray-100">
+              <td colspan="5" class="px-4 py-3 text-gray-800">System Calculated Total</td>
+              <td class="px-4 py-3 text-right text-gray-800">{{ tdw.systemCalculatedHours | number: '1.2-2' }}</td>
+              <td class="px-4 py-3 text-right text-blue-600">{{ tdw.systemCalculatedFte | number: '1.3-3' }}</td>
+              <td></td>
+            </tr>
+          </tfoot>
+        </table>
+      </div>
+      <div class="mt-4 p-4 bg-gray-50 rounded-md text-sm space-y-3">
+        <div class="flex justify-between items-center">
+            <div class="flex items-center gap-2">
+               <label for="managerAdjustment" class="font-medium text-gray-700">Manager Adjustment</label>
+               <div class="relative group">
+                 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-gray-400 cursor-pointer" viewBox="0 0 20 20" fill="currentColor">
+                   <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd" />
+                 </svg>
+                 <div class="absolute bottom-full z-10 mb-2 w-64 bg-gray-800 text-white text-xs rounded py-2 px-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none -translate-x-1/2 left-1/2">
+                   Adjust for unticketed work, data inaccuracies, or expected future changes to get a more realistic FTE calculation.
+                   <svg class="absolute text-gray-800 h-2 w-full left-0 top-full" x="0px" y="0px" viewBox="0 0 255 255"><polygon class="fill-current" points="0,0 127.5,127.5 255,0"/></svg>
+                 </div>
+               </div>
+            </div>
+            <span class="font-semibold text-gray-800">{{ reportData().ticketDrivenWork.managerAdjustment }}%</span>
+        </div>
+        <input 
+            id="managerAdjustment"
+            type="range" 
+            min="-50" 
+            max="50" 
+            step="1"
+            [value]="reportData().ticketDrivenWork.managerAdjustment"
+            (input)="onManagerAdjustmentChange($event)"
+            class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-blue-600">
+        <div class="flex justify-end items-center font-bold">
+            <span class="text-gray-800">Final FTE: <span class="text-blue-600">{{ finalTicketDrivenFte() | number: '1.3-3' }}</span></span>
+        </div>
+      </div>
+    </app-collapsible-section>
+  }
+
+  <!-- Act 2: Structured Activities -->
+  <form [formGroup]="activitiesForm" novalidate>
+    @for(category of structuredActivities(); track category.name; let catIndex = $index) {
+      <app-collapsible-section
+        [title]="category.name"
+        [totalFte]="category.totalFte"
+        [fteChange]="category.totalFteChange"
+        [fteChangeDirection]="category.totalFteChangeDirection">
+        <div class="flex justify-start -mt-2 mb-2">
+            <button (click)="exportStructuredActivities(category.name)" class="p-1 text-gray-500 hover:text-green-600" title="Download CSV">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clip-rule="evenodd" /></svg>
+            </button>
+        </div>
+        <div class="overflow-x-auto" [formArrayName]="category.name">
+          <table class="w-full text-sm text-left">
+            <thead class="text-xs text-gray-700 uppercase bg-gray-50 sticky top-0">
+              <tr>
+                <th class="px-4 py-3">Activity Name</th>
+                <th class="px-4 py-3">Frequency</th>
+                <th class="px-4 py-3 text-right">Instances</th>
+                <th class="px-4 py-3 text-right">Hrs/Instance</th>
+                <th class="px-4 py-3 text-right">Total Hours</th>
+                <th class="px-4 py-3 text-right">Calculated FTE</th>
+                <th class="px-4 py-3 text-center">MoM Trend</th>
+              </tr>
+            </thead>
+            <tbody>
+            @for(item of category.items; track item.id; let itemIndex = $index) {
+              <tr class="border-b transition-colors text-gray-900" [formGroupName]="itemIndex" [class]="(item.calculatedFte > 0.5 || (item.fteChange && item.fteChange > 0.2 && item.fteChangeDirection === 'up')) ? 'bg-yellow-50 hover:bg-yellow-100' : 'hover:bg-gray-50'">
+                <td class="px-4 py-3 font-medium text-gray-900">{{ item.activityName }}</td>
+                <td class="px-4 py-3">
+                  <select formControlName="frequency" class="w-full border-gray-300 rounded-md shadow-sm p-1 bg-gray-50 focus:bg-white text-gray-900 focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50">
+                    @for(freq of frequencies; track freq) {
+                      <option [value]="freq">{{ freq }}</option>
+                    }
+                  </select>
+                </td>
+                <td class="px-4 py-3 text-right">
+                  <input type="number" formControlName="instances" class="w-20 text-right border rounded-md p-1 bg-gray-50 focus:bg-white text-gray-900">
+                </td>
+                <td class="px-4 py-3 text-right">
+                  <input type="number" formControlName="hrsPerInstance" class="w-20 text-right border rounded-md p-1 bg-gray-50 focus:bg-white text-gray-900">
+                </td>
+                <td class="px-4 py-3 text-right text-gray-700">{{ item.totalHours | number: '1.2-2' }}</td>
+                <td class="px-4 py-3 text-right font-semibold text-blue-600">{{ item.calculatedFte | number: '1.3-3' }}</td>
+                <td class="px-4 py-3 text-center">
+                  @if (item.fteChange && item.fteChangeDirection) {
+                    <span class="inline-flex items-center text-xs font-semibold px-2 py-0.5 rounded-full" [class]="item.fteChangeDirection === 'up' ? 'bg-red-100 text-red-800' : 'bg-green-100 text-green-800'">
+                      @if (item.fteChangeDirection === 'up') {
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M5 10l7-7m0 0l7 7m-7-7v18" /></svg>
+                      } @else {
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M19 14l-7 7m0 0l-7-7m7 7V3" /></svg>
+                      }
+                      {{ item.fteChange | percent:'1.0-0' }}
+                    </span>
+                  } @else {
+                    <span class="text-gray-400">-</span>
+                  }
+                </td>
+              </tr>
+            }
+            </tbody>
+          </table>
+        </div>
+        <div class="mt-4 pt-4 border-t flex items-center gap-4">
+            <div class="flex-grow relative">
+                <input 
+                  type="text"
+                  placeholder="Search to add an activity..."
+                  class="w-full text-sm border-gray-300 rounded-md shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50 bg-white text-gray-900"
+                  [value]="activitySearchState()[category.name]?.term || ''"
+                  (input)="onActivitySearch(category.name, $event)"
+                  (focus)="toggleActivityDropdown(category.name, true)">
+                
+                @if (activitySearchState()[category.name]?.open) {
+                  <div class="absolute z-10 w-full mt-1 bg-white rounded-md shadow-lg border border-gray-200 max-h-60 overflow-y-auto">
+                    @if (filteredActivitiesByCategory()[category.name]?.length > 0) {
+                      @for (activity of filteredActivitiesByCategory()[category.name]; track activity.id) {
+                        <button 
+                          type="button"
+                          class="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-blue-50"
+                          (click)="selectAndAddActivity(category.name, activity)">
+                          {{ activity.name }}
+                        </button>
+                      }
+                    } @else {
+                      <p class="px-4 py-2 text-sm text-gray-500">No activities found.</p>
+                    }
+                  </div>
+                }
+            </div>
+
+            <div class="border-l pl-4">
+                <button type="button" (click)="openSuggestionModal(category.name)" class="text-sm text-gray-600 hover:underline whitespace-nowrap">Suggest New...</button>
+            </div>
+        </div>
+      </app-collapsible-section>
+    }
+  </form>
+
+  <!-- Final Workload Summary -->
+  <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+     <h2 class="text-xl font-bold text-gray-700 text-center mb-4">Final Workload Summary</h2>
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-6">
+      <div class="bg-gray-50 p-4 rounded-lg text-center">
+        <p class="text-sm text-gray-500">Total Required FTE</p>
+        <p class="text-3xl font-bold text-gray-800 mt-1">
+          {{ totalRequiredFte() | number : "1.3-3" }}
+        </p>
+      </div>
+      <div class="bg-gray-50 p-4 rounded-lg text-center">
+        <p class="text-sm text-gray-500">Actual Deployed FTE</p>
+        <p class="text-3xl font-bold text-gray-800 mt-1">
+          {{ reportData().finalWorkload.actualDeployedFte | number : "1.3-3" }}
+        </p>
+      </div>
+      <div class="p-4 rounded-lg text-center" [class]="surplusFte() >= 0 ? 'bg-green-100' : 'bg-red-100'">
+        <p class="text-sm" [class]="surplusFte() >= 0 ? 'text-green-700' : 'text-red-700'">{{ surplusFte() >= 0 ? 'Surplus' : 'Deficit' }}</p>
+        <p class="text-3xl font-bold mt-1" [class]="surplusFte() >= 0 ? 'text-green-800' : 'text-red-800'">
+          {{ surplusFte() >= 0 ? '+' : ''}}{{ surplusFte() | number : "1.3-3" }}
+        </p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Suggestion Modal -->
+@if (isSuggestionModalOpen()) {
+  <div class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4" (click)="closeSuggestionModal()">
+    <div class="bg-white rounded-lg shadow-xl p-6 w-full max-w-lg" (click)="$event.stopPropagation()">
+      <div class="flex justify-between items-center mb-4">
+        <h2 class="text-xl font-bold text-gray-800">Suggest New Activity for <span class="text-blue-600">'{{ suggestionCategory() }}'</span></h2>
+        <button (click)="closeSuggestionModal()" class="text-gray-400 hover:text-gray-600">&times;</button>
+      </div>
+      <p class="text-sm text-gray-600 mb-4">Your suggestion will be sent to an administrator for review. Please provide a clear name and justification.</p>
+      <form [formGroup]="suggestionForm" (ngSubmit)="submitSuggestion()">
+        <div class="space-y-4">
+          <div>
+            <label for="suggestedName" class="block text-sm font-medium text-gray-700">Suggested Activity Name</label>
+            <input type="text" id="suggestedName" formControlName="suggestedName" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm bg-white text-gray-900">
+          </div>
+          <div>
+            <label for="justification" class="block text-sm font-medium text-gray-700">Justification</label>
+            <textarea id="justification" formControlName="justification" rows="3" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm bg-white text-gray-900" placeholder="Why is this new activity needed? What kind of work does it represent?"></textarea>
+          </div>
+        </div>
+        <div class="mt-6 flex justify-end gap-3">
+          <button type="button" (click)="closeSuggestionModal()" class="px-4 py-2 bg-gray-200 text-gray-800 rounded-md hover:bg-gray-300">Cancel</button>
+          <button type="submit" [disabled]="suggestionForm.invalid" class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:bg-gray-400">Submit Suggestion</button>
+        </div>
+      </form>
+    </div>
+  </div>
+}
+
+<!-- Analytics Modal -->
+<app-analytics-modal 
+  [isOpen]="isAnalyticsModalOpen()"
+  [title]="analyticsTitle()"
+  [data]="analyticsData()"
+  (closeModal)="closeAnalyticsModal()">
+</app-analytics-modal>
