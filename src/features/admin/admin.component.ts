@@ -1,6 +1,7 @@
 import { Component, ChangeDetectionStrategy, inject, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ReactiveFormsModule, FormBuilder, Validators, FormGroup, ValidatorFn, AbstractControl, ValidationErrors } from '@angular/forms';
+// FIX: Import FormControl and remove FormBuilder.
+import { ReactiveFormsModule, Validators, FormGroup, ValidatorFn, AbstractControl, ValidationErrors, FormControl } from '@angular/forms';
 import { AdminService } from '../../services/admin.service';
 import { AnalyticsService } from '../../services/analytics.service';
 import { Frequency } from '../../models/tower-report.model';
@@ -16,7 +17,6 @@ import { FteCalculationModel } from '../../models/admin.model';
 export class AdminComponent {
   private adminService = inject(AdminService);
   private analyticsService = inject(AnalyticsService);
-  private fb = inject(FormBuilder);
 
   masterActivities = this.adminService.masterActivities;
   fteCalculationModel = this.adminService.fteCalculationModel;
@@ -59,11 +59,12 @@ export class AdminComponent {
   });
 
   constructor() {
-    this.activityForm = this.fb.group({
-      name: ['', Validators.required],
-      category: [this.activityCategories[0], Validators.required],
-      defaultFrequency: [this.frequencies[0], Validators.required],
-      defaultHrsPerInstance: [1, [Validators.required, Validators.min(0.1)]]
+    // FIX: Replaced FormBuilder with direct instantiation of FormGroup and FormControl to fix 'Property 'group' does not exist on type 'unknown'' error.
+    this.activityForm = new FormGroup({
+      name: new FormControl('', Validators.required),
+      category: new FormControl(this.activityCategories[0], Validators.required),
+      defaultFrequency: new FormControl(this.frequencies[0], Validators.required),
+      defaultHrsPerInstance: new FormControl(1, [Validators.required, Validators.min(0.1)])
     }, {
       validators: this.duplicateActivityValidator()
     });

@@ -1,6 +1,7 @@
 import { Component, ChangeDetectionStrategy, inject, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
+// FIX: Import FormGroup and FormControl instead of FormBuilder.
+import { ReactiveFormsModule, FormGroup, FormControl, Validators } from '@angular/forms';
 import { FteBalancingService } from '../../services/fte-balancing.service';
 import { AnalyticsService } from '../../services/analytics.service';
 
@@ -14,7 +15,6 @@ import { AnalyticsService } from '../../services/analytics.service';
 export class FteBalancingComponent {
   private fteService = inject(FteBalancingService);
   private analyticsService = inject(AnalyticsService);
-  private fb = inject(FormBuilder);
 
   // Expose signals from service
   towers = this.fteService.towerStatusWithDelta;
@@ -32,10 +32,11 @@ export class FteBalancingComponent {
   });
 
   // Form for moving FTE
-  balancingForm = this.fb.group({
-    fromTower: ['', Validators.required],
-    toTower: ['', Validators.required],
-    fteAmount: [0.5, [Validators.required, Validators.min(0.1)]],
+  // FIX: Replaced FormBuilder with direct instantiation of FormGroup and FormControl to fix 'Property 'group' does not exist on type 'unknown'' error.
+  balancingForm = new FormGroup({
+    fromTower: new FormControl('', Validators.required),
+    toTower: new FormControl('', Validators.required),
+    fteAmount: new FormControl(0.5, [Validators.required, Validators.min(0.1)]),
   });
 
   onMonthChange(event: Event) {

@@ -10,6 +10,7 @@ import { TowerReportComponent } from './features/tower-report/tower-report.compo
 import { ApiDataHubComponent } from './features/api-data-hub/api-data-hub.component';
 import { FteBalancingComponent } from './features/fte-balancing/fte-balancing.component';
 import { AdminComponent } from './features/admin/admin.component';
+import { HandoverHubComponent } from './features/handover-hub/handover-hub.component';
 
 export const routes: Routes = [
   // Incident Feature Routes
@@ -20,6 +21,9 @@ export const routes: Routes = [
   { path: 'observability', component: ObservabilityDashboardComponent, title: 'Observability Dashboard' },
   { path: 'observability/journey-detail', component: ServiceJourneyDetailComponent, title: 'Service Journey Details' },
   { path: 'observability/sla-detail', component: SlaComplianceDetailComponent, title: 'SLA Compliance Details' },
+
+  // Handover Hub Feature Route
+  { path: 'handover-hub', component: HandoverHubComponent, title: 'Handover Hub' },
 
   // Tower Report Feature Route
   { path: 'tower-report', component: TowerReportComponent, title: 'Tower Deep Dive Report' },
