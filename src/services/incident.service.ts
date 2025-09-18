@@ -1,5 +1,6 @@
 import { Injectable, signal, inject } from '@angular/core';
 import { Incident } from '../models/incident.model';
+import { GeminiService } from './gemini.service';
 // import { HttpClient } from '@angular/common/http';
 // import { tap } from 'rxjs/operators';
 
@@ -7,6 +8,7 @@ import { Incident } from '../models/incident.model';
   providedIn: 'root',
 })
 export class IncidentService {
+  private geminiService = inject(GeminiService);
   // private http = inject(HttpClient);
 
   // In a real app, you would fetch this data from an API.
@@ -86,6 +88,7 @@ export class IncidentService {
   );
   
   constructor() {
+    this.enrichIncidentsWithAiGist();
     // ** FOR BACKEND DEVELOPERS: UNCOMMENT THE CODE BLOCK BELOW TO CONNECT TO A LIVE API **
     /*
     this.http.get<Incident[]>('/api/incidents').pipe(
@@ -98,11 +101,26 @@ export class IncidentService {
         })).sort((a, b) => a.slaBreachDate.getTime() - b.slaBreachDate.getTime());
         
         this.incidentsSignal.set(parsedIncidents);
+        this.enrichIncidentsWithAiGist();
       })
     ).subscribe({
       error: (err) => console.error('Failed to load incidents', err)
     });
     */
+  }
+
+  private async enrichIncidentsWithAiGist() {
+    const incidents = this.incidentsSignal();
+    const enrichedIncidents = await Promise.all(
+      incidents.map(async (incident) => {
+        if (!incident.aiGist) {
+          const gist = await this.geminiService.generateIncidentGist(incident);
+          return { ...incident, aiGist: gist };
+        }
+        return incident;
+      })
+    );
+    this.incidentsSignal.set(enrichedIncidents.sort((a, b) => a.slaBreachDate.getTime() - b.slaBreachDate.getTime()));
   }
 
   getIncidents() {

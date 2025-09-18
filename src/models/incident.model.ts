@@ -8,4 +8,5 @@ export interface Incident {
   description: string;
   affectedServices: string[];
   lastUpdate: string;
+  aiGist?: string;
 }

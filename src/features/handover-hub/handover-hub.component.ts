@@ -4,6 +4,7 @@ import { HandoverService } from '../../services/handover.service';
 import { PortfolioHealth, HistoricalHandover } from '../../models/handover.model';
 import { IncidentHandoverCardComponent } from './incident-handover-card/incident-handover-card.component';
 import { StarRatingComponent } from './star-rating/star-rating.component';
+import { GeminiService } from '../../services/gemini.service';
 
 @Component({
   selector: 'app-handover-hub',
@@ -14,6 +15,7 @@ import { StarRatingComponent } from './star-rating/star-rating.component';
 })
 export class HandoverHubComponent {
   private handoverService = inject(HandoverService);
+  private geminiService = inject(GeminiService);
 
   // --- State for both views ---
   portfolios = this.handoverService.getPortfolios();
@@ -25,6 +27,10 @@ export class HandoverHubComponent {
   activeIncidents = this.handoverService.activePortfolioIncidents;
   handoverData = this.handoverService.activePortfolioHandoverData;
   
+  // AI Generation State
+  isEodGenerating = signal(false);
+  isBodGenerating = signal(false);
+
   // --- State for 'History' view ---
   selectedHistoryDate = signal(new Date().toISOString().split('T')[0]);
   historyForDate = computed(() => this.handoverService.getHistoryForDate(this.selectedHistoryDate()));
@@ -51,10 +57,10 @@ export class HandoverHubComponent {
   }
 
   // --- Methods for 'Live' view ---
-  onNotesChange(type: 'onshore' | 'offshore', event: Event) {
+  onNotesChange(type: 'eod' | 'bod', event: Event) {
     const portfolioId = this.activePortfolioId();
     const value = (event.target as HTMLTextAreaElement).value;
-    if (type === 'onshore') {
+    if (type === 'eod') {
       this.handoverService.updateNotes(portfolioId, { onshoreToOffshore: value });
     } else {
       this.handoverService.updateNotes(portfolioId, { offshoreToOnshore: value });
@@ -65,6 +71,35 @@ export class HandoverHubComponent {
     const portfolioId = this.activePortfolioId();
     const value = (event.target as HTMLTextAreaElement).value;
     this.handoverService.updateIncidentGist(portfolioId, incidentId, value);
+  }
+
+  async generateSummary(type: 'eod' | 'bod') {
+    const portfolioId = this.activePortfolioId();
+    const incidents = this.activeIncidents();
+    
+    if (type === 'eod') {
+      this.isEodGenerating.set(true);
+    } else {
+      this.isBodGenerating.set(true);
+    }
+    
+    try {
+      const summary = await this.geminiService.generateHandoverSummary(incidents);
+      if (type === 'eod') {
+        this.handoverService.updateNotes(portfolioId, { onshoreToOffshore: summary });
+      } else {
+        this.handoverService.updateNotes(portfolioId, { offshoreToOnshore: summary });
+      }
+    } catch (error) {
+      console.error('Error generating AI summary:', error);
+      // Optionally show an error message to the user
+    } finally {
+      if (type === 'eod') {
+        this.isEodGenerating.set(false);
+      } else {
+        this.isBodGenerating.set(false);
+      }
+    }
   }
 
   archiveHandovers() {

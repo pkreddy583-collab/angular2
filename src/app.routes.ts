@@ -22,6 +22,7 @@ import { PostMortemListComponent } from './features/post-mortem/post-mortem-list
 import { PostMortemDetailComponent } from './features/post-mortem/post-mortem-detail/post-mortem-detail.component';
 import { CapacityDashboardComponent } from './features/capacity-planning/capacity-dashboard/capacity-dashboard.component';
 import { CapacityDetailComponent } from './features/capacity-planning/capacity-detail/capacity-detail.component';
+import { AiRoiTrackerComponent } from './features/ai-roi-tracker/ai-roi-tracker.component';
 
 export const routes: Routes = [
   // Incident Feature Routes
@@ -50,6 +51,9 @@ export const routes: Routes = [
   { path: 'post-mortem/:id', component: PostMortemDetailComponent, title: 'Post-Mortem Details' },
   { path: 'capacity-planning', component: CapacityDashboardComponent, title: 'Capacity Planning' },
   { path: 'capacity-planning/:id', component: CapacityDetailComponent, title: 'Capacity Details' },
+  
+  // New AI ROI Tracker Route
+  { path: 'ai-roi-tracker', component: AiRoiTrackerComponent, title: 'AI ROI & Savings Tracker' },
 
   // Tower Report Feature Route
   { path: 'tower-report', component: TowerReportComponent, title: 'Tower Deep Dive Report' },
