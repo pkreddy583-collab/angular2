@@ -1,0 +1,80 @@
+<main class="container mx-auto p-4 sm:p-6 lg:p-8">
+  <!-- Header -->
+  <header class="mb-8">
+    <h1 class="text-3xl font-bold text-gray-800 flex items-center">
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 mr-3 text-blue-500" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 12c0-1.232-.046-2.453-.138-3.662a4.006 4.006 0 00-3.7-3.7 48.678 48.678 0 00-7.324 0 4.006 4.006 0 00-3.7 3.7c-.092 1.21-.138 2.43-.138 3.662v4.286a4.006 4.006 0 003.7 3.7 48.678 48.678 0 007.324 0 4.006 4.006 0 003.7-3.7v-4.286zM15.75 12a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0z" />
+      </svg>
+      Change Management Dashboard
+    </h1>
+    <p class="mt-1 text-gray-500">Track and manage upcoming and in-progress IT changes.</p>
+  </header>
+
+  <!-- Error Message Display -->
+  @if (errorMessage()) {
+    <div class="fixed top-24 right-8 bg-red-100 border-l-4 border-red-500 text-red-700 p-4 rounded-md shadow-lg z-50 transition-opacity duration-300" role="alert">
+      <p class="font-bold">Action Blocked</p>
+      <p>{{ errorMessage() }}</p>
+    </div>
+  }
+
+  <!-- Kanban Board -->
+  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+    @for(column of boardColumns; track column) {
+      <div 
+        class="bg-gray-100 rounded-lg transition-colors duration-200"
+        [class.bg-blue-100]="dragOverColumn() === column"
+        (dragover)="onDragOver($event, column)"
+        (dragleave)="onDragLeave()"
+        (drop)="onDrop($event, column)">
+        <h2 class="text-lg font-semibold text-gray-700 p-4 border-b border-gray-200 sticky top-[80px] bg-gray-100/80 backdrop-blur-sm">{{ column }}</h2>
+        <div class="p-4 space-y-4 h-[calc(100vh-250px)] overflow-y-auto">
+          @if(getChangesByStatus(column).length > 0) {
+            @for(change of getChangesByStatus(column); track change.id) {
+              <div 
+                class="bg-white rounded-md shadow-sm border border-gray-200 p-4 cursor-move"
+                draggable="true"
+                (dragstart)="onDragStart($event, change)">
+                <div class="flex justify-between items-start mb-2">
+                  <span class="font-semibold text-gray-800">{{ change.id }}</span>
+                  <span class="text-xs font-bold px-2 py-1 rounded-full" [class]="getRiskClass(change.risk)">{{ change.risk }} Risk</span>
+                </div>
+                <p class="text-sm text-gray-700">{{ change.title }}</p>
+                
+                @if (change.dependencies?.length) {
+                  <div class="mt-3 pt-2 border-t border-gray-200">
+                    <h4 class="text-xs font-semibold text-gray-500 mb-1">Dependencies</h4>
+                    <div class="space-y-1">
+                      @for (depId of change.dependencies; track depId) {
+                        @let depStatus = getDependencyStatus(depId);
+                        <div class="flex items-center justify-between text-xs">
+                          <span class="text-gray-600">{{ depId }}</span>
+                          <span class="font-semibold px-1.5 py-0.5 rounded" 
+                                [class]="depStatus === 'Completed' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'">
+                            {{ depStatus }}
+                          </span>
+                        </div>
+                      }
+                    </div>
+                  </div>
+                }
+
+                <div class="text-xs text-gray-500 border-t pt-2 mt-3 space-y-1">
+                  <p><strong>Service:</strong> {{ change.service }}</p>
+                  <p><strong>Assigned:</strong> {{ change.assignedTo }}</p>
+                  @if (change.status !== 'Completed' && change.status !== 'Awaiting Approval') {
+                    <p><strong>Date:</strong> {{ change.scheduledFor | date: 'medium' }}</p>
+                  }
+                </div>
+              </div>
+            }
+          } @else {
+             <div class="text-center py-10">
+                <p class="text-sm text-gray-500">No changes in this stage.</p>
+              </div>
+          }
+        </div>
+      </div>
+    }
+  </div>
+</main>
