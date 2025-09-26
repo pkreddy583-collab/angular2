@@ -11,18 +11,10 @@ import { ApiDataHubComponent } from './features/api-data-hub/api-data-hub.compon
 import { FteBalancingComponent } from './features/fte-balancing/fte-balancing.component';
 import { AdminComponent } from './features/admin/admin.component';
 import { HandoverHubComponent } from './features/handover-hub/handover-hub.component';
-import { ChangeDashboardComponent } from './features/change-management/change-dashboard/change-dashboard.component';
-import { ProblemWorkspaceComponent } from './features/problem-management/problem-workspace/problem-workspace.component';
-import { OnCallDashboardComponent } from './features/on-call-hub/on-call-dashboard/on-call-dashboard.component';
-import { ServiceListComponent } from './features/service-catalog/service-list/service-list.component';
-import { ServiceDetailComponent } from './features/service-catalog/service-detail/service-detail.component';
-import { KnowledgeBaseListComponent } from './features/knowledge-base/knowledge-base-list/knowledge-base-list.component';
-import { KnowledgeBaseArticleComponent } from './features/knowledge-base/knowledge-base-article/knowledge-base-article.component';
-import { PostMortemListComponent } from './features/post-mortem/post-mortem-list/post-mortem-list.component';
-import { PostMortemDetailComponent } from './features/post-mortem/post-mortem-detail/post-mortem-detail.component';
-import { CapacityDashboardComponent } from './features/capacity-planning/capacity-dashboard/capacity-dashboard.component';
-import { CapacityDetailComponent } from './features/capacity-planning/capacity-detail/capacity-detail.component';
-import { AiRoiTrackerComponent } from './features/ai-roi-tracker/ai-roi-tracker.component';
+import { WorkbenchComponent } from './features/workbench/workbench.component';
+import { ComplianceTrackerComponent } from './features/compliance-tracker/compliance-tracker.component';
+import { PredictiveInsightsComponent } from './features/predictive-insights/predictive-insights.component';
+import { DeepDiveTrendsComponent } from './features/tower-report/deep-dive-trends/deep-dive-trends.component';
 
 export const routes: Routes = [
   // Incident Feature Routes
@@ -37,26 +29,18 @@ export const routes: Routes = [
   // Handover Hub Feature Route
   { path: 'handover-hub', component: HandoverHubComponent, title: 'Handover Hub' },
 
-  // Existing Module Routes
-  { path: 'change-management', component: ChangeDashboardComponent, title: 'Change Management' },
-  { path: 'problem-management', component: ProblemWorkspaceComponent, title: 'Problem Management' },
-  { path: 'on-call-hub', component: OnCallDashboardComponent, title: 'On-Call Hub' },
+  // Compliance Tracker Route
+  { path: 'compliance-tracker', component: ComplianceTrackerComponent, title: 'EOD/BOD Compliance' },
 
-  // New Actionable Modules
-  { path: 'service-catalog', component: ServiceListComponent, title: 'Service Catalog' },
-  { path: 'service-catalog/:id', component: ServiceDetailComponent, title: 'Service Details' },
-  { path: 'knowledge-base', component: KnowledgeBaseListComponent, title: 'Knowledge Base' },
-  { path: 'knowledge-base/:id', component: KnowledgeBaseArticleComponent, title: 'KB Article' },
-  { path: 'post-mortem', component: PostMortemListComponent, title: 'Post-Mortem Hub' },
-  { path: 'post-mortem/:id', component: PostMortemDetailComponent, title: 'Post-Mortem Details' },
-  { path: 'capacity-planning', component: CapacityDashboardComponent, title: 'Capacity Planning' },
-  { path: 'capacity-planning/:id', component: CapacityDetailComponent, title: 'Capacity Details' },
-  
-  // New AI ROI Tracker Route
-  { path: 'ai-roi-tracker', component: AiRoiTrackerComponent, title: 'AI ROI & Savings Tracker' },
+  // AI Workbench Route
+  { path: 'workbench', component: WorkbenchComponent, title: 'AI Workbench' },
+
+  // Predictive Insights Route
+  { path: 'predictive-insights', component: PredictiveInsightsComponent, title: 'Predictive Insights' },
 
   // Tower Report Feature Route
   { path: 'tower-report', component: TowerReportComponent, title: 'Tower Deep Dive Report' },
+  { path: 'tower-report/trends', component: DeepDiveTrendsComponent, title: 'Deep Dive Trends' },
   
   // FTE Balancing Feature Route
   { path: 'fte-balancing', component: FteBalancingComponent, title: 'FTE Heat Map & Balancing' },

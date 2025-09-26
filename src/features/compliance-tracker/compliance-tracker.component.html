@@ -1,0 +1,64 @@
+<main class="container mx-auto p-4 sm:p-6 lg:p-8">
+  <!-- Header -->
+  <header class="mb-8">
+    <h1 class="text-3xl font-bold text-gray-800 flex items-center">
+       <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 mr-3 text-blue-500" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.75c0 5.592 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.57-.598-3.75h-.152c-3.196 0-6.1-1.248-8.25-3.286z" />
+      </svg>
+      EOD/BOD Email Compliance Hub
+    </h1>
+    <p class="mt-1 text-gray-500">Audit and track the status of contractual handover emails.</p>
+  </header>
+
+  <!-- Compliance Scorecard -->
+  <div class="bg-white rounded-lg shadow-md p-6 mb-8 text-center">
+    <h2 class="text-sm font-medium text-gray-500 uppercase tracking-wider">Overall Compliance Rate</h2>
+    @let percentage = compliancePercentage();
+    <p class="mt-1 text-6xl font-extrabold" [class]="percentage > 95 ? 'text-green-600' : percentage > 85 ? 'text-yellow-600' : 'text-red-600'">
+      {{ percentage | number: '1.1-1' }}%
+    </p>
+    <div class="mt-4 w-full bg-gray-200 rounded-full h-2.5 max-w-sm mx-auto">
+        <div class="h-2.5 rounded-full" [class]="percentage > 95 ? 'bg-green-500' : percentage > 85 ? 'bg-yellow-500' : 'bg-red-500'" [style.width]="percentage + '%'"></div>
+    </div>
+    <p class="mt-2 text-xs text-gray-500">Based on the percentage of handover emails sent on time.</p>
+  </div>
+
+  <!-- Email Log Table -->
+  <div class="bg-white rounded-lg shadow-md overflow-hidden">
+    <div class="p-5 border-b">
+        <h2 class="text-xl font-bold text-gray-700">Handover Email Log</h2>
+    </div>
+    <div class="overflow-x-auto">
+      <table class="w-full text-sm text-left">
+        <thead class="text-xs text-gray-700 uppercase bg-gray-50">
+          <tr>
+            <th class="px-6 py-3">Date & Time</th>
+            <th class="px-6 py-3">Portfolio</th>
+            <th class="px-6 py-3">Type</th>
+            <th class="px-6 py-3">Subject</th>
+            <th class="px-6 py-3 text-center">Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (log of emailLogs(); track log.id) {
+            <tr class="border-b hover:bg-gray-50">
+              <td class="px-6 py-4 font-medium text-gray-900">{{ log.timestamp | date:'MMM d, y, h:mm a' }}</td>
+              <td class="px-6 py-4 text-gray-600">{{ log.portfolioName }}</td>
+              <td class="px-6 py-4 text-gray-600">{{ log.type }}</td>
+              <td class="px-6 py-4 text-gray-600 truncate max-w-xs">{{ log.subject }}</td>
+              <td class="px-6 py-4 text-center">
+                <span class="text-xs font-semibold px-2.5 py-1 rounded-full" [class]="getStatusClass(log.status)">
+                  {{ log.status }}
+                </span>
+              </td>
+            </tr>
+          } @empty {
+            <tr>
+              <td colspan="5" class="text-center py-10 text-gray-500">No email logs found.</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  </div>
+</main>

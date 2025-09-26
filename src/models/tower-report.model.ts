@@ -10,6 +10,7 @@ export interface TicketDrivenWorkItem {
   countHistory?: number[]; // for sparkline trend
   previousCount?: number;
   previousAvgTime?: number;
+  adjustmentPct?: number | null; // Row-level adjustment override
 }
 
 export type Frequency = 'Ad-hoc' | 'Weekly' | 'Monthly' | 'Bi-Weekly' | 'Sprint';
@@ -22,6 +23,7 @@ export interface StructuredActivityItem {
   hrsPerInstance: number;
   previousInstances?: number;
   previousHrsPerInstance?: number;
+  adjustmentPct?: number | null; // Row-level adjustment override
 }
 
 export interface StructuredActivityCategory {

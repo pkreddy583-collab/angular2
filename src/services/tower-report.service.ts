@@ -3,6 +3,7 @@ import {
   ReportData,
   StructuredActivityItem,
   Frequency,
+  TicketDrivenWorkItem,
 } from '../models/tower-report.model';
 import { MasterActivity } from '../models/admin.model';
 import { AdminService } from './admin.service';
@@ -29,48 +30,48 @@ export class TowerReportService {
     ticketDrivenWork: {
       managerAdjustment: 0,
       items: [
-        { id: 1, category: 'Incidents', priority: 'P1', count: 10, avgTime: 120, p50Time: 110, p75Time: 150, p90Time: 180, countHistory: [5, 8, 10], previousCount: 8, previousAvgTime: 125 },
-        { id: 2, category: 'Incidents', priority: 'P2', count: 50, avgTime: 60, p50Time: 55, p75Time: 75, p90Time: 90, countHistory: [70, 60, 50], previousCount: 60, previousAvgTime: 55 },
-        { id: 3, category: 'Incidents', priority: 'P3', count: 200, avgTime: 30, p50Time: 25, p75Time: 40, p90Time: 50, countHistory: [190, 210, 200], previousCount: 200, previousAvgTime: 30 },
-        { id: 4, category: 'Changes', priority: 'Standard', count: 80, avgTime: 45, p50Time: 40, p75Time: 55, p90Time: 65, countHistory: [90, 100, 80], previousCount: 100, previousAvgTime: 45 },
-        { id: 5, category: 'Tasks', priority: 'Standard', count: 150, avgTime: 15, p50Time: 12, p75Time: 20, p90Time: 25, countHistory: [110, 120, 150], previousCount: 120, previousAvgTime: 15 },
+        { id: 1, category: 'Incidents', priority: 'P1', count: 10, avgTime: 120, p50Time: 110, p75Time: 150, p90Time: 180, countHistory: [5, 8, 10], previousCount: 8, previousAvgTime: 125, adjustmentPct: null },
+        { id: 2, category: 'Incidents', priority: 'P2', count: 50, avgTime: 60, p50Time: 55, p75Time: 75, p90Time: 90, countHistory: [70, 60, 50], previousCount: 60, previousAvgTime: 55, adjustmentPct: 10 }, // Example override
+        { id: 3, category: 'Incidents', priority: 'P3', count: 200, avgTime: 30, p50Time: 25, p75Time: 40, p90Time: 50, countHistory: [190, 210, 200], previousCount: 200, previousAvgTime: 30, adjustmentPct: null },
+        { id: 4, category: 'Changes', priority: 'Standard', count: 80, avgTime: 45, p50Time: 40, p75Time: 55, p90Time: 65, countHistory: [90, 100, 80], previousCount: 100, previousAvgTime: 45, adjustmentPct: null },
+        { id: 5, category: 'Tasks', priority: 'Standard', count: 150, avgTime: 15, p50Time: 12, p75Time: 20, p90Time: 25, countHistory: [110, 120, 150], previousCount: 120, previousAvgTime: 15, adjustmentPct: null },
       ],
     },
     structuredActivities: [
       {
         name: 'Response',
         items: [
-          { id: 1, activityName: 'Major Incident Command', frequency: 'Ad-hoc', instances: 2, hrsPerInstance: 8.0, previousInstances: 1, previousHrsPerInstance: 9.0 },
-          { id: 2, activityName: 'One-shot manual fixes', frequency: 'Weekly', instances: 4, hrsPerInstance: 2.0, previousInstances: 4, previousHrsPerInstance: 2.5 },
+          { id: 1, activityName: 'Major Incident Command', frequency: 'Ad-hoc', instances: 2, hrsPerInstance: 8.0, previousInstances: 1, previousHrsPerInstance: 9.0, adjustmentPct: null },
+          { id: 2, activityName: 'One-shot manual fixes', frequency: 'Weekly', instances: 4, hrsPerInstance: 2.0, previousInstances: 4, previousHrsPerInstance: 2.5, adjustmentPct: null },
         ],
       },
       {
         name: 'Proactive',
         items: [
-          { id: 3, activityName: 'Healthcheck Scripting', frequency: 'Monthly', instances: 1, hrsPerInstance: 16.0, previousInstances: 1, previousHrsPerInstance: 16.0 },
-          { id: 4, activityName: 'Production Turnover Analysis', frequency: 'Bi-Weekly', instances: 2, hrsPerInstance: 8.0, previousInstances: 2, previousHrsPerInstance: 8.0 },
+          { id: 3, activityName: 'Healthcheck Scripting', frequency: 'Monthly', instances: 1, hrsPerInstance: 16.0, previousInstances: 1, previousHrsPerInstance: 16.0, adjustmentPct: null },
+          { id: 4, activityName: 'Production Turnover Analysis', frequency: 'Bi-Weekly', instances: 2, hrsPerInstance: 8.0, previousInstances: 2, previousHrsPerInstance: 8.0, adjustmentPct: null },
         ],
       },
       {
         name: 'Continuous Improvement',
         items: [
-          { id: 5, activityName: 'Automation for Toil', frequency: 'Sprint', instances: 2, hrsPerInstance: 20.0, previousInstances: 1, previousHrsPerInstance: 24.0 },
-          { id: 6, activityName: 'Tech Debt Remediation', frequency: 'Sprint', instances: 1, hrsPerInstance: 40.0, previousInstances: 1, previousHrsPerInstance: 40.0 },
+          { id: 5, activityName: 'Automation for Toil', frequency: 'Sprint', instances: 2, hrsPerInstance: 20.0, previousInstances: 1, previousHrsPerInstance: 24.0, adjustmentPct: -15 }, // Example override
+          { id: 6, activityName: 'Tech Debt Remediation', frequency: 'Sprint', instances: 1, hrsPerInstance: 40.0, previousInstances: 1, previousHrsPerInstance: 40.0, adjustmentPct: null },
         ],
       },
       {
         name: 'Shift Left / Onboarding',
         items: [
-          { id: 7, activityName: 'KT Session with L1', frequency: 'Monthly', instances: 2, hrsPerInstance: 4.0 },
-          { id: 8, activityName: 'Self-service Tool Training', frequency: 'Ad-hoc', instances: 3, hrsPerInstance: 2.0 },
-          { id: 9, activityName: 'Onboarding new team member', frequency: 'Ad-hoc', instances: 1, hrsPerInstance: 30.0 },
+          { id: 7, activityName: 'KT Session with L1', frequency: 'Monthly', instances: 2, hrsPerInstance: 4.0, adjustmentPct: null },
+          { id: 8, activityName: 'Self-service Tool Training', frequency: 'Ad-hoc', instances: 3, hrsPerInstance: 2.0, adjustmentPct: null },
+          { id: 9, activityName: 'Onboarding new team member', frequency: 'Ad-hoc', instances: 1, hrsPerInstance: 30.0, adjustmentPct: null },
         ],
       },
       {
         name: 'Governance',
         items: [
-          { id: 10, activityName: 'SME Declaration Meeting', frequency: 'Weekly', instances: 4, hrsPerInstance: 2.0 },
-          { id: 11, activityName: 'Business Review Prep', frequency: 'Monthly', instances: 1, hrsPerInstance: 8.0 },
+          { id: 10, activityName: 'SME Declaration Meeting', frequency: 'Weekly', instances: 4, hrsPerInstance: 2.0, adjustmentPct: null },
+          { id: 11, activityName: 'Business Review Prep', frequency: 'Monthly', instances: 1, hrsPerInstance: 8.0, adjustmentPct: null },
         ],
       },
     ],
@@ -90,6 +91,7 @@ export class TowerReportService {
   ticketDrivenWorkCalculations = computed(() => {
     const items = this.reportData().ticketDrivenWork.items;
     const model = this.adminService.fteCalculationModel();
+    const globalAdjustment = this.reportData().ticketDrivenWork.managerAdjustment;
 
     const calculatedItems = items.map((item) => {
       let effectiveTime = item.avgTime;
@@ -106,7 +108,10 @@ export class TowerReportService {
       }
 
       const hours = (item.count * effectiveTime) / 60;
-      const fte = hours / FTE_HOURS_PER_MONTH;
+      const baseFte = hours / FTE_HOURS_PER_MONTH;
+      
+      const adjustment = item.adjustmentPct !== null && item.adjustmentPct !== undefined ? item.adjustmentPct : globalAdjustment;
+      const fte = baseFte * (1 + (adjustment / 100));
       
       let previousFte: number | undefined;
       let fteChange: number | undefined;
@@ -129,28 +134,28 @@ export class TowerReportService {
     });
 
     const systemCalculatedHours = calculatedItems.reduce((sum, item) => sum + item.hours, 0);
-    const systemCalculatedFte = calculatedItems.reduce((sum, item) => sum + item.fte, 0);
     
     return {
       items: calculatedItems,
       systemCalculatedHours,
-      systemCalculatedFte,
     };
   });
 
   finalTicketDrivenFte = computed(() => {
-      const baseFte = this.ticketDrivenWorkCalculations().systemCalculatedFte;
-      const adjustment = this.reportData().ticketDrivenWork.managerAdjustment / 100;
-      return baseFte * (1 + adjustment);
+      return this.ticketDrivenWorkCalculations().items.reduce((sum, item) => sum + item.fte, 0);
   });
   
 
   // Structured Activities calculations
   structuredActivitiesCalculations = computed(() => {
+    const globalAdjustment = this.reportData().ticketDrivenWork.managerAdjustment; // Using the same global slider for consistency
     return this.reportData().structuredActivities.map((category) => {
       const calculatedItems = category.items.map((item) => {
         const totalHours = item.instances * item.hrsPerInstance;
-        const calculatedFte = totalHours / FTE_HOURS_PER_MONTH;
+        const baseFte = totalHours / FTE_HOURS_PER_MONTH;
+        
+        const adjustment = item.adjustmentPct !== null && item.adjustmentPct !== undefined ? item.adjustmentPct : globalAdjustment;
+        const calculatedFte = baseFte * (1 + (adjustment / 100));
 
         let previousFte: number | undefined;
         let fteChange: number | undefined;
@@ -239,6 +244,29 @@ export class TowerReportService {
     });
   }
 
+  updateTicketItemAdjustment(itemId: number, adjustment: number | null) {
+    this._reportData.update(data => {
+      const item = data.ticketDrivenWork.items.find(i => i.id === itemId);
+      if (item) {
+        item.adjustmentPct = adjustment;
+      }
+      return {...data};
+    });
+  }
+
+  updateStructuredItemAdjustment(categoryName: string, itemId: number, adjustment: number | null) {
+    this._reportData.update(data => {
+      const category = data.structuredActivities.find(c => c.name === categoryName);
+      if (category) {
+        const item = category.items.find(i => i.id === itemId);
+        if (item) {
+          item.adjustmentPct = adjustment;
+        }
+      }
+      return {...data};
+    });
+  }
+
   updateStructuredActivity(
     categoryName: string,
     itemId: number,
@@ -276,6 +304,7 @@ export class TowerReportService {
           frequency: activity.defaultFrequency,
           instances: 1, // Default to 1 instance
           hrsPerInstance: activity.defaultHrsPerInstance,
+          adjustmentPct: null,
         });
       }
       return {...data};

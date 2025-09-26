@@ -1,5 +1,5 @@
 import { Injectable, signal, computed, inject } from '@angular/core';
-import { Portfolio, HandoverNotes, PortfolioHealth, HistoricalHandover } from '../models/handover.model';
+import { Portfolio, HandoverNotes, PortfolioHealth, HistoricalHandover, EmailTemplate } from '../models/handover.model';
 import { IncidentService } from './incident.service';
 import { Incident } from '../models/incident.model';
 
@@ -38,40 +38,67 @@ const initialHandoverData: { [key: string]: HandoverNotes } = {
   }
 };
 
-const yesterday = new Date();
-yesterday.setDate(yesterday.getDate() - 1);
-const yesterdayStr = yesterday.toISOString().split('T')[0];
-
-const initialHistory: HistoricalHandover[] = [
-    {
-        id: `portfolio-1-${yesterdayStr}`,
-        date: yesterdayStr,
-        portfolioId: 'portfolio-1',
-        portfolioName: 'Core Services',
-        portfolioHealth: 'Warning',
+const createHistoryEntry = (dateOffset: number, portfolioId: string, portfolioName: string, health: PortfolioHealth, notes: Partial<HandoverNotes>, feedback: {rating: number, comment: string}): HistoricalHandover => {
+    const d = new Date();
+    d.setDate(d.getDate() - dateOffset);
+    const dateStr = d.toISOString().split('T')[0];
+    return {
+        id: `${portfolioId}-${dateStr}`,
+        date: dateStr,
+        portfolioId,
+        portfolioName,
+        portfolioHealth: health,
         notes: {
-            onshoreToOffshore: 'Yesterday EOD: Rolled out patch for auth service. Keeping an eye on INC-002.',
-            offshoreToOnshore: 'Yesterday BOD: Patch looks stable. No new alerts overnight.',
-            incidentGists: { 'INC-002': 'Database performance remains a concern.' }
+            onshoreToOffshore: '',
+            offshoreToOnshore: '',
+            incidentGists: {},
+            ...notes
         },
         incidents: [], // In a real app, this would be a snapshot
-        feedback: { rating: 4, comment: 'Good handover, clear notes on the auth service patch.' }
-    },
-    {
-        id: `portfolio-3-${yesterdayStr}`,
-        date: yesterdayStr,
-        portfolioId: 'portfolio-3',
-        portfolioName: 'Public Facing',
-        portfolioHealth: 'Healthy',
-        notes: {
-            onshoreToOffshore: 'Site performance was stable all day.',
-            offshoreToOnshore: '',
-            incidentGists: {}
-        },
-        incidents: [],
-        feedback: { rating: 0, comment: '' }
-    }
+        feedback
+    };
+};
+
+const initialHistory: HistoricalHandover[] = [
+    createHistoryEntry(1, 'portfolio-1', 'Core Services', 'Warning', 
+      { onshoreToOffshore: 'EOD T-1: Rolled out patch for auth service. Keeping an eye on INC-002.', offshoreToOnshore: 'BOD T-1: Patch looks stable. No new alerts overnight.', incidentGists: { 'INC-002': 'Database performance remains a concern.' } },
+      { rating: 4, comment: 'Good handover, clear notes on the auth service patch.' }
+    ),
+    createHistoryEntry(1, 'portfolio-3', 'Public Facing', 'Healthy', 
+      { onshoreToOffshore: 'Site performance was stable all day.', offshoreToOnshore: '' },
+      { rating: 5, comment: 'Quiet day, no issues.' }
+    ),
+     createHistoryEntry(2, 'portfolio-1', 'Core Services', 'Critical', 
+      { onshoreToOffshore: 'EOD T-2: Major DB latency spike investigated. Root cause was a runaway query, now killed.', offshoreToOnshore: 'BOD T-2: DB performance is back to normal. Monitored overnight.', incidentGists: { 'INC-002': 'Runaway query killed, but need to find the source.' } },
+      { rating: 3, comment: 'Handover was okay, but the initial alert for the DB spike was missed by 30 minutes.' }
+    ),
+    createHistoryEntry(2, 'portfolio-2', 'Finance & HR', 'Healthy', 
+      { onshoreToOffshore: 'No incidents today. Completed planned maintenance on payroll service.', offshoreToOnshore: '' },
+      { rating: 0, comment: '' }
+    ),
+    createHistoryEntry(3, 'portfolio-3', 'Public Facing', 'Critical', 
+      { onshoreToOffshore: 'EOD T-3: Dealing with a DDoS attack. Mitigation steps are in place with Cloudflare.', offshoreToOnshore: 'BOD T-3: Attack has subsided. Traffic patterns are back to normal.' },
+      { rating: 5, comment: 'Excellent communication and quick response during the DDoS event. Great work team.' }
+    ),
 ];
+
+const initialEmailTemplates: { [portfolioId: string]: EmailTemplate } = {
+  'portfolio-1': {
+    to: 'offshore-core@example.com',
+    cc: 'onshore-core-leads@example.com;global-sre@example.com',
+    subject: 'EOD Handover: {{portfolioName}} - {{date}}'
+  },
+  'portfolio-2': {
+    to: 'offshore-finance@example.com',
+    cc: 'onshore-finance-leads@example.com',
+    subject: 'EOD Handover: {{portfolioName}} - {{date}}'
+  },
+  'portfolio-3': {
+    to: 'offshore-public@example.com',
+    cc: 'onshore-public-leads@example.com;security-oncall@example.com',
+    subject: 'CRITICAL EOD Handover: {{portfolioName}} - {{date}}'
+  }
+};
 
 
 @Injectable({
@@ -88,6 +115,7 @@ export class HandoverService {
 
   private handoverData = signal<{ [portfolioId: string]: HandoverNotes }>(initialHandoverData);
   private handoverHistory = signal<HistoricalHandover[]>(initialHistory);
+  private emailTemplates = signal<{ [portfolioId: string]: EmailTemplate }>(initialEmailTemplates);
 
   activePortfolioId = signal<string>(this.portfolios()[0].id);
 
@@ -135,6 +163,10 @@ export class HandoverService {
     });
   }
 
+  getEmailTemplate(portfolioId: string): EmailTemplate | undefined {
+    return this.emailTemplates()[portfolioId];
+  }
+
   // --- History Methods ---
 
   getHistoryForDate(date: string) { // date in 'YYYY-MM-DD' format
@@ -175,7 +207,7 @@ export class HandoverService {
       }
     }
     
-    this.handoverHistory.update(history => [...newHistoryEntries, ...history]);
+    this.handoverHistory.update(history => [...newHistoryEntries, ...history].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()));
   }
 
   updateManagerFeedback(historyId: string, rating: number, comment: string) {

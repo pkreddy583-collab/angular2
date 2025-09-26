@@ -30,3 +30,9 @@ export interface HistoricalHandover {
   incidents: Incident[];
   feedback: ManagerFeedback;
 }
+
+export interface EmailTemplate {
+  to: string;
+  cc: string;
+  subject: string; // e.g., "EOD Handover: {{portfolioName}} - {{date}}"
+}

@@ -1,0 +1,36 @@
+<section>
+  <header class="mb-4">
+    <h2 class="text-2xl font-bold text-gray-800 flex items-center">
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-2 text-blue-500" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M9.53 16.122a3 3 0 00-5.78 1.128 2.25 2.25 0 01-2.4 2.245 4.5 4.5 0 008.4-2.245c0-.399-.078-.78-.22-1.128zm0 0a15.998 15.998 0 003.388-1.62m-5.043-.025a15.994 15.994 0 011.622-3.385m5.043.025a15.994 15.994 0 001.622-3.385m3.388 1.62a15.998 15.998 0 00-1.62-3.385m-5.043-.025a15.998 15.998 0 01-1.622-3.385m-3.388 1.622a15.994 15.994 0 01-1.622-3.385M6.47 16.122a2.25 2.25 0 01-2.4-2.245m13.5 0a2.25 2.25 0 01-2.4 2.245m-9.6 0c0-.399.078-.78.22-1.128a3 3 0 005.78 1.128z" />
+      </svg>
+      Predictive Operations Briefing
+    </h2>
+  </header>
+
+  @if (isLoading()) {
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+      @for (_ of [1,2,3]; track $index) {
+        <div class="bg-gray-200 rounded-lg p-6 animate-pulse h-32"></div>
+      }
+    </div>
+  } @else if (error()) {
+    <div class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 rounded-md" role="alert">
+      <p class="font-bold">Error</p>
+      <p>{{ error() }}</p>
+    </div>
+  } @else {
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+      @for (prediction of predictions(); track prediction.modelName) {
+        <div class="bg-white rounded-lg shadow-md p-6 border-l-4 border-blue-500">
+          <h3 class="text-sm font-semibold text-gray-500 uppercase tracking-wider">{{ prediction.modelName }}</h3>
+          <p class="text-xs text-gray-400 mb-2">{{ prediction.input }}</p>
+          <p class="text-xl font-bold text-gray-800">{{ prediction.prediction }}</p>
+          <p class="text-sm font-semibold mt-2" [class]="getConfidenceClass(prediction.confidence)">
+            Confidence: {{ prediction.confidence }}
+          </p>
+        </div>
+      }
+    </div>
+  }
+</section>

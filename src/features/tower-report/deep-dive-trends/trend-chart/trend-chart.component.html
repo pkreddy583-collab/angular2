@@ -1,0 +1,12 @@
+<div #chartContainer class="w-full h-full relative">
+  <!-- Legend -->
+  <div class="absolute top-0 right-0 flex space-x-4 text-xs">
+    @for(dataset of data().datasets; track dataset.label) {
+      <div class="flex items-center">
+        <div class="w-3 h-3 rounded-sm mr-1.5" [style.background-color]="dataset.color"></div>
+        <span class="text-gray-600">{{ dataset.label }}</span>
+      </div>
+    }
+  </div>
+  <!-- D3 will render the SVG chart inside this div -->
+</div>

@@ -1,6 +1,6 @@
 import { Component, ChangeDetectionStrategy, inject, OnInit, OnDestroy, computed, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ReactiveFormsModule, FormBuilder, FormGroup, FormArray, Validators } from '@angular/forms';
+import { ReactiveFormsModule, FormGroup, FormArray, FormControl, Validators } from '@angular/forms';
 import { Subject } from 'rxjs';
 import { takeUntil, debounceTime, distinctUntilChanged } from 'rxjs/operators';
 import { TowerReportService } from '../../services/tower-report.service';
@@ -31,7 +31,6 @@ export class TowerReportComponent implements OnInit, OnDestroy {
   private reportService = inject(TowerReportService);
   private adminService = inject(AdminService);
   private analyticsService = inject(AnalyticsService);
-  private fb: FormBuilder = inject(FormBuilder);
   private destroy$ = new Subject<void>();
 
   // Expose signals from services to the template
@@ -112,9 +111,9 @@ export class TowerReportComponent implements OnInit, OnDestroy {
   });
 
   constructor() {
-    this.suggestionForm = this.fb.group({
-      suggestedName: ['', Validators.required],
-      justification: ['', Validators.required],
+    this.suggestionForm = new FormGroup({
+      suggestedName: new FormControl('', Validators.required),
+      justification: new FormControl('', Validators.required),
     });
   }
 
@@ -126,20 +125,20 @@ export class TowerReportComponent implements OnInit, OnDestroy {
   
   private buildForm(): void {
     const categories = this.reportData().structuredActivities;
-    const group = this.fb.group({});
+    const group: { [key: string]: FormArray } = {};
 
     categories.forEach(category => {
-      const array = this.fb.array(
-        category.items.map(item => this.fb.group({
-          id: [item.id],
-          instances: [item.instances],
-          hrsPerInstance: [item.hrsPerInstance],
-          frequency: [item.frequency],
+      const array = new FormArray(
+        category.items.map(item => new FormGroup({
+          id: new FormControl(item.id),
+          instances: new FormControl(item.instances),
+          hrsPerInstance: new FormControl(item.hrsPerInstance),
+          frequency: new FormControl(item.frequency),
         }))
       );
-      group.addControl(category.name, array);
+      group[category.name] = array;
     });
-    this.activitiesForm = group;
+    this.activitiesForm = new FormGroup(group);
   }
 
   private initializeSearchState(): void {
@@ -208,11 +207,11 @@ export class TowerReportComponent implements OnInit, OnDestroy {
     if (newItem) {
         const formArray = this.activitiesForm.get(categoryName) as FormArray;
         if (formArray) {
-            formArray.push(this.fb.group({
-                id: [newItem.id],
-                instances: [newItem.instances],
-                hrsPerInstance: [newItem.hrsPerInstance],
-                frequency: [newItem.frequency],
+            formArray.push(new FormGroup({
+                id: new FormControl(newItem.id),
+                instances: new FormControl(newItem.instances),
+                hrsPerInstance: new FormControl(newItem.hrsPerInstance),
+                frequency: new FormControl(newItem.frequency),
             }));
         }
     }
@@ -255,6 +254,18 @@ export class TowerReportComponent implements OnInit, OnDestroy {
     this.reportService.updateManagerAdjustment(Number(value));
   }
   
+  onTicketAdjustmentChange(event: Event, itemId: number): void {
+    const input = event.target as HTMLInputElement;
+    const value = input.value === '' ? null : Number(input.value);
+    this.reportService.updateTicketItemAdjustment(itemId, value);
+  }
+
+  onStructuredAdjustmentChange(event: Event, categoryName: string, itemId: number): void {
+    const input = event.target as HTMLInputElement;
+    const value = input.value === '' ? null : Number(input.value);
+    this.reportService.updateStructuredItemAdjustment(categoryName, itemId, value);
+  }
+
   openAnalyticsModal(type: 'tickets' | 'structured'): void {
     if (type === 'tickets') {
       this.analyticsTitle.set('Ticket-Driven Work Analytics');

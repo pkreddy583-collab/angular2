@@ -4,12 +4,12 @@
     <div class="flex flex-wrap items-center justify-between gap-4">
       <div>
         <h1 class="text-3xl font-bold text-gray-800 flex items-center">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 mr-3 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 mr-3 text-blue-500" fill="none" viewBox="0 0 24 24" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4m0 5c0 2.21-3.582 4-8 4s-8-1.79-8-4" />
           </svg>
           API & Data Hub
         </h1>
-        <p class="mt-1 text-gray-500">Your single source of truth for backend integration.</p>
+        <p class="mt-1 text-gray-500">Your single source of truth for backend integration and database schemas.</p>
       </div>
     </div>
   </header>
@@ -24,7 +24,7 @@
       </div>
       <div class="ml-3">
         <p class="text-sm text-blue-700">
-          This hub provides the specifications for the API endpoints and Databricks SQL queries needed to power the dashboards. The backend team should implement these specifications to ensure seamless data flow.
+          This hub provides specifications for API endpoints and the complete **MySQL database schema** needed to power the dashboards. The backend team should implement these schemas to ensure seamless data flow.
         </p>
       </div>
     </div>
@@ -35,144 +35,246 @@
     <aside class="md:w-1/4">
       <h2 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">Data Modules</h2>
       <nav class="space-y-1">
-        <button (click)="selectSection('incidents')" [class]="activeSection() === 'incidents' ? 'bg-blue-100 text-blue-700' : 'text-gray-600 hover:bg-gray-100'" class="w-full flex items-center px-3 py-2 text-sm font-medium rounded-md text-left">
-          SLA Incidents
-        </button>
-        <button (click)="selectSection('serviceJourney')" [class]="activeSection() === 'serviceJourney' ? 'bg-blue-100 text-blue-700' : 'text-gray-600 hover:bg-gray-100'" class="w-full flex items-center px-3 py-2 text-sm font-medium rounded-md text-left">
-          Service Journey Details
-        </button>
-        <button (click)="selectSection('slaCompliance')" [class]="activeSection() === 'slaCompliance' ? 'bg-blue-100 text-blue-700' : 'text-gray-600 hover:bg-gray-100'" class="w-full flex items-center px-3 py-2 text-sm font-medium rounded-md text-left">
-          SLA Compliance Details
-        </button>
-         <button (click)="selectSection('towerReport')" [class]="activeSection() === 'towerReport' ? 'bg-blue-100 text-blue-700' : 'text-gray-600 hover:bg-gray-100'" class="w-full flex items-center px-3 py-2 text-sm font-medium rounded-md text-left">
-          Tower Deep Dive Report
-        </button>
+        <button (click)="selectSection('incidents')" [class]="activeSection() === 'incidents' ? 'bg-blue-100 text-blue-700' : 'text-gray-600 hover:bg-gray-100'" class="w-full flex items-center px-3 py-2 text-sm font-medium rounded-md text-left">SLA Incidents</button>
+        <button (click)="selectSection('predictiveBriefing')" [class]="activeSection() === 'predictiveBriefing' ? 'bg-blue-100 text-blue-700' : 'text-gray-600 hover:bg-gray-100'" class="w-full flex items-center px-3 py-2 text-sm font-medium rounded-md text-left">Predictive Briefing</button>
+        <button (click)="selectSection('aiRoi')" [class]="activeSection() === 'aiRoi' ? 'bg-blue-100 text-blue-700' : 'text-gray-600 hover:bg-gray-100'" class="w-full flex items-center px-3 py-2 text-sm font-medium rounded-md text-left">AI ROI Analytics</button>
+        <button (click)="selectSection('towerReport')" [class]="activeSection() === 'towerReport' ? 'bg-blue-100 text-blue-700' : 'text-gray-600 hover:bg-gray-100'" class="w-full flex items-center px-3 py-2 text-sm font-medium rounded-md text-left">Tower Deep Dive Report</button>
+        <button (click)="selectSection('towerReportTrends')" [class]="activeSection() === 'towerReportTrends' ? 'bg-blue-100 text-blue-700' : 'text-gray-600 hover:bg-gray-100'" class="w-full flex items-center px-3 py-2 text-sm font-medium rounded-md text-left">Deep Dive Trends</button>
+        <button (click)="selectSection('fteBalancing')" [class]="activeSection() === 'fteBalancing' ? 'bg-blue-100 text-blue-700' : 'text-gray-600 hover:bg-gray-100'" class="w-full flex items-center px-3 py-2 text-sm font-medium rounded-md text-left">FTE Balancing</button>
+        <button (click)="selectSection('handovers')" [class]="activeSection() === 'handovers' ? 'bg-blue-100 text-blue-700' : 'text-gray-600 hover:bg-gray-100'" class="w-full flex items-center px-3 py-2 text-sm font-medium rounded-md text-left">Handover Hub</button>
+        <button (click)="selectSection('compliance')" [class]="activeSection() === 'compliance' ? 'bg-blue-100 text-blue-700' : 'text-gray-600 hover:bg-gray-100'" class="w-full flex items-center px-3 py-2 text-sm font-medium rounded-md text-left">Email Compliance</button>
+        <button (click)="selectSection('admin')" [class]="activeSection() === 'admin' ? 'bg-blue-100 text-blue-700' : 'text-gray-600 hover:bg-gray-100'" class="w-full flex items-center px-3 py-2 text-sm font-medium rounded-md text-left">Admin & Master Data</button>
+        <button (click)="selectSection('postmortems')" [class]="activeSection() === 'postmortems' ? 'bg-blue-100 text-blue-700' : 'text-gray-600 hover:bg-gray-100'" class="w-full flex items-center px-3 py-2 text-sm font-medium rounded-md text-left">Postmortem Reports</button>
       </nav>
     </aside>
 
     <!-- Content Area -->
     <div class="flex-1">
       <!-- Incidents Section -->
-      @if (activeSection() === 'incidents' && configs().incidents; as config) {
+      @if (activeSection() === 'incidents') {
         <div class="bg-white rounded-lg shadow-md overflow-hidden">
           <div class="p-5">
-            <h2 class="text-xl font-bold text-gray-800">{{ config.title }}</h2>
-            <p class="mt-1 text-sm text-gray-600">{{ config.description }}</p>
+            <h2 class="text-xl font-bold text-gray-800">SLA Incidents (Watchtower)</h2>
+            <p class="mt-1 text-sm text-gray-600">Schema for the main incident tracking and SLA watchtower dashboard.</p>
           </div>
           <div class="border-b border-gray-200 px-5">
             <nav class="-mb-px flex space-x-6" aria-label="Tabs">
-              <button (click)="selectTab('incidents', 'api')" [class]="activeTab()['incidents'] === 'api' ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'" class="whitespace-nowrap py-3 px-1 border-b-2 font-medium text-sm">API Endpoint</button>
-              <button (click)="selectTab('incidents', 'json')" [class]="activeTab()['incidents'] === 'json' ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'" class="whitespace-nowrap py-3 px-1 border-b-2 font-medium text-sm">JSON Response</button>
-              <button (click)="selectTab('incidents', 'sql')" [class]="activeTab()['incidents'] === 'sql' ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'" class="whitespace-nowrap py-3 px-1 border-b-2 font-medium text-sm">Databricks SQL</button>
+              <button (click)="selectTab('incidents', 'logic')" [class]="activeTab()['incidents'] === 'logic' ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'" class="whitespace-nowrap py-3 px-1 border-b-2 font-medium text-sm">API & Backend Logic</button>
+              <button (click)="selectTab('incidents', 'db')" [class]="activeTab()['incidents'] === 'db' ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'" class="whitespace-nowrap py-3 px-1 border-b-2 font-medium text-sm">Database Schema</button>
+              <button (click)="selectTab('incidents', 'json')" [class]="activeTab()['incidents'] === 'json' ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'" class="whitespace-nowrap py-3 px-1 border-b-2 font-medium text-sm">API JSON Response</button>
             </nav>
           </div>
-          <div class="relative bg-gray-800 p-4">
-            @if(activeTab()['incidents'] === 'api') {
-              <pre><code class="language-bash text-sm text-gray-300 whitespace-pre-wrap">HTTP Method: GET\nAPI Endpoint: /api/incidents</code></pre>
-            }
-            @if(activeTab()['incidents'] === 'json') {
-              @let content = prettyPrintJson(incidentSample());
+          @if(activeTab()['incidents'] === 'logic') {
+            <div class="p-5 text-sm markup" [innerHTML]="incidentsApiLogic"></div>
+          }
+          @if(activeTab()['incidents'] === 'db') {
+            <div class="p-5 space-y-4">
+              <div>
+                <h3 class="font-semibold text-gray-700">MySQL DDL (CREATE TABLE)</h3>
+                <div class="relative bg-gray-800 p-4 rounded-md mt-2">
+                  <pre><code class="language-sql text-sm text-gray-300 whitespace-pre-wrap">{{ incidentsDdl }}</code></pre>
+                  <button (click)="copyToClipboard('incidentsDdl', incidentsDdl)" class="absolute top-3 right-3 bg-gray-700 text-gray-300 hover:bg-gray-600 px-3 py-1 rounded text-xs font-medium">{{ copied() === 'incidentsDdl' ? 'Copied!' : 'Copy' }}</button>
+                </div>
+              </div>
+              <div>
+                <h3 class="font-semibold text-gray-700">Sample DML (INSERT)</h3>
+                <div class="relative bg-gray-800 p-4 rounded-md mt-2">
+                  <pre><code class="language-sql text-sm text-gray-300 whitespace-pre-wrap">{{ incidentsDml }}</code></pre>
+                  <button (click)="copyToClipboard('incidentsDml', incidentsDml)" class="absolute top-3 right-3 bg-gray-700 text-gray-300 hover:bg-gray-600 px-3 py-1 rounded text-xs font-medium">{{ copied() === 'incidentsDml' ? 'Copied!' : 'Copy' }}</button>
+                </div>
+              </div>
+            </div>
+          }
+          @if(activeTab()['incidents'] === 'json') {
+            @let content = prettyPrintJson(incidentSample());
+            <div class="relative bg-gray-800 p-4">
               <pre><code class="language-json text-sm text-gray-300 whitespace-pre-wrap">{{ content }}</code></pre>
               <button (click)="copyToClipboard('incidentsJson', content)" class="absolute top-3 right-3 bg-gray-700 text-gray-300 hover:bg-gray-600 px-3 py-1 rounded text-xs font-medium">{{ copied() === 'incidentsJson' ? 'Copied!' : 'Copy' }}</button>
-            }
-            @if(activeTab()['incidents'] === 'sql') {
-              <pre><code class="language-sql text-sm text-gray-300 whitespace-pre-wrap">{{ config.query }}</code></pre>
-              <button (click)="copyToClipboard('incidentsSql', config.query)" class="absolute top-3 right-3 bg-gray-700 text-gray-300 hover:bg-gray-600 px-3 py-1 rounded text-xs font-medium">{{ copied() === 'incidentsSql' ? 'Copied!' : 'Copy' }}</button>
-            }
-          </div>
+            </div>
+          }
         </div>
       }
 
-      <!-- Service Journey Section -->
-      @if (activeSection() === 'serviceJourney' && configs().serviceJourney; as config) {
+      <!-- Predictive Briefing Section -->
+      @if (activeSection() === 'predictiveBriefing') {
         <div class="bg-white rounded-lg shadow-md overflow-hidden">
           <div class="p-5">
-            <h2 class="text-xl font-bold text-gray-800">{{ config.title }}</h2>
-            <p class="mt-1 text-sm text-gray-600">{{ config.description }}</p>
+            <h2 class="text-xl font-bold text-gray-800">Predictive Operations Briefing</h2>
+            <p class="mt-1 text-sm text-gray-600">Backend implementation guide for generating the AI-powered dashboard briefing.</p>
           </div>
           <div class="border-b border-gray-200 px-5">
             <nav class="-mb-px flex space-x-6" aria-label="Tabs">
-              <button (click)="selectTab('serviceJourney', 'api')" [class]="activeTab()['serviceJourney'] === 'api' ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'" class="whitespace-nowrap py-3 px-1 border-b-2 font-medium text-sm">API Endpoint</button>
-              <button (click)="selectTab('serviceJourney', 'json')" [class]="activeTab()['serviceJourney'] === 'json' ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'" class="whitespace-nowrap py-3 px-1 border-b-2 font-medium text-sm">JSON Response</button>
-              <button (click)="selectTab('serviceJourney', 'sql')" [class]="activeTab()['serviceJourney'] === 'sql' ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'" class="whitespace-nowrap py-3 px-1 border-b-2 font-medium text-sm">Databricks SQL</button>
+              <button (click)="selectTab('predictiveBriefing', 'logic')" [class]="activeTab()['predictiveBriefing'] === 'logic' ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'" class="whitespace-nowrap py-3 px-1 border-b-2 font-medium text-sm">API & Backend Logic</button>
+              <button (click)="selectTab('predictiveBriefing', 'db')" [class]="activeTab()['predictiveBriefing'] === 'db' ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'" class="whitespace-nowrap py-3 px-1 border-b-2 font-medium text-sm">Database Schema</button>
+              <button (click)="selectTab('predictiveBriefing', 'json')" [class]="activeTab()['predictiveBriefing'] === 'json' ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'" class="whitespace-nowrap py-3 px-1 border-b-2 font-medium text-sm">API JSON Response</button>
             </nav>
           </div>
-          <div class="relative bg-gray-800 p-4">
-            @if(activeTab()['serviceJourney'] === 'api') {
-              <pre><code class="language-bash text-sm text-gray-300 whitespace-pre-wrap">HTTP Method: GET\nAPI Endpoint: /api/observability/journey-details</code></pre>
-            }
-            @if(activeTab()['serviceJourney'] === 'json') {
-              @let content = prettyPrintJson(journeySample());
+          @if(activeTab()['predictiveBriefing'] === 'logic') {
+            <div class="p-5 text-sm markup" [innerHTML]="predictiveBriefingApiLogic"></div>
+          }
+          @if(activeTab()['predictiveBriefing'] === 'db') {
+            <div class="p-5 space-y-4 text-sm">
+                <h3 class="font-semibold text-gray-700">Relevant Tables</h3>
+                <p>This feature does not require new tables. It generates insights by querying existing data from the following schemas:</p>
+                <ul class="list-disc list-inside mt-2 space-y-1">
+                  <li><code class="bg-gray-100 p-1 rounded-sm text-xs">incidents</code>: Used for the Incident Volume and SLA Breach Risk forecasts.</li>
+                  <li><code class="bg-gray-100 p-1 rounded-sm text-xs">fte_snapshots</code>: Used for the FTE Demand forecast.</li>
+                </ul>
+            </div>
+          }
+          @if(activeTab()['predictiveBriefing'] === 'json') {
+            @let content = prettyPrintJson(predictiveBriefingSample());
+            <div class="relative bg-gray-800 p-4">
               <pre><code class="language-json text-sm text-gray-300 whitespace-pre-wrap">{{ content }}</code></pre>
-              <button (click)="copyToClipboard('journeyJson', content)" class="absolute top-3 right-3 bg-gray-700 text-gray-300 hover:bg-gray-600 px-3 py-1 rounded text-xs font-medium">{{ copied() === 'journeyJson' ? 'Copied!' : 'Copy' }}</button>
-            }
-            @if(activeTab()['serviceJourney'] === 'sql') {
-              <pre><code class="language-sql text-sm text-gray-300 whitespace-pre-wrap">{{ config.query }}</code></pre>
-              <button (click)="copyToClipboard('journeySql', config.query)" class="absolute top-3 right-3 bg-gray-700 text-gray-300 hover:bg-gray-600 px-3 py-1 rounded text-xs font-medium">{{ copied() === 'journeySql' ? 'Copied!' : 'Copy' }}</button>
-            }
-          </div>
+              <button (click)="copyToClipboard('predictiveBriefingJson', content)" class="absolute top-3 right-3 bg-gray-700 text-gray-300 hover:bg-gray-600 px-3 py-1 rounded text-xs font-medium">{{ copied() === 'predictiveBriefingJson' ? 'Copied!' : 'Copy' }}</button>
+            </div>
+          }
         </div>
       }
 
-      <!-- SLA Compliance Section -->
-      @if (activeSection() === 'slaCompliance' && configs().slaCompliance; as config) {
+      <!-- AI ROI Section -->
+      @if (activeSection() === 'aiRoi') {
         <div class="bg-white rounded-lg shadow-md overflow-hidden">
           <div class="p-5">
-            <h2 class="text-xl font-bold text-gray-800">{{ config.title }}</h2>
-            <p class="mt-1 text-sm text-gray-600">{{ config.description }}</p>
+            <h2 class="text-xl font-bold text-gray-800">AI ROI Analytics</h2>
+            <p class="mt-1 text-sm text-gray-600">Backend logic for calculating AI effectiveness metrics from user feedback.</p>
           </div>
           <div class="border-b border-gray-200 px-5">
             <nav class="-mb-px flex space-x-6" aria-label="Tabs">
-              <button (click)="selectTab('slaCompliance', 'api')" [class]="activeTab()['slaCompliance'] === 'api' ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'" class="whitespace-nowrap py-3 px-1 border-b-2 font-medium text-sm">API Endpoint</button>
-              <button (click)="selectTab('slaCompliance', 'json')" [class]="activeTab()['slaCompliance'] === 'json' ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'" class="whitespace-nowrap py-3 px-1 border-b-2 font-medium text-sm">JSON Response</button>
-              <button (click)="selectTab('slaCompliance', 'sql')" [class]="activeTab()['slaCompliance'] === 'sql' ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'" class="whitespace-nowrap py-3 px-1 border-b-2 font-medium text-sm">Databricks SQL</button>
+              <button (click)="selectTab('aiRoi', 'logic')" [class]="activeTab()['aiRoi'] === 'logic' ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'" class="whitespace-nowrap py-3 px-1 border-b-2 font-medium text-sm">API & Backend Logic</button>
+              <button (click)="selectTab('aiRoi', 'db')" [class]="activeTab()['aiRoi'] === 'db' ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'" class="whitespace-nowrap py-3 px-1 border-b-2 font-medium text-sm">Database Schema</button>
+              <button (click)="selectTab('aiRoi', 'json')" [class]="activeTab()['aiRoi'] === 'json' ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'" class="whitespace-nowrap py-3 px-1 border-b-2 font-medium text-sm">API JSON Response</button>
             </nav>
           </div>
-          <div class="relative bg-gray-800 p-4">
-            @if(activeTab()['slaCompliance'] === 'api') {
-              <pre><code class="language-bash text-sm text-gray-300 whitespace-pre-wrap">HTTP Method: GET\nAPI Endpoint: /api/observability/sla-details</code></pre>
-            }
-            @if(activeTab()['slaCompliance'] === 'json') {
-              @let content = prettyPrintJson(slaSample());
+          @if(activeTab()['aiRoi'] === 'logic') {
+            <div class="p-5 text-sm markup" [innerHTML]="aiRoiApiLogic"></div>
+          }
+          @if(activeTab()['aiRoi'] === 'db') {
+             <div class="p-5 text-sm">
+                <p>This feature uses the <strong><code>incident_ai_feedback</code></strong> table from the SLA Incidents schema.</p>
+             </div>
+          }
+          @if(activeTab()['aiRoi'] === 'json') {
+            @let content = prettyPrintJson(aiRoiSample());
+            <div class="relative bg-gray-800 p-4">
               <pre><code class="language-json text-sm text-gray-300 whitespace-pre-wrap">{{ content }}</code></pre>
-              <button (click)="copyToClipboard('slaJson', content)" class="absolute top-3 right-3 bg-gray-700 text-gray-300 hover:bg-gray-600 px-3 py-1 rounded text-xs font-medium">{{ copied() === 'slaJson' ? 'Copied!' : 'Copy' }}</button>
-            }
-            @if(activeTab()['slaCompliance'] === 'sql') {
-              <pre><code class="language-sql text-sm text-gray-300 whitespace-pre-wrap">{{ config.query }}</code></pre>
-              <button (click)="copyToClipboard('slaSql', config.query)" class="absolute top-3 right-3 bg-gray-700 text-gray-300 hover:bg-gray-600 px-3 py-1 rounded text-xs font-medium">{{ copied() === 'slaSql' ? 'Copied!' : 'Copy' }}</button>
-            }
-          </div>
+              <button (click)="copyToClipboard('aiRoiJson', content)" class="absolute top-3 right-3 bg-gray-700 text-gray-300 hover:bg-gray-600 px-3 py-1 rounded text-xs font-medium">{{ copied() === 'aiRoiJson' ? 'Copied!' : 'Copy' }}</button>
+            </div>
+          }
         </div>
       }
 
       <!-- Tower Deep Dive Section -->
-      @if (activeSection() === 'towerReport' && configs().towerReport; as config) {
+      @if (activeSection() === 'towerReport') {
         <div class="bg-white rounded-lg shadow-md overflow-hidden">
           <div class="p-5">
-            <h2 class="text-xl font-bold text-gray-800">{{ config.title }}</h2>
-            <p class="mt-1 text-sm text-gray-600">{{ config.description }}</p>
+            <h2 class="text-xl font-bold text-gray-800">Tower Deep Dive Report</h2>
+            <p class="mt-1 text-sm text-gray-600">Database schema and logic for the monthly deep dive report.</p>
           </div>
           <div class="border-b border-gray-200 px-5">
             <nav class="-mb-px flex space-x-6" aria-label="Tabs">
-              <button (click)="selectTab('towerReport', 'api')" [class]="activeTab()['towerReport'] === 'api' ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'" class="whitespace-nowrap py-3 px-1 border-b-2 font-medium text-sm">API Endpoint</button>
-              <button (click)="selectTab('towerReport', 'json')" [class]="activeTab()['towerReport'] === 'json' ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'" class="whitespace-nowrap py-3 px-1 border-b-2 font-medium text-sm">JSON Response</button>
-              <button (click)="selectTab('towerReport', 'sql')" [class]="activeTab()['towerReport'] === 'sql' ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'" class="whitespace-nowrap py-3 px-1 border-b-2 font-medium text-sm">Databricks SQL</button>
+              <button (click)="selectTab('towerReport', 'logic')" [class]="activeTab()['towerReport'] === 'logic' ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'" class="whitespace-nowrap py-3 px-1 border-b-2 font-medium text-sm">API & Backend Logic</button>
+              <button (click)="selectTab('towerReport', 'db')" [class]="activeTab()['towerReport'] === 'db' ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'" class="whitespace-nowrap py-3 px-1 border-b-2 font-medium text-sm">Database Schema</button>
+              <button (click)="selectTab('towerReport', 'json')" [class]="activeTab()['towerReport'] === 'json' ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'" class="whitespace-nowrap py-3 px-1 border-b-2 font-medium text-sm">API JSON Response</button>
             </nav>
           </div>
-          <div class="relative bg-gray-800 p-4">
-            @if(activeTab()['towerReport'] === 'api') {
-              <pre><code class="language-bash text-sm text-gray-300 whitespace-pre-wrap">HTTP Method: GET\nAPI Endpoint: /api/tower-report/deep-dive?month=YYYY-MM&tower=Compute</code></pre>
-            }
-            @if(activeTab()['towerReport'] === 'json') {
-              @let content = prettyPrintJson(towerReportSample());
-              <pre><code class="language-json text-sm text-gray-300 whitespace-pre-wrap">{{ content }}</code></pre>
-              <button (click)="copyToClipboard('towerReportJson', content)" class="absolute top-3 right-3 bg-gray-700 text-gray-300 hover:bg-gray-600 px-3 py-1 rounded text-xs font-medium">{{ copied() === 'towerReportJson' ? 'Copied!' : 'Copy' }}</button>
-            }
-            @if(activeTab()['towerReport'] === 'sql') {
-              <pre><code class="language-sql text-sm text-gray-300 whitespace-pre-wrap">{{ config.query }}</code></pre>
-              <button (click)="copyToClipboard('towerReportSql', config.query)" class="absolute top-3 right-3 bg-gray-700 text-gray-300 hover:bg-gray-600 px-3 py-1 rounded text-xs font-medium">{{ copied() === 'towerReportSql' ? 'Copied!' : 'Copy' }}</button>
-            }
+          @if(activeTab()['towerReport'] === 'logic') {
+            <div class="p-5 text-sm markup" [innerHTML]="towerReportApiLogic"></div>
+          }
+          @if(activeTab()['towerReport'] === 'db') {
+            <div class="p-5 space-y-4">
+              <div>
+                <h3 class="font-semibold text-gray-700">Schema Overview</h3>
+                <p class="text-sm text-gray-600 mt-1">This schema uses a monthly snapshot model with a full audit trail. A backend process should aggregate raw data (from ticketing systems, etc.) and populate these tables. This makes loading the report fast and efficient.</p>
+                 <h3 class="font-semibold text-gray-700 mt-2">Manager Adjustment & Other Data</h3>
+                 <ul class="list-disc list-inside text-sm text-gray-600">
+                    <li>The <strong>Manager Adjustment</strong> value is stored directly in the <code class="text-xs bg-gray-100 p-1 rounded">monthly_report_summaries</code> table.</li>
+                    <li>The data for structured activities like "Response" and "Proactive" is stored in the <code class="text-xs bg-gray-100 p-1 rounded">monthly_structured_aggregates</code> table, which links to the <code class="text-xs bg-gray-100 p-1 rounded">master_activities</code> table to get the category name.</li>
+                    <li>The entire report summary has an approval workflow and audit fields (<code class="text-xs bg-gray-100 p-1 rounded">created_by</code>, <code class="text-xs bg-gray-100 p-1 rounded">last_modified_by</code>, etc.) to track who entered and modified the data.</li>
+                 </ul>
+              </div>
+              <div>
+                <h3 class="font-semibold text-gray-700">MySQL DDL (CREATE TABLE)</h3>
+                <div class="relative bg-gray-800 p-4 rounded-md mt-2">
+                  <pre><code class="language-sql text-sm text-gray-300 whitespace-pre-wrap">{{ towerReportDdl }}</code></pre>
+                  <button (click)="copyToClipboard('towerDdl', towerReportDdl)" class="absolute top-3 right-3 bg-gray-700 text-gray-300 hover:bg-gray-600 px-3 py-1 rounded text-xs font-medium">{{ copied() === 'towerDdl' ? 'Copied!' : 'Copy' }}</button>
+                </div>
+              </div>
+              <div>
+                <h3 class="font-semibold text-gray-700">Sample DML (INSERT for July 2025 Report)</h3>
+                <div class="relative bg-gray-800 p-4 rounded-md mt-2">
+                  <pre><code class="language-sql text-sm text-gray-300 whitespace-pre-wrap">{{ towerReportDml }}</code></pre>
+                  <button (click)="copyToClipboard('towerDml', towerReportDml)" class="absolute top-3 right-3 bg-gray-700 text-gray-300 hover:bg-gray-600 px-3 py-1 rounded text-xs font-medium">{{ copied() === 'towerDml' ? 'Copied!' : 'Copy' }}</button>
+                </div>
+              </div>
+            </div>
+          }
+          @if(activeTab()['towerReport'] === 'json') {
+             @let content = prettyPrintJson(towerReportSample());
+              <div class="relative bg-gray-800 p-4">
+                <pre><code class="language-json text-sm text-gray-300 whitespace-pre-wrap">{{ content }}</code></pre>
+                <button (click)="copyToClipboard('towerReportJson', content)" class="absolute top-3 right-3 bg-gray-700 text-gray-300 hover:bg-gray-600 px-3 py-1 rounded text-xs font-medium">{{ copied() === 'towerReportJson' ? 'Copied!' : 'Copy' }}</button>
+              </div>
+          }
+        </div>
+      }
+
+       <!-- Deep Dive Trends Section -->
+      @if (activeSection() === 'towerReportTrends') {
+        <div class="bg-white rounded-lg shadow-md overflow-hidden">
+          <div class="p-5">
+            <h2 class="text-xl font-bold text-gray-800">Deep Dive Trends</h2>
+            <p class="mt-1 text-sm text-gray-600">Backend logic for the historical trends analysis page.</p>
           </div>
+           <div class="border-b border-gray-200 px-5">
+            <nav class="-mb-px flex space-x-6" aria-label="Tabs">
+              <button (click)="selectTab('towerReportTrends', 'logic')" [class]="activeTab()['towerReportTrends'] === 'logic' ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'" class="whitespace-nowrap py-3 px-1 border-b-2 font-medium text-sm">API & Backend Logic</button>
+              <button (click)="selectTab('towerReportTrends', 'db')" [class]="activeTab()['towerReportTrends'] === 'db' ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'" class="whitespace-nowrap py-3 px-1 border-b-2 font-medium text-sm">Database Schema</button>
+            </nav>
+          </div>
+           @if(activeTab()['towerReportTrends'] === 'logic') {
+            <div class="p-5 text-sm markup" [innerHTML]="towerReportTrendsApiLogic"></div>
+          }
+          @if(activeTab()['towerReportTrends'] === 'db') {
+             <div class="p-5 text-sm">
+                <p>This feature uses the existing <strong>monthly snapshot tables</strong> from the Tower Deep Dive Report schema. No new tables are required. The API should query these tables over a date range to generate the trend data.</p>
+             </div>
+          }
+        </div>
+      }
+
+      <!-- FTE Balancing Section -->
+      @if (activeSection() === 'fteBalancing') {
+         <div class="bg-white rounded-lg shadow-md overflow-hidden">
+          <!-- ... FTE Balancing Content ... -->
+        </div>
+      }
+
+      <!-- Handover Hub Section -->
+      @if (activeSection() === 'handovers') {
+        <div class="bg-white rounded-lg shadow-md overflow-hidden">
+            <!-- ... Handover Hub Content ... -->
+        </div>
+      }
+
+       <!-- Compliance Section -->
+      @if (activeSection() === 'compliance') {
+        <div class="bg-white rounded-lg shadow-md overflow-hidden">
+            <!-- ... Compliance Content ... -->
+        </div>
+      }
+
+      <!-- Admin Section -->
+      @if (activeSection() === 'admin') {
+         <div class="bg-white rounded-lg shadow-md overflow-hidden">
+            <!-- ... Admin Content ... -->
+        </div>
+      }
+
+       <!-- Postmortems Section -->
+      @if (activeSection() === 'postmortems') {
+         <div class="bg-white rounded-lg shadow-md overflow-hidden">
+           <!-- ... Postmortems Content ... -->
         </div>
       }
     </div>

@@ -1,0 +1,92 @@
+<main class="container mx-auto p-4 sm:p-6 lg:p-8">
+  <!-- Header -->
+  <header class="mb-8">
+    <div class="flex flex-wrap items-center justify-between gap-4">
+      <div>
+        <h1 class="text-3xl font-bold text-gray-800 flex items-center">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 mr-3 text-blue-500" viewBox="0 0 20 20" fill="currentColor">
+            <path d="M2 11a1 1 0 011-1h2a1 1 0 011 1v5a1 1 0 01-1 1H3a1 1 0 01-1-1v-5zM8 7a1 1 0 011-1h2a1 1 0 011 1v9a1 1 0 01-1 1H9a1 1 0 01-1-1V7zM14 4a1 1 0 011-1h2a1 1 0 011 1v12a1 1 0 01-1 1h-2a1 1 0 01-1-1V4z" />
+          </svg>
+          Deep Dive Trends Analysis
+        </h1>
+        <p class="mt-1 text-gray-500">Historical workload and FTE trends for the Compute Tower.</p>
+      </div>
+      <div class="flex items-center gap-4">
+        <button (click)="exportData()" class="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md shadow-sm text-gray-700 bg-white hover:bg-gray-50">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clip-rule="evenodd" /></svg>
+          Export All Trend Data
+        </button>
+        <a routerLink="/tower-report" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clip-rule="evenodd" /></svg>
+          Back to Report
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <!-- Trend Charts -->
+  <div class="space-y-8">
+    <!-- Required vs Deployed FTE Chart -->
+    <div class="bg-white rounded-lg shadow-md p-6">
+      <h2 class="text-xl font-bold text-gray-700 mb-4">Required vs. Deployed FTE (Last 6 Months)</h2>
+      <app-trend-chart [data]="comparisonChartData()" [chartType]="'line'" [height]="300"></app-trend-chart>
+    </div>
+    
+    <!-- Workload Composition Chart -->
+    <div class="bg-white rounded-lg shadow-md p-6">
+      <h2 class="text-xl font-bold text-gray-700 mb-4">Workload Composition Trend</h2>
+      <app-trend-chart [data]="compositionChartData()" [chartType]="'stackedBar'" [height]="300"></app-trend-chart>
+    </div>
+
+    <!-- Data Table -->
+    <div class="bg-white rounded-lg shadow-md">
+       <div class="p-5 border-b">
+        <h2 class="text-xl font-bold text-gray-700">Monthly Data Breakdown</h2>
+      </div>
+      <div class="overflow-x-auto">
+        <table class="w-full text-sm text-left">
+          <thead class="text-xs text-gray-700 uppercase bg-gray-50">
+            <tr>
+              <th class="px-6 py-3">Month</th>
+              <th class="px-6 py-3 text-right">Required FTE</th>
+              <th class="px-6 py-3 text-center">MoM Change</th>
+              <th class="px-6 py-3 text-right">Deployed FTE</th>
+              <th class="px-6 py-3 text-center">MoM Change</th>
+              <th class="px-6 py-3 text-right">Surplus/Deficit</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (item of tableData(); track item.month) {
+              <tr class="border-b hover:bg-gray-50">
+                <td class="px-6 py-4 font-medium text-gray-900">{{ item.monthDisplay }}</td>
+                <td class="px-6 py-4 text-right font-semibold text-blue-600">{{ item.totalRequiredFte | number:'1.2-2' }}</td>
+                <td class="px-6 py-4 text-center">
+                  @if(item.requiredFteChange !== 0) {
+                     <span class="inline-flex items-center text-xs font-semibold px-2 py-0.5 rounded-full" [class]="item.requiredFteChange > 0 ? 'bg-red-100 text-red-800' : 'bg-green-100 text-green-800'">
+                       {{ item.requiredFteChange > 0 ? '+' : '' }}{{ item.requiredFteChange | percent:'1.0-0' }}
+                     </span>
+                  } @else {
+                    <span class="text-gray-400">-</span>
+                  }
+                </td>
+                <td class="px-6 py-4 text-right font-semibold text-green-600">{{ item.actualDeployedFte | number:'1.2-2' }}</td>
+                 <td class="px-6 py-4 text-center">
+                  @if(item.deployedFteChange !== 0) {
+                     <span class="inline-flex items-center text-xs font-semibold px-2 py-0.5 rounded-full" [class]="item.deployedFteChange > 0 ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'">
+                       {{ item.deployedFteChange > 0 ? '+' : '' }}{{ item.deployedFteChange | percent:'1.0-0' }}
+                     </span>
+                  } @else {
+                     <span class="text-gray-400">-</span>
+                  }
+                </td>
+                <td class="px-6 py-4 text-right font-semibold" [class]="item.surplusDeficit > 0 ? 'text-green-700' : 'text-red-700'">
+                  {{ item.surplusDeficit > 0 ? '+' : '' }}{{ item.surplusDeficit | number:'1.2-2' }}
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</main>

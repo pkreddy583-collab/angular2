@@ -44,14 +44,27 @@ export class FteBalancingComponent {
     this.currentMonth.set(target.value);
   }
 
-  getHeatmapClass(status: 'surplus' | 'deficit' | 'balanced'): string {
+  getHeatmapBorderClass(status: 'surplus' | 'deficit' | 'balanced'): string {
     switch (status) {
-      case 'surplus':
-        return 'bg-green-100 border-green-500 text-green-800';
-      case 'deficit':
-        return 'bg-red-100 border-red-500 text-red-800';
-      case 'balanced':
-        return 'bg-yellow-100 border-yellow-500 text-yellow-800';
+      case 'surplus': return 'border-green-500';
+      case 'deficit': return 'border-red-500';
+      case 'balanced': return 'border-yellow-500';
+    }
+  }
+  
+  getHeatmapTextClass(status: 'surplus' | 'deficit' | 'balanced'): string {
+    switch (status) {
+      case 'surplus': return 'text-green-600';
+      case 'deficit': return 'text-red-600';
+      case 'balanced': return 'text-yellow-800';
+    }
+  }
+
+  getStatusPillClass(status: 'surplus' | 'deficit' | 'balanced'): string {
+    switch (status) {
+      case 'surplus': return 'bg-green-100 text-green-800';
+      case 'deficit': return 'bg-red-100 text-red-800';
+      case 'balanced': return 'bg-yellow-100 text-yellow-800';
     }
   }
 
