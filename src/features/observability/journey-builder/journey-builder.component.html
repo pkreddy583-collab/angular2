@@ -1,0 +1,102 @@
+<main class="container mx-auto p-4 sm:p-6 lg:p-8">
+  <header class="mb-8">
+    <div class="flex flex-wrap items-center justify-between gap-4">
+      <div>
+        <h1 class="text-3xl font-bold text-gray-800 flex items-center">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 mr-3 text-blue-500" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M11.42 15.17L17.25 21A2.652 2.652 0 0021 18.75V8.843a1.5 1.5 0 00-1.012-1.423l-4.522-1.472a1.5 1.5 0 01-1.012-1.423V3.543A2.652 2.652 0 0012.25 1h-2.5A2.652 2.652 0 007.1 3.543v2.404a1.5 1.5 0 01-1.012 1.423l-4.522 1.472A1.5 1.5 0 001 8.843v9.907a2.652 2.652 0 003.75 2.582l5.67-3.616zM11.42 15.17l2.472-2.473a1.5 1.5 0 000-2.122L11.42 8.122m0 7.048L8.122 11.42m3.298 3.75l-.422-.422a1.5 1.5 0 010-2.122l.422-.422m0 2.964l2.473-2.473" /></svg>
+          Business Journey Builder
+        </h1>
+        <p class="mt-1 text-gray-500">Define new business models and their steps for observability monitoring.</p>
+      </div>
+       <a routerLink="/observability" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clip-rule="evenodd" /></svg>
+        Back to Dashboard
+      </a>
+    </div>
+  </header>
+  
+  <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+    <!-- Form Section -->
+    <div class="bg-white p-6 rounded-lg shadow-md border border-gray-200">
+      <form [formGroup]="journeyForm" (ngSubmit)="saveJourney()" novalidate>
+        <div class="mb-6">
+          <label for="journeyName" class="block text-lg font-semibold text-gray-800">Journey Name</label>
+          <p class="text-sm text-gray-500 mb-2">e.g., "Medicare Claims Processing" or "Star Ratings Dashboard"</p>
+          <input type="text" id="journeyName" formControlName="name" class="w-full text-base border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500 bg-white text-gray-900" placeholder="Enter a descriptive name">
+        </div>
+
+        <div class="border-t pt-4">
+          <h3 class="text-lg font-semibold text-gray-800 mb-2">Journey Steps</h3>
+          <div formArrayName="steps" class="space-y-4">
+            @for (step of steps.controls; track $index) {
+              <div [formGroupName]="$index" class="bg-gray-50 p-4 rounded-lg border relative">
+                <div class="flex justify-between items-center mb-2">
+                   <p class="font-semibold text-gray-700">Step {{ $index + 1 }}</p>
+                    <button type="button" (click)="removeStep($index)" [disabled]="steps.controls.length <= 1" class="text-gray-400 hover:text-red-600 disabled:opacity-50 disabled:cursor-not-allowed">
+                       <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd" /></svg>
+                    </button>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label [for]="'stepName' + $index" class="block text-sm font-medium text-gray-700">Step Name</label>
+                    <input type="text" [id]="'stepName' + $index" formControlName="stepName" class="mt-1 w-full text-sm border-gray-300 rounded-md shadow-sm bg-white text-gray-900" placeholder="e.g., Verify Eligibility">
+                  </div>
+                   <div>
+                    <label [for]="'serviceName' + $index" class="block text-sm font-medium text-gray-700">Service Name</label>
+                    <input type="text" [id]="'serviceName' + $index" formControlName="serviceName" class="mt-1 w-full text-sm border-gray-300 rounded-md shadow-sm bg-white text-gray-900" placeholder="e.g., Eligibility API">
+                  </div>
+                  <div>
+                    <label [for]="'slaMs' + $index" class="block text-sm font-medium text-gray-700">SLA (ms)</label>
+                    <input type="number" [id]="'slaMs' + $index" formControlName="slaMs" class="mt-1 w-full text-sm border-gray-300 rounded-md shadow-sm bg-white text-gray-900">
+                  </div>
+                  <div>
+                    <label [for]="'errorRateThreshold' + $index" class="block text-sm font-medium text-gray-700">Error Rate Threshold (%)</label>
+                    <input type="number" [id]="'errorRateThreshold' + $index" formControlName="errorRateThreshold" class="mt-1 w-full text-sm border-gray-300 rounded-md shadow-sm bg-white text-gray-900">
+                  </div>
+                </div>
+              </div>
+            }
+          </div>
+        </div>
+
+        <div class="mt-4 flex justify-between items-center">
+          <button type="button" (click)="addStep()" class="inline-flex items-center px-3 py-2 border border-dashed border-gray-400 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd" /></svg>
+            Add Step
+          </button>
+          <button type="submit" class="inline-flex items-center justify-center px-6 py-2 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-green-600 hover:bg-green-700 disabled:bg-gray-400">
+            Save Journey
+          </button>
+        </div>
+      </form>
+    </div>
+    
+    <!-- Saved Journeys Section -->
+    <div class="bg-white p-6 rounded-lg shadow-md border border-gray-200">
+       <h2 class="text-xl font-bold text-gray-700 mb-4">Saved Journeys</h2>
+       @if (saveSuccess()) {
+        <div class="bg-green-100 border-l-4 border-green-500 text-green-700 p-4 rounded-md mb-4" role="alert">
+          <p class="font-bold">Success!</p>
+          <p>Your new journey has been saved.</p>
+        </div>
+       }
+       <div class="space-y-4">
+        @for (journey of savedJourneys(); track journey.name) {
+          <div class="border rounded-lg p-4">
+            <h3 class="font-bold text-blue-600">{{ journey.name }}</h3>
+            <ul class="mt-2 text-sm space-y-1 list-disc list-inside">
+              @for (step of journey.steps; track step.stepName) {
+                <li>{{ step.stepName }} (Service: {{ step.serviceName }})</li>
+              }
+            </ul>
+          </div>
+        } @empty {
+          <div class="text-center py-10 border-2 border-dashed rounded-lg">
+            <p class="text-gray-500">No custom journeys saved yet.</p>
+            <p class="text-sm text-gray-400">Use the form to create your first one.</p>
+          </div>
+        }
+       </div>
+    </div>
+  </div>
+</main>

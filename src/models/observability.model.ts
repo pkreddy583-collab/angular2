@@ -38,3 +38,15 @@ export interface SlaComplianceDetail {
   relatedIncidents: RelatedIncident[];
   aiInsight: string;
 }
+
+export interface JourneyStepConfig {
+  stepName: string;
+  serviceName: string;
+  slaMs: number;
+  errorRateThreshold: number;
+}
+
+export interface CustomJourney {
+  name: string;
+  steps: JourneyStepConfig[];
+}

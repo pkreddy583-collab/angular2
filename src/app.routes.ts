@@ -17,6 +17,7 @@ import { PredictiveInsightsComponent } from './features/predictive-insights/pred
 import { DeepDiveTrendsComponent } from './features/tower-report/deep-dive-trends/deep-dive-trends.component';
 import { AiRoiDashboardComponent } from './features/ai-roi-dashboard/ai-roi-dashboard.component';
 import { OnCallRosterComponent } from './features/on-call-roster/on-call-roster.component';
+import { JourneyBuilderComponent } from './features/observability/journey-builder/journey-builder.component';
 
 export const routes: Routes = [
   // Incident Feature Routes
@@ -26,6 +27,7 @@ export const routes: Routes = [
   
   // Observability Feature Routes
   { path: 'observability', component: ObservabilityDashboardComponent, title: 'Observability Dashboard' },
+  { path: 'observability/builder', component: JourneyBuilderComponent, title: 'Journey Builder' },
   { path: 'observability/journey-detail', component: ServiceJourneyDetailComponent, title: 'Service Journey Details' },
   { path: 'observability/sla-detail', component: SlaComplianceDetailComponent, title: 'SLA Compliance Details' },
 
