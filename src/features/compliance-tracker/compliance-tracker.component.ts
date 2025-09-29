@@ -1,12 +1,12 @@
 import { Component, ChangeDetectionStrategy, inject } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { DatePipe, DecimalPipe } from '@angular/common';
 import { ComplianceService } from '../../services/compliance.service';
 import { EmailLog } from '../../models/compliance.model';
 
 @Component({
   selector: 'app-compliance-tracker',
   standalone: true,
-  imports: [CommonModule],
+  imports: [DatePipe, DecimalPipe],
   templateUrl: './compliance-tracker.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })

@@ -1,12 +1,11 @@
 import { Component, ChangeDetectionStrategy, inject } from '@angular/core';
-import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { ObservabilityDataService } from '../../../services/observability-data.service';
 
 @Component({
   selector: 'app-service-journey-detail',
   standalone: true,
-  imports: [CommonModule, RouterLink],
+  imports: [RouterLink],
   templateUrl: './service-journey-detail.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })

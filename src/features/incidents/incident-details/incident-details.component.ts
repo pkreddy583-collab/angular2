@@ -1,6 +1,5 @@
 import { Component, ChangeDetectionStrategy, inject, signal, computed } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { ActivatedRoute, RouterLink } from '@angular/router';
+import { ActivatedRoute } from '@angular/router';
 import { IncidentService } from '../../../services/incident.service';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { map } from 'rxjs/operators';
@@ -8,8 +7,9 @@ import { ReactiveFormsModule, FormControl } from '@angular/forms';
 
 @Component({
   selector: 'app-incident-details',
+  standalone: true,
   templateUrl: './incident-details.component.html',
-  imports: [CommonModule, RouterLink, ReactiveFormsModule],
+  imports: [ReactiveFormsModule],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class IncidentDetailsComponent {

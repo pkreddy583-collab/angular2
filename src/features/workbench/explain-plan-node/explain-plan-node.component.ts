@@ -1,11 +1,11 @@
 import { Component, ChangeDetectionStrategy, input } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { DecimalPipe } from '@angular/common';
 import { ExplainPlanNode } from '../../../models/dbre.model';
 
 @Component({
   selector: 'app-explain-plan-node',
   standalone: true,
-  imports: [CommonModule, ExplainPlanNodeComponent],
+  imports: [DecimalPipe, ExplainPlanNodeComponent],
   templateUrl: './explain-plan-node.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })

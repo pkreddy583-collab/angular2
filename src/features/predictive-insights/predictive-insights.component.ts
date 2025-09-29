@@ -1,5 +1,4 @@
 import { Component, ChangeDetectionStrategy, inject, signal, computed, effect } from '@angular/core';
-import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormControl } from '@angular/forms';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { PredictiveService } from '../../services/predictive.service';
@@ -9,7 +8,7 @@ import { PredictionResult } from '../../models/predictive.model';
 @Component({
   selector: 'app-predictive-insights',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [ReactiveFormsModule],
   templateUrl: './predictive-insights.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })

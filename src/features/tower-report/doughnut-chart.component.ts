@@ -1,5 +1,4 @@
 import { Component, ChangeDetectionStrategy, input, computed } from '@angular/core';
-import { CommonModule } from '@angular/common';
 
 interface ChartData {
   name: string;
@@ -10,7 +9,7 @@ interface ChartData {
 @Component({
   selector: 'app-doughnut-chart',
   standalone: true,
-  imports: [CommonModule],
+  imports: [],
   template: `
     <div class="flex items-center justify-center p-4 gap-6">
       @if (chartSegments().length > 0) {

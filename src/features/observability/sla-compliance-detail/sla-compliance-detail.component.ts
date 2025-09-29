@@ -1,12 +1,11 @@
 import { Component, ChangeDetectionStrategy, inject } from '@angular/core';
-import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { ObservabilityDataService } from '../../../services/observability-data.service';
 
 @Component({
   selector: 'app-sla-compliance-detail',
   standalone: true,
-  imports: [CommonModule, RouterLink],
+  imports: [RouterLink],
   templateUrl: './sla-compliance-detail.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })

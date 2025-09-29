@@ -1,5 +1,5 @@
 import { Component, ChangeDetectionStrategy, inject, computed } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { DatePipe, DecimalPipe } from '@angular/common';
 // FIX: Import FormControl and remove FormBuilder.
 import { ReactiveFormsModule, Validators, FormGroup, ValidatorFn, AbstractControl, ValidationErrors, FormControl } from '@angular/forms';
 import { AdminService } from '../../services/admin.service';
@@ -10,7 +10,7 @@ import { FteCalculationModel } from '../../models/admin.model';
 @Component({
   selector: 'app-admin',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [DatePipe, DecimalPipe, ReactiveFormsModule],
   templateUrl: './admin.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })

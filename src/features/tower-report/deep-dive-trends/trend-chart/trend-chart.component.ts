@@ -1,5 +1,4 @@
 import { Component, ChangeDetectionStrategy, input, effect, signal, ElementRef, viewChild } from '@angular/core';
-import { CommonModule } from '@angular/common';
 import * as d3 from 'd3';
 
 interface ChartDataset {
@@ -16,7 +15,7 @@ interface ChartData {
 @Component({
   selector: 'app-trend-chart',
   standalone: true,
-  imports: [CommonModule],
+  imports: [],
   templateUrl: './trend-chart.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })

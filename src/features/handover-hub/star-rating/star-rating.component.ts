@@ -1,10 +1,9 @@
 import { Component, ChangeDetectionStrategy, input, output, signal } from '@angular/core';
-import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'app-star-rating',
   standalone: true,
-  imports: [CommonModule],
+  imports: [],
   templateUrl: './star-rating.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })

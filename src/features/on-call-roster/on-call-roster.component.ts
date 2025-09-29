@@ -1,11 +1,11 @@
 import { Component, ChangeDetectionStrategy, inject, signal, OnDestroy } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { DatePipe } from '@angular/common';
 import { OnCallRosterService } from '../../services/on-call-roster.service';
 
 @Component({
   selector: 'app-on-call-roster',
   standalone: true,
-  imports: [CommonModule],
+  imports: [DatePipe],
   templateUrl: './on-call-roster.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })

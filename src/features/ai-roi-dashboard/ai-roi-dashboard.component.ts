@@ -1,12 +1,12 @@
 import { Component, ChangeDetectionStrategy, inject, signal, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { DecimalPipe } from '@angular/common';
 import { GeminiService } from '../../services/gemini.service';
 import { AiRoiSummary } from '../../models/ai-roi.model';
 
 @Component({
   selector: 'app-ai-roi-dashboard',
   standalone: true,
-  imports: [CommonModule],
+  imports: [DecimalPipe],
   templateUrl: './ai-roi-dashboard.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })

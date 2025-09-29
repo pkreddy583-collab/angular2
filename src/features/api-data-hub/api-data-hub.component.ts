@@ -1,5 +1,4 @@
 import { Component, ChangeDetectionStrategy, inject, signal, computed } from '@angular/core';
-import { CommonModule } from '@angular/common';
 import { DataConfigService } from '../../services/data-config.service';
 import { IncidentService } from '../../services/incident.service';
 import { ObservabilityDataService } from '../../services/observability-data.service';
@@ -15,7 +14,7 @@ import { OnCallRosterService } from '../../services/on-call-roster.service';
 @Component({
   selector: 'app-api-data-hub',
   standalone: true,
-  imports: [CommonModule],
+  imports: [],
   templateUrl: './api-data-hub.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })

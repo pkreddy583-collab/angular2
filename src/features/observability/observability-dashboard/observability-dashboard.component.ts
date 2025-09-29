@@ -1,11 +1,11 @@
 import { Component, ChangeDetectionStrategy, signal, QueryList, ViewChildren, ElementRef } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { DatePipe } from '@angular/common';
 import { RouterLink } from '@angular/router';
 
 @Component({
   selector: 'app-observability-dashboard',
   standalone: true,
-  imports: [CommonModule, RouterLink],
+  imports: [DatePipe, RouterLink],
   templateUrl: './observability-dashboard.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })

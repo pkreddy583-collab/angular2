@@ -1,11 +1,10 @@
 import { Component, ChangeDetectionStrategy, input, signal, computed, OnDestroy } from '@angular/core';
-import { CommonModule } from '@angular/common';
 import { Incident } from '../../../models/incident.model';
 
 @Component({
   selector: 'app-incident-handover-card',
   standalone: true,
-  imports: [CommonModule],
+  imports: [],
   templateUrl: './incident-handover-card.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })

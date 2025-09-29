@@ -1,5 +1,5 @@
 import { Component, ChangeDetectionStrategy, inject, OnInit, OnDestroy, computed, signal } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { DecimalPipe, PercentPipe } from '@angular/common';
 import { ReactiveFormsModule, FormGroup, FormArray, FormControl, Validators } from '@angular/forms';
 import { Subject } from 'rxjs';
 import { takeUntil, debounceTime, distinctUntilChanged } from 'rxjs/operators';
@@ -17,7 +17,8 @@ import { AnalyticsModalComponent } from './analytics-modal.component';
   selector: 'app-tower-report',
   standalone: true,
   imports: [
-    CommonModule,
+    DecimalPipe,
+    PercentPipe,
     ReactiveFormsModule,
     DoughnutChartComponent,
     CollapsibleSectionComponent,

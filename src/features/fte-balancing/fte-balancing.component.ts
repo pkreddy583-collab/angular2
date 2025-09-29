@@ -1,5 +1,5 @@
 import { Component, ChangeDetectionStrategy, inject, signal, computed } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { DatePipe, DecimalPipe } from '@angular/common';
 // FIX: Import FormGroup and FormControl instead of FormBuilder.
 import { ReactiveFormsModule, FormGroup, FormControl, Validators } from '@angular/forms';
 import { FteBalancingService } from '../../services/fte-balancing.service';
@@ -8,7 +8,7 @@ import { AnalyticsService } from '../../services/analytics.service';
 @Component({
   selector: 'app-fte-balancing',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [DecimalPipe, DatePipe, ReactiveFormsModule],
   templateUrl: './fte-balancing.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })

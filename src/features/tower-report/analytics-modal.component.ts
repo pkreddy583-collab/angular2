@@ -1,10 +1,9 @@
 import { Component, ChangeDetectionStrategy, input, output } from '@angular/core';
-import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'app-analytics-modal',
   standalone: true,
-  imports: [CommonModule],
+  imports: [],
   template: `
     @if (isOpen()) {
       <div class="fixed inset-0 bg-black bg-opacity-60 z-50 flex items-center justify-center p-4" (click)="onClose()">

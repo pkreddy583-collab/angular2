@@ -1,5 +1,4 @@
 import { Component, ChangeDetectionStrategy, inject, signal, computed, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormGroup, FormControl, Validators } from '@angular/forms';
 import { HandoverService } from '../../services/handover.service';
 import { ComplianceService } from '../../services/compliance.service';
@@ -12,7 +11,7 @@ import { Incident } from '../../models/incident.model';
 @Component({
   selector: 'app-handover-hub',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, IncidentHandoverCardComponent, StarRatingComponent],
+  imports: [ReactiveFormsModule, IncidentHandoverCardComponent, StarRatingComponent],
   templateUrl: './handover-hub.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })

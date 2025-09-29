@@ -1,10 +1,10 @@
 import { Component, ChangeDetectionStrategy, input, signal } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { DecimalPipe, PercentPipe } from '@angular/common';
 
 @Component({
   selector: 'app-collapsible-section',
   standalone: true,
-  imports: [CommonModule],
+  imports: [DecimalPipe, PercentPipe],
   template: `
     <div class="bg-white rounded-lg shadow-sm border border-gray-200 mb-6">
       <button

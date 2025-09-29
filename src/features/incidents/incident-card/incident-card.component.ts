@@ -1,12 +1,12 @@
 import { Component, ChangeDetectionStrategy, input, signal, computed, OnDestroy } from '@angular/core';
-import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { Incident } from '../../../models/incident.model';
 
 @Component({
   selector: 'app-incident-card',
+  standalone: true,
   templateUrl: './incident-card.component.html',
-  imports: [CommonModule, RouterLink],
+  imports: [RouterLink],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class IncidentCardComponent implements OnDestroy {

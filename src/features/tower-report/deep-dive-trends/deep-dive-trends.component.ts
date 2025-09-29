@@ -1,5 +1,5 @@
 import { Component, ChangeDetectionStrategy, inject, computed } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { DecimalPipe, PercentPipe } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { TrendDataService } from '../../../services/trend-data.service';
 import { AnalyticsService } from '../../../services/analytics.service';
@@ -9,7 +9,7 @@ import { MonthlyTrendData } from '../../../models/trend.model';
 @Component({
   selector: 'app-deep-dive-trends',
   standalone: true,
-  imports: [CommonModule, RouterLink, TrendChartComponent],
+  imports: [DecimalPipe, PercentPipe, RouterLink, TrendChartComponent],
   templateUrl: './deep-dive-trends.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })

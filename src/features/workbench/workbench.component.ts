@@ -1,5 +1,5 @@
 import { Component, ChangeDetectionStrategy, inject, signal, computed, effect } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { DatePipe, DecimalPipe } from '@angular/common';
 import { ControlmService } from '../../services/controlm.service';
 import { SreService } from '../../services/sre.service';
 import { GeminiService } from '../../services/gemini.service';
@@ -21,7 +21,7 @@ type ActionStatus = 'idle' | 'loading' | 'success' | 'failed';
 @Component({
   selector: 'app-workbench',
   standalone: true,
-  imports: [CommonModule, ExplainPlanNodeComponent],
+  imports: [DatePipe, DecimalPipe, ExplainPlanNodeComponent],
   templateUrl: './workbench.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })

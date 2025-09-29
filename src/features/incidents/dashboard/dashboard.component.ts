@@ -1,13 +1,12 @@
 import { Component, ChangeDetectionStrategy, inject } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { RouterLink } from '@angular/router';
 import { IncidentService } from '../../../services/incident.service';
 import { IncidentCardComponent } from '../incident-card/incident-card.component';
 
 @Component({
   selector: 'app-dashboard',
+  standalone: true,
   templateUrl: './dashboard.component.html',
-  imports: [CommonModule, IncidentCardComponent, RouterLink],
+  imports: [IncidentCardComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class DashboardComponent {

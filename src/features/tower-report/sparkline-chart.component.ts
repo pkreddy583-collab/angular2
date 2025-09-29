@@ -1,10 +1,9 @@
 import { Component, ChangeDetectionStrategy, input, computed } from '@angular/core';
-import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'app-sparkline-chart',
   standalone: true,
-  imports: [CommonModule],
+  imports: [],
   template: `
     @if (path()) {
       <svg class="w-24 h-8" viewBox="0 0 100 20" preserveAspectRatio="none">
