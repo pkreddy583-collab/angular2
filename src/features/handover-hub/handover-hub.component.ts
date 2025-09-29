@@ -1,6 +1,6 @@
 import { Component, ChangeDetectionStrategy, inject, signal, computed, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { ReactiveFormsModule, FormGroup, FormControl, Validators } from '@angular/forms';
 import { HandoverService } from '../../services/handover.service';
 import { ComplianceService } from '../../services/compliance.service';
 import { PortfolioHealth, HistoricalHandover, EmailTemplate } from '../../models/handover.model';
@@ -20,7 +20,6 @@ export class HandoverHubComponent implements OnInit {
   private handoverService = inject(HandoverService);
   private geminiService = inject(GeminiService);
   private complianceService = inject(ComplianceService);
-  private fb = inject(FormBuilder);
 
   // --- State for both views ---
   portfolios = this.handoverService.getPortfolios();
@@ -48,11 +47,11 @@ export class HandoverHubComponent implements OnInit {
   feedbackComments = signal<{ [historyId: string]: string }>({});
 
   ngOnInit() {
-    this.emailForm = this.fb.group({
-      to: ['', Validators.required],
-      cc: [''],
-      subject: ['', Validators.required],
-      body: ['', Validators.required],
+    this.emailForm = new FormGroup({
+      to: new FormControl('', Validators.required),
+      cc: new FormControl(''),
+      subject: new FormControl('', Validators.required),
+      body: new FormControl('', Validators.required),
     });
   }
 
@@ -173,7 +172,7 @@ export class HandoverHubComponent implements OnInit {
     const portfolio = this.activePortfolio();
     if (!portfolio) return;
 
-    const formValue = this.emailForm.getRawValue();
+    const formValue = this.emailForm.value;
 
     // In a real app, this would call an email API. Here, we just log it for compliance.
     this.complianceService.logEmail({

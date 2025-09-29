@@ -6,7 +6,7 @@ import { WebApp, AiInsight, SreInvestigation, LogEntry } from '../models/sre.mod
 import { ExplainPlanNode } from '../models/dbre.model';
 import { PostmortemReport, TimelineEvent, ActionItem } from '../models/postmortem.model';
 import { FinOpsApp, SavingsOpportunity } from '../models/finops.model';
-import { PredictionResult, PredictionSummary } from '../models/predictive.model';
+import { PredictionResult } from '../models/predictive.model';
 import { AiRoiSummary } from '../models/ai-roi.model';
 
 @Injectable({
@@ -395,53 +395,6 @@ export class GeminiService {
     } catch (error) {
       console.error('Error generating prediction:', error);
       throw new Error('Failed to generate prediction from AI service.');
-    }
-  }
-
-  async getDashboardPredictions(): Promise<PredictionSummary[]> {
-    if (!this.ai) {
-      throw new Error('AI service is not initialized.');
-    }
-
-    const prompt = `You are Strider AI. Generate a set of 3 high-level predictive insights for an IT Operations dashboard.
-    
-    1.  **Incident Volume Forecast (7d)** for 'All Production Services'.
-    2.  **FTE Demand Forecast (Q-Next)** for the 'Applications' tower.
-    3.  **Top SLA Breach Risk** for the most critical active incident, 'INC-001: Production server unresponsive'.
-    
-    Provide a brief prediction and confidence level for each.`;
-
-    try {
-      const response = await this.ai.models.generateContent({
-        model: 'gemini-2.5-flash',
-        contents: prompt,
-        config: {
-          responseMimeType: 'application/json',
-          responseSchema: {
-            type: Type.OBJECT,
-            properties: {
-              predictions: {
-                type: Type.ARRAY,
-                items: {
-                  type: Type.OBJECT,
-                  properties: {
-                    modelName: { type: Type.STRING },
-                    input: { type: Type.STRING },
-                    prediction: { type: Type.STRING },
-                    confidence: { type: Type.STRING, enum: ['High', 'Medium', 'Low'] },
-                  },
-                },
-              },
-            },
-          },
-        },
-      });
-
-      const json = JSON.parse(response.text);
-      return json.predictions as PredictionSummary[];
-    } catch (error) {
-      console.error('Error generating dashboard predictions:', error);
-      throw new Error('Failed to generate dashboard predictions.');
     }
   }
 

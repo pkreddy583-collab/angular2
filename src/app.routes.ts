@@ -15,11 +15,13 @@ import { WorkbenchComponent } from './features/workbench/workbench.component';
 import { ComplianceTrackerComponent } from './features/compliance-tracker/compliance-tracker.component';
 import { PredictiveInsightsComponent } from './features/predictive-insights/predictive-insights.component';
 import { DeepDiveTrendsComponent } from './features/tower-report/deep-dive-trends/deep-dive-trends.component';
+import { AiRoiDashboardComponent } from './features/ai-roi-dashboard/ai-roi-dashboard.component';
 
 export const routes: Routes = [
   // Incident Feature Routes
   { path: '', component: DashboardComponent, title: 'SLA Watchtower' },
   { path: 'incident/:id', component: IncidentDetailsComponent, title: 'Incident Details' },
+  { path: 'ai-roi', component: AiRoiDashboardComponent, title: 'AI ROI Dashboard' },
   
   // Observability Feature Routes
   { path: 'observability', component: ObservabilityDashboardComponent, title: 'Observability Dashboard' },

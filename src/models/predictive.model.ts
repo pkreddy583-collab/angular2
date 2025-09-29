@@ -12,10 +12,3 @@ export interface PredictionResult {
   keyFactors: string[];
   recommendations: string[];
 }
-
-export interface PredictionSummary {
-  modelName: string;
-  input: string;
-  prediction: string;
-  confidence: 'High' | 'Medium' | 'Low';
-}
