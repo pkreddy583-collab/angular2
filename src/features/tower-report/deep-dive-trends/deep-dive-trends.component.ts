@@ -1,5 +1,5 @@
 import { Component, ChangeDetectionStrategy, inject, computed } from '@angular/core';
-import { DecimalPipe, PercentPipe } from '@angular/common';
+import { CommonModule, DecimalPipe, PercentPipe } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { TrendDataService } from '../../../services/trend-data.service';
 import { AnalyticsService } from '../../../services/analytics.service';
@@ -9,7 +9,7 @@ import { MonthlyTrendData } from '../../../models/trend.model';
 @Component({
   selector: 'app-deep-dive-trends',
   standalone: true,
-  imports: [DecimalPipe, PercentPipe, RouterLink, TrendChartComponent],
+  imports: [CommonModule, DecimalPipe, PercentPipe, RouterLink, TrendChartComponent],
   templateUrl: './deep-dive-trends.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -95,5 +95,9 @@ export class DeepDiveTrendsComponent {
       Governance_FTE: d.structuredFteBreakdown.governance.toFixed(2),
     }));
     this.analyticsService.exportToCsv(dataToExport, 'deep_dive_trends_export');
+  }
+  
+  trackByMonth(index: number, item: { month: string }): string {
+    return item.month;
   }
 }

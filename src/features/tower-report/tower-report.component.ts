@@ -1,5 +1,5 @@
 import { Component, ChangeDetectionStrategy, inject, OnInit, OnDestroy, computed, signal } from '@angular/core';
-import { DecimalPipe, PercentPipe } from '@angular/common';
+import { CommonModule, DecimalPipe, PercentPipe } from '@angular/common';
 import { ReactiveFormsModule, FormGroup, FormArray, FormControl, Validators } from '@angular/forms';
 import { Subject } from 'rxjs';
 import { takeUntil, debounceTime, distinctUntilChanged } from 'rxjs/operators';
@@ -10,13 +10,15 @@ import { MasterActivity } from '../../models/admin.model';
 import { DoughnutChartComponent } from './doughnut-chart.component';
 import { CollapsibleSectionComponent } from './collapsible-section.component';
 import { SparklineChartComponent } from './sparkline-chart.component';
-import { Frequency } from '../../models/tower-report.model';
+import { Frequency, StructuredActivityItem, TicketDrivenWorkItem } from '../../models/tower-report.model';
 import { AnalyticsModalComponent } from './analytics-modal.component';
+import { RouterLink } from '@angular/router';
 
 @Component({
   selector: 'app-tower-report',
   standalone: true,
   imports: [
+    CommonModule,
     DecimalPipe,
     PercentPipe,
     ReactiveFormsModule,
@@ -24,6 +26,7 @@ import { AnalyticsModalComponent } from './analytics-modal.component';
     CollapsibleSectionComponent,
     SparklineChartComponent,
     AnalyticsModalComponent,
+    RouterLink,
   ],
   templateUrl: './tower-report.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -124,8 +127,12 @@ export class TowerReportComponent implements OnInit, OnDestroy {
     this.listenToFormChanges();
   }
   
+  getCategoryFormName(name: string): string {
+    return name.replace(/[^a-zA-Z0-9]/g, '');
+  }
+
   private buildForm(): void {
-    const categories = this.reportData().structuredActivities;
+    const categories = this.structuredActivities();
     const group: { [key: string]: FormArray } = {};
 
     categories.forEach(category => {
@@ -137,7 +144,7 @@ export class TowerReportComponent implements OnInit, OnDestroy {
           frequency: new FormControl(item.frequency),
         }))
       );
-      group[category.name] = array;
+      group[this.getCategoryFormName(category.name)] = array;
     });
     this.activitiesForm = new FormGroup(group);
   }
@@ -161,15 +168,18 @@ export class TowerReportComponent implements OnInit, OnDestroy {
       )
       .subscribe((formValue) => {
         const formObject = formValue as Record<string, any>;
-        for (const categoryName in formObject) {
-          const items = formObject[categoryName];
-          items.forEach((item: { id: number; instances: number; hrsPerInstance: number; frequency: Frequency }) => {
-            this.reportService.updateStructuredActivity(categoryName, item.id, {
-              instances: Number(item.instances) || 0,
-              hrsPerInstance: Number(item.hrsPerInstance) || 0,
-              frequency: item.frequency,
+        for (const formName in formObject) {
+          const category = this.structuredActivities().find(c => this.getCategoryFormName(c.name) === formName);
+          if (category) {
+            const items = formObject[formName];
+            items.forEach((item: { id: number; instances: number; hrsPerInstance: number; frequency: Frequency }) => {
+              this.reportService.updateStructuredActivity(category.name, item.id, {
+                instances: Number(item.instances) || 0,
+                hrsPerInstance: Number(item.hrsPerInstance) || 0,
+                frequency: item.frequency,
+              });
             });
-          });
+          }
         }
       });
   }
@@ -202,11 +212,11 @@ export class TowerReportComponent implements OnInit, OnDestroy {
   selectAndAddActivity(categoryName: string, activity: MasterActivity): void {
     this.reportService.addStructuredActivity(categoryName, activity);
     
-    const categoryModel = this.reportData().structuredActivities.find(c => c.name === categoryName);
+    const categoryModel = this.structuredActivities().find(c => c.name === categoryName);
     const newItem = categoryModel?.items.find(i => i.activityName === activity.name);
 
     if (newItem) {
-        const formArray = this.activitiesForm.get(categoryName) as FormArray;
+        const formArray = this.activitiesForm.get(this.getCategoryFormName(categoryName)) as FormArray;
         if (formArray) {
             formArray.push(new FormGroup({
                 id: new FormControl(newItem.id),

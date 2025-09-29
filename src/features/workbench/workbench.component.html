@@ -41,8 +41,8 @@
     </div>
   </div>
 
-  @switch (activeWorkbench()) {
-    @case ('controlM') {
+  <div [ngSwitch]="activeWorkbench()" class="flex-grow flex overflow-hidden">
+    <ng-container *ngSwitchCase="'controlM'">
       <div class="flex-grow flex overflow-hidden">
         <!-- Left Column: Failed Jobs List -->
         <aside class="w-1/3 bg-white border-r border-gray-200 overflow-y-auto">
@@ -50,8 +50,8 @@
             <h2 class="text-lg font-bold text-gray-800">Failed Jobs</h2>
           </div>
           <nav class="py-2">
-            @for (job of controlMJobs(); track job.id) {
-            <button (click)="selectControlMJob(job)"
+            <button *ngFor="let job of controlMJobs(); trackBy: trackByJobId" 
+                    (click)="selectControlMJob(job)"
                     class="w-full text-left p-4 border-b hover:bg-gray-50 transition-colors"
                     [class]="selectedControlMJob()?.id === job.id ? 'bg-blue-50 border-l-4 border-blue-500' : 'border-l-4 border-transparent'">
               <div class="flex justify-between items-center mb-1">
@@ -61,13 +61,12 @@
               <p class="text-sm text-gray-500">{{ job.application }}</p>
               <p class="text-xs text-gray-400 mt-2">{{ job.endTime | date:'medium' }}</p>
             </button>
-            }
           </nav>
         </aside>
 
         <!-- Right Column: Job Details and AI Co-pilot -->
         <div class="w-2/3 bg-gray-50 overflow-y-auto p-6">
-          @if (selectedControlMJob(); as job) {
+          <ng-container *ngIf="selectedControlMJob() as job; else noJobSelected">
             <div class="max-w-4xl mx-auto space-y-6">
               <!-- Job Details Section -->
               <section class="bg-white p-6 rounded-lg shadow-md">
@@ -93,71 +92,70 @@
                   <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-2" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5 2.5a.5.5 0 01.5-.5h8a.5.5 0 01.5.5v2.879a.5.5 0 01-.146.353l-2.122 2.121a.5.5 0 00-.146.354V13a1 1 0 01-1 1h-2a1 1 0 01-1-1V8.207a.5.5 0 00-.146-.354L5.146 5.732A.5.5 0 015 5.379V2.5zM3.5 14.5A1.5 1.5 0 015 13h10a1.5 1.5 0 011.5 1.5v1a1.5 1.5 0 01-1.5 1.5H5A1.5 1.5 0 013.5 16v-1.5z" clip-rule="evenodd" /></svg>
                   Strider AI Co-pilot
                 </h2>
-                @if (isLoadingControlMSuggestions()) {
+                <ng-container *ngIf="isLoadingControlMSuggestions(); else suggestionsOrButton">
                   <div class="flex items-center justify-center p-8">
                     <svg class="animate-spin h-8 w-8 text-blue-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
                     <p class="ml-4 text-blue-700">Analyzing job failure...</p>
                   </div>
-                } @else if (controlMAiSuggestions().length > 0) {
-                  <div class="space-y-3">
-                    @for (suggestion of controlMAiSuggestions(); track suggestion.title) {
-                      <div class="bg-white p-4 rounded-md border flex items-start">
-                        <div class="flex-shrink-0">
-                          @switch(suggestion.actionType) {
-                            @case('rerun') { <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-blue-500" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M4 2a1 1 0 011 1v2.101a7.002 7.002 0 0111.601 2.566 1 1 0 11-1.885.666A5.002 5.002 0 005.999 7H9a1 1 0 110 2H4a1 1 0 01-1-1V3a1 1 0 011-1zm10 8a1 1 0 011-1h5a1 1 0 011 1v5a1 1 0 11-2 0v-2.101a7.002 7.002 0 01-11.601-2.566 1 1 0 111.885-.666A5.002 5.002 0 0014.001 13H11a1 1 0 01-1-1z" clip-rule="evenodd" /></svg> }
-                            @case('investigate') { <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-yellow-500" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd" /></svg> }
-                            @case('escalate') { <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-red-500" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd" /></svg> }
-                            @default { <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-500" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd" /></svg> }
-                          }
+                </ng-container>
+                <ng-template #suggestionsOrButton>
+                  <ng-container *ngIf="controlMAiSuggestions().length > 0; else generateButton">
+                    <div class="space-y-3">
+                      <div *ngFor="let suggestion of controlMAiSuggestions(); trackBy: trackBySuggestionTitle" class="bg-white p-4 rounded-md border flex items-start">
+                        <div class="flex-shrink-0" [ngSwitch]="suggestion.actionType">
+                          <svg *ngSwitchCase="'rerun'" xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-blue-500" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M4 2a1 1 0 011 1v2.101a7.002 7.002 0 0111.601 2.566 1 1 0 11-1.885.666A5.002 5.002 0 005.999 7H9a1 1 0 110 2H4a1 1 0 01-1-1V3a1 1 0 011-1zm10 8a1 1 0 011-1h5a1 1 0 011 1v5a1 1 0 11-2 0v-2.101a7.002 7.002 0 01-11.601-2.566 1 1 0 111.885-.666A5.002 5.002 0 0014.001 13H11a1 1 0 01-1-1z" clip-rule="evenodd" /></svg>
+                          <svg *ngSwitchCase="'investigate'" xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-yellow-500" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd" /></svg>
+                          <svg *ngSwitchCase="'escalate'" xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-red-500" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd" /></svg>
+                          <svg *ngSwitchDefault xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-500" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd" /></svg>
                         </div>
                         <div class="ml-3">
                           <h4 class="font-semibold text-gray-800">{{ suggestion.title }}</h4>
                           <p class="text-sm text-gray-600 mt-1">{{ suggestion.description }}</p>
                         </div>
                       </div>
-                    }
-                  </div>
-                } @else {
-                  <button (click)="getControlMAiSuggestions()" class="w-full bg-white text-blue-600 font-semibold py-3 px-4 rounded-lg hover:bg-blue-50 transition-colors flex items-center justify-center shadow-sm border border-blue-200">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5 2.5a.5.5 0 01.5-.5h8a.5.5 0 01.5.5v2.879a.5.5 0 01-.146.353l-2.122 2.121a.5.5 0 00-.146.354V13a1 1 0 01-1 1h-2a1 1 0 01-1-1V8.207a.5.5 0 00-.146-.354L5.146 5.732A.5.5 0 015 5.379V2.5zM3.5 14.5A1.5 1.5 0 015 13h10a1.5 1.5 0 011.5 1.5v1a1.5 1.5 0 01-1.5 1.5H5A1.5 1.5 0 013.5 16v-1.5z" clip-rule="evenodd" /></svg>
-                    Get AI Suggestions
-                  </button>
-                }
+                    </div>
+                  </ng-container>
+                  <ng-template #generateButton>
+                    <button (click)="getControlMAiSuggestions()" class="w-full bg-white text-blue-600 font-semibold py-3 px-4 rounded-lg hover:bg-blue-50 transition-colors flex items-center justify-center shadow-sm border border-blue-200">
+                      <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5 2.5a.5.5 0 01.5-.5h8a.5.5 0 01.5.5v2.879a.5.5 0 01-.146.353l-2.122 2.121a.5.5 0 00-.146.354V13a1 1 0 01-1 1h-2a1 1 0 01-1-1V8.207a.5.5 0 00-.146-.354L5.146 5.732A.5.5 0 015 5.379V2.5zM3.5 14.5A1.5 1.5 0 015 13h10a1.5 1.5 0 011.5 1.5v1a1.5 1.5 0 01-1.5 1.5H5A1.5 1.5 0 013.5 16v-1.5z" clip-rule="evenodd" /></svg>
+                      Get AI Suggestions
+                    </button>
+                  </ng-template>
+                </ng-template>
               </section>
             </div>
-          } @else {
+          </ng-container>
+          <ng-template #noJobSelected>
             <div class="text-center py-20 flex flex-col items-center justify-center h-full">
               <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 text-gray-400" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m.75 12l3 3m0 0l3-3m-3 3v-6m-1.5-9H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" /></svg>
               <h3 class="text-xl font-semibold text-gray-700 mt-4">Select a Job</h3>
               <p class="text-gray-500 mt-1">Choose a failed job from the list on the left to see its details and get AI-powered help.</p>
             </div>
-          }
+          </ng-template>
         </div>
       </div>
-    }
-    @case ('sre') {
+    </ng-container>
+    <ng-container *ngSwitchCase="'sre'">
       <div class="flex-grow flex overflow-hidden">
         <!-- SRE Left and Right panels -->
       </div>
-    }
-    @case ('dbre') {
+    </ng-container>
+    <ng-container *ngSwitchCase="'dbre'">
       <div class="flex-grow flex overflow-hidden">
         <aside class="w-1/3 bg-white border-r border-gray-200 overflow-y-auto">
           <div class="p-4 border-b"><h2 class="text-lg font-bold text-gray-800">Slow Query Triage</h2></div>
           <nav class="py-2">
-            @for(query of slowQueries(); track query.id) {
-              <button (click)="selectSlowQuery(query)" class="w-full text-left p-4 border-b hover:bg-gray-50" [class]="selectedSlowQuery()?.id === query.id ? 'bg-blue-50 border-l-4 border-blue-500' : 'border-l-4 border-transparent'">
-                <p class="font-mono text-sm text-gray-700 truncate">{{ query.query }}</p>
-                <div class="flex justify-between items-center text-xs text-gray-500 mt-2">
-                  <span>Avg Duration: <strong class="text-red-600">{{ query.avgDurationMs }}ms</strong></span>
-                  <span>Frequency: <strong>{{ query.frequency }} / hr</strong></span>
-                </div>
-              </button>
-            }
+            <button *ngFor="let query of slowQueries(); trackBy: trackByQueryId" (click)="selectSlowQuery(query)" class="w-full text-left p-4 border-b hover:bg-gray-50" [class]="selectedSlowQuery()?.id === query.id ? 'bg-blue-50 border-l-4 border-blue-500' : 'border-l-4 border-transparent'">
+              <p class="font-mono text-sm text-gray-700 truncate">{{ query.query }}</p>
+              <div class="flex justify-between items-center text-xs text-gray-500 mt-2">
+                <span>Avg Duration: <strong class="text-red-600">{{ query.avgDurationMs }}ms</strong></span>
+                <span>Frequency: <strong>{{ query.frequency }} / hr</strong></span>
+              </div>
+            </button>
           </nav>
         </aside>
         <div class="w-2/3 bg-gray-50 overflow-y-auto p-6">
-          @if(selectedSlowQuery(); as query) {
+          <ng-container *ngIf="selectedSlowQuery() as query; else noQuerySelected">
             <div class="max-w-4xl mx-auto space-y-6">
               <section class="bg-white p-6 rounded-lg shadow-md">
                 <h3 class="text-lg font-bold text-gray-800 mb-2">Query Details</h3>
@@ -172,80 +170,108 @@
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div class="bg-white p-4 rounded-md border">
                     <h4 class="font-semibold text-gray-700 mb-2">Explain this Plan</h4>
-                    @if(isLoadingDbre().analysis) { <p class="text-sm text-gray-500 italic">Analyzing...</p> }
-                    @else if (explainPlanAnalysis()) { <p class="text-sm text-gray-600">{{ explainPlanAnalysis() }}</p> }
-                    @else { <button (click)="analyzeExplainPlan()" class="text-sm font-semibold text-blue-600">Get AI Explanation</button> }
+                    <ng-container *ngIf="isLoadingDbre().analysis; else analysisResult">
+                      <p class="text-sm text-gray-500 italic">Analyzing...</p>
+                    </ng-container>
+                    <ng-template #analysisResult>
+                      <p *ngIf="explainPlanAnalysis(); else getExplanationButton" class="text-sm text-gray-600">{{ explainPlanAnalysis() }}</p>
+                      <ng-template #getExplanationButton>
+                        <button (click)="analyzeExplainPlan()" class="text-sm font-semibold text-blue-600">Get AI Explanation</button>
+                      </ng-template>
+                    </ng-template>
                   </div>
                   <div class="bg-white p-4 rounded-md border">
                     <h4 class="font-semibold text-gray-700 mb-2">Optimize this Query</h4>
-                    @if(isLoadingDbre().optimization) { <p class="text-sm text-gray-500 italic">Generating...</p> }
-                    @else if (optimizedQuery()) { <pre class="text-xs bg-gray-100 p-2 rounded-md font-mono">{{ optimizedQuery() }}</pre> }
-                    @else { <button (click)="getQueryOptimization()" class="text-sm font-semibold text-blue-600">Suggest Optimization</button> }
+                    <ng-container *ngIf="isLoadingDbre().optimization; else optimizationResult">
+                       <p class="text-sm text-gray-500 italic">Generating...</p>
+                    </ng-container>
+                    <ng-template #optimizationResult>
+                       <pre *ngIf="optimizedQuery(); else getOptimizationButton" class="text-xs bg-gray-100 p-2 rounded-md font-mono">{{ optimizedQuery() }}</pre>
+                       <ng-template #getOptimizationButton>
+                          <button (click)="getQueryOptimization()" class="text-sm font-semibold text-blue-600">Suggest Optimization</button>
+                       </ng-template>
+                    </ng-template>
                   </div>
                 </div>
               </section>
             </div>
-          } @else { <div class="text-center py-20"><p class="text-gray-500">Select a slow query to analyze.</p></div> }
+          </ng-container>
+          <ng-template #noQuerySelected><div class="text-center py-20"><p class="text-gray-500">Select a slow query to analyze.</p></div></ng-template>
         </div>
       </div>
-    }
-    @case ('postmortem') {
+    </ng-container>
+    <ng-container *ngSwitchCase="'postmortem'">
       <div class="flex-grow flex overflow-hidden">
         <aside class="w-1/3 bg-white border-r border-gray-200 overflow-y-auto">
           <div class="p-4 border-b"><h2 class="text-lg font-bold text-gray-800">Start Postmortem</h2></div>
           <nav class="py-2">
-            @for(incident of postmortemIncidents(); track incident.id) {
-              <button (click)="startPostmortem(incident)" class="w-full text-left p-4 border-b hover:bg-gray-50" [class]="activePostmortem()?.incidentId === incident.id ? 'bg-blue-50 border-l-4 border-blue-500' : 'border-l-4 border-transparent'">
-                <p class="font-semibold text-gray-900">{{ incident.id }}: {{ incident.title }}</p>
-              </button>
-            }
+            <button *ngFor="let incident of postmortemIncidents(); trackBy: trackByIncidentId" (click)="startPostmortem(incident)" class="w-full text-left p-4 border-b hover:bg-gray-50" [class]="activePostmortem()?.incidentId === incident.id ? 'bg-blue-50 border-l-4 border-blue-500' : 'border-l-4 border-transparent'">
+              <p class="font-semibold text-gray-900">{{ incident.id }}: {{ incident.title }}</p>
+            </button>
           </nav>
         </aside>
         <div class="w-2/3 bg-gray-50 overflow-y-auto p-6">
-          @if(activePostmortem(); as pm) {
+          <ng-container *ngIf="activePostmortem() as pm; else noPostmortem">
             <div class="max-w-4xl mx-auto space-y-6">
               <h2 class="text-2xl font-bold text-gray-800">Postmortem: {{pm.incidentTitle}}</h2>
               <!-- Each section is a step in the process -->
               <section class="bg-white p-4 rounded-lg shadow-md">
                 <h3 class="font-semibold text-gray-700 mb-2">1. Generate Incident Timeline</h3>
-                @if(isLoadingPostmortem()['timeline']) { <p>Generating...</p> }
-                @else if (pm.timeline.length === 0) { <button (click)="generateTimeline()" class="text-sm font-semibold text-blue-600">Generate with AI</button> }
-                @else { <ul class="text-sm space-y-1">@for(event of pm.timeline; track event.time) { <li><strong>{{event.time | date:'shortTime'}}:</strong> {{event.description}}</li> }</ul> }
+                <ng-container *ngIf="isLoadingPostmortem()['timeline']; else timelineResult">
+                   <p>Generating...</p>
+                </ng-container>
+                <ng-template #timelineResult>
+                    <button *ngIf="pm.timeline.length === 0; else showTimeline" (click)="generateTimeline()" class="text-sm font-semibold text-blue-600">Generate with AI</button>
+                    <ng-template #showTimeline>
+                      <ul class="text-sm space-y-1"><li *ngFor="let event of pm.timeline; trackBy: trackByTime"><strong>{{event.time | date:'shortTime'}}:</strong> {{event.description}}</li></ul>
+                    </ng-template>
+                </ng-template>
               </section>
               <section class="bg-white p-4 rounded-lg shadow-md">
                 <h3 class="font-semibold text-gray-700 mb-2">2. Suggest Root Cause Analysis (RCA)</h3>
-                @if(isLoadingPostmortem()['rca']) { <p>Analyzing...</p> }
-                @else if (!pm.rootCauseAnalysis) { <button (click)="generateRca()" [disabled]="pm.timeline.length === 0" class="text-sm font-semibold text-blue-600 disabled:text-gray-400">Generate with AI</button> }
-                @else { <p class="text-sm">{{pm.rootCauseAnalysis}}</p> }
+                 <ng-container *ngIf="isLoadingPostmortem()['rca']; else rcaResult">
+                   <p>Analyzing...</p>
+                </ng-container>
+                <ng-template #rcaResult>
+                    <button *ngIf="!pm.rootCauseAnalysis; else showRca" (click)="generateRca()" [disabled]="pm.timeline.length === 0" class="text-sm font-semibold text-blue-600 disabled:text-gray-400">Generate with AI</button>
+                    <ng-template #showRca>
+                      <p class="text-sm">{{pm.rootCauseAnalysis}}</p>
+                    </ng-template>
+                </ng-template>
               </section>
               <section class="bg-white p-4 rounded-lg shadow-md">
                 <h3 class="font-semibold text-gray-700 mb-2">3. Create Action Items</h3>
-                @if(isLoadingPostmortem()['actions']) { <p>Generating...</p> }
-                @else if (pm.actionItems.length === 0) { <button (click)="generateActionItems()" [disabled]="!pm.rootCauseAnalysis" class="text-sm font-semibold text-blue-600 disabled:text-gray-400">Generate with AI</button> }
-                @else { <ul class="text-sm space-y-2">@for(item of pm.actionItems; track item) { <li><strong>{{item.owner}}:</strong> {{item.description}} [{{item.status}}]</li> }</ul> }
+                <ng-container *ngIf="isLoadingPostmortem()['actions']; else actionsResult">
+                   <p>Generating...</p>
+                </ng-container>
+                <ng-template #actionsResult>
+                    <button *ngIf="pm.actionItems.length === 0; else showActions" (click)="generateActionItems()" [disabled]="!pm.rootCauseAnalysis" class="text-sm font-semibold text-blue-600 disabled:text-gray-400">Generate with AI</button>
+                    <ng-template #showActions>
+                      <ul class="text-sm space-y-2"><li *ngFor="let item of pm.actionItems; trackBy: trackByActionItem"><strong>{{item.owner}}:</strong> {{item.description}} [{{item.status}}]</li></ul>
+                    </ng-template>
+                </ng-template>
               </section>
             </div>
-          } @else { <div class="text-center py-20"><p class="text-gray-500">Select an incident to start a new postmortem report.</p></div> }
+          </ng-container>
+          <ng-template #noPostmortem><div class="text-center py-20"><p class="text-gray-500">Select an incident to start a new postmortem report.</p></div></ng-template>
         </div>
       </div>
-    }
-    @case ('finops') {
+    </ng-container>
+    <ng-container *ngSwitchCase="'finops'">
        <div class="flex-grow flex overflow-hidden">
         <aside class="w-1/3 bg-white border-r border-gray-200 overflow-y-auto">
           <div class="p-4 border-b"><h2 class="text-lg font-bold text-gray-800">Applications by Cost</h2></div>
           <nav class="py-2">
-            @for(app of finopsApps(); track app.id) {
-              <button (click)="selectFinopsApp(app)" class="w-full text-left p-4 border-b hover:bg-gray-50" [class]="selectedFinopsApp()?.id === app.id ? 'bg-blue-50 border-l-4 border-blue-500' : 'border-l-4 border-transparent'">
-                <div class="flex justify-between items-center">
-                  <p class="font-semibold text-gray-900">{{ app.name }}</p>
-                  <p class="font-semibold text-gray-700">${{ app.totalCost | number }}</p>
-                </div>
-              </button>
-            }
+            <button *ngFor="let app of finopsApps(); trackBy: trackByAppId" (click)="selectFinopsApp(app)" class="w-full text-left p-4 border-b hover:bg-gray-50" [class]="selectedFinopsApp()?.id === app.id ? 'bg-blue-50 border-l-4 border-blue-500' : 'border-l-4 border-transparent'">
+              <div class="flex justify-between items-center">
+                <p class="font-semibold text-gray-900">{{ app.name }}</p>
+                <p class="font-semibold text-gray-700">${{ app.totalCost | number }}</p>
+              </div>
+            </button>
           </nav>
         </aside>
         <div class="w-2/3 bg-gray-50 overflow-y-auto p-6">
-          @if(selectedFinopsApp(); as app) {
+          <ng-container *ngIf="selectedFinopsApp() as app; else noFinopsAppSelected">
             <div class="max-w-4xl mx-auto space-y-6">
               <section class="bg-white p-6 rounded-lg shadow-md">
                 <h2 class="text-2xl font-bold text-gray-800">{{ app.name }}</h2>
@@ -257,24 +283,29 @@
               </section>
               <section class="bg-blue-50/70 border border-blue-200 rounded-lg p-6">
                  <h2 class="flex items-center text-xl font-bold text-blue-800 mb-4">Strider AI FinOps Co-pilot</h2>
-                 @if(isLoadingSavings()) { <p>Finding savings...</p> }
-                 @else if (savingsOpportunities().length === 0) { <button (click)="findSavings()" class="text-sm font-semibold text-blue-600">Find Savings Opportunities</button> }
-                 @else { 
-                   <div class="space-y-3">
-                    @for(opp of savingsOpportunities(); track opp.description) {
-                      <div class="bg-white p-4 rounded-md border">
+                 <ng-container *ngIf="isLoadingSavings(); else savingsResult">
+                   <p>Finding savings...</p>
+                 </ng-container>
+                 <ng-template #savingsResult>
+                   <button *ngIf="savingsOpportunities().length === 0; else showSavings" (click)="findSavings()" class="text-sm font-semibold text-blue-600">Find Savings Opportunities</button>
+                   <ng-template #showSavings>
+                     <div class="space-y-3">
+                      <div *ngFor="let opp of savingsOpportunities(); trackBy: trackByOppDescription" class="bg-white p-4 rounded-md border">
                         <p class="font-bold text-green-700">${{ opp.estimatedMonthlySavings | number }} / mo</p>
                         <p class="font-semibold text-gray-800">{{ opp.type }}</p>
                         <p class="text-sm text-gray-600">{{ opp.description }}</p>
                       </div>
-                    }
-                   </div>
-                 }
+                     </div>
+                   </ng-template>
+                 </ng-template>
               </section>
             </div>
-          } @else { <div class="text-center py-20"><p class="text-gray-500">Select an application to view its cost breakdown and find savings.</p></div> }
+          </ng-container>
+          <ng-template #noFinopsAppSelected>
+             <div class="text-center py-20"><p class="text-gray-500">Select an application to view its cost breakdown and find savings.</p></div>
+          </ng-template>
         </div>
       </div>
-    }
-  }
+    </ng-container>
+  </div>
 </main>

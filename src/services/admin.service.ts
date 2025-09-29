@@ -1,5 +1,5 @@
 import { Injectable, signal } from '@angular/core';
-import { MasterActivity, ActivitySuggestion, FteCalculationModel } from '../models/admin.model';
+import { MasterActivity, ActivitySuggestion, FteCalculationModel, SlaConfig } from '../models/admin.model';
 
 @Injectable({
   providedIn: 'root',
@@ -31,12 +31,24 @@ export class AdminService {
     { id: 2, suggestedName: 'Capacity Planning Analysis', category: 'Proactive', justification: 'This is a quarterly activity that takes significant time and should be accounted for.', status: 'rejected', submittedBy: 'Diana (Tower Head)', dateSubmitted: new Date(Date.now() - 86400000 * 5) },
   ]);
   
+  private _slaConfigs = signal<SlaConfig[]>([
+    { priority: 'P1', value: 8, unit: 'hours', businessHoursOnly: true, description: 'Critical incident with major business impact. Requires immediate attention.' },
+    { priority: 'P2', value: 24, unit: 'hours', businessHoursOnly: true, description: 'High impact incident affecting a large number of users or critical functions.' },
+    { priority: 'P3', value: 3, unit: 'days', businessHoursOnly: false, description: 'Medium impact incident affecting a limited number of users or non-critical functions.' },
+    { priority: 'P4', value: 2, unit: 'days', businessHoursOnly: true, description: 'Low impact incident with minimal business effect.' },
+  ]);
+
   masterActivities = this._masterActivities.asReadonly();
   activitySuggestions = this._activitySuggestions.asReadonly();
   fteCalculationModel = this._fteCalculationModel.asReadonly();
+  slaConfigs = this._slaConfigs.asReadonly();
 
   setFteCalculationModel(model: FteCalculationModel) {
     this._fteCalculationModel.set(model);
+  }
+
+  updateSlaConfigs(configs: SlaConfig[]) {
+    this._slaConfigs.set(configs);
   }
 
   addMasterActivity(activity: Omit<MasterActivity, 'id'>) {

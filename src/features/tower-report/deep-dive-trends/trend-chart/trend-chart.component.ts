@@ -1,4 +1,4 @@
-import { Component, ChangeDetectionStrategy, input, effect, signal, ElementRef, viewChild } from '@angular/core';
+import { Component, ChangeDetectionStrategy, Input, ElementRef, viewChild, OnChanges, SimpleChanges, AfterViewInit } from '@angular/core';
 import * as d3 from 'd3';
 
 interface ChartDataset {
@@ -19,22 +19,31 @@ interface ChartData {
   templateUrl: './trend-chart.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class TrendChartComponent {
-  data = input.required<ChartData>();
-  chartType = input<'line' | 'stackedBar'>('line');
-  height = input<number>(300);
+export class TrendChartComponent implements OnChanges, AfterViewInit {
+  @Input({ required: true }) data!: ChartData;
+  @Input() chartType: 'line' | 'stackedBar' = 'line';
+  @Input() height: number = 300;
 
   private chartContainer = viewChild<ElementRef<HTMLDivElement>>('chartContainer');
   private svg: any;
+  private isViewInitialized = false;
 
-  constructor() {
-    effect(() => {
-      const container = this.chartContainer();
-      const data = this.data();
-      if (container && data?.datasets.length > 0) {
-        this.createChart(container.nativeElement, data);
-      }
-    });
+  ngAfterViewInit(): void {
+    this.isViewInitialized = true;
+    this.createChartIfReady();
+  }
+
+  ngOnChanges(changes: SimpleChanges): void {
+    if (this.isViewInitialized && changes['data'] && !changes['data'].firstChange) {
+      this.createChartIfReady();
+    }
+  }
+  
+  private createChartIfReady(): void {
+    const container = this.chartContainer();
+    if (container && this.data?.datasets.length > 0) {
+      this.createChart(container.nativeElement, this.data);
+    }
   }
 
   private createChart(element: HTMLElement, data: ChartData): void {
@@ -42,7 +51,7 @@ export class TrendChartComponent {
 
     const margin = { top: 20, right: 30, bottom: 40, left: 50 };
     const width = element.clientWidth - margin.left - margin.right;
-    const height = this.height() - margin.top - margin.bottom;
+    const height = this.height - margin.top - margin.bottom;
 
     this.svg = d3.select(element)
       .append('svg')
@@ -60,7 +69,7 @@ export class TrendChartComponent {
       .attr('transform', `translate(0,${height})`)
       .call(d3.axisBottom(x));
 
-    if (this.chartType() === 'line') {
+    if (this.chartType === 'line') {
       this.drawLineChart(data, x, height);
     } else {
       this.drawStackedBarChart(data, x, height);

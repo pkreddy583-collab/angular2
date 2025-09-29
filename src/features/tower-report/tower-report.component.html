@@ -3,7 +3,7 @@
   <header class="mb-8 flex flex-wrap justify-between items-center gap-4">
     <div>
       <h1 class="text-3xl font-bold text-gray-800 flex items-center">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 mr-3 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 mr-3 text-blue-500" fill="none" viewBox="0 0 24 24" stroke-width="2">
           <path stroke-linecap="round" stroke-linejoin="round" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
         </svg>
         Tower Deep Dive Report
@@ -77,73 +77,44 @@
     </div>
   </div>
 
-  <!-- Floating FTE Pool -->
-  <app-collapsible-section title="Floating FTE Pool" [totalFte]="null">
-    <div class="grid grid-cols-1 sm:grid-cols-3 gap-6">
-      <div class="bg-white p-4 rounded-lg shadow-sm text-center">
-        <p class="text-sm text-gray-500">Total Floating Capacity</p>
-        <p class="text-3xl font-bold text-gray-800 mt-1">
-          {{ reportData().floatingFte.total | number : "1.1-1" }}
-          <span class="text-xl">FTE</span>
-        </p>
+  <!-- Act 0: Staffing Overview -->
+  <app-collapsible-section 
+    title="Act 0: Staffing Overview"
+    description="A high-level view of the team's staffing, including contractual obligations, deployed resources from the tower, and supplemental resources from the floating pool."
+    [totalFte]="null">
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+      <!-- Contractual FTE -->
+      <div class="bg-gray-50 p-4 rounded-lg text-center">
+        <p class="text-sm text-gray-500">Contractual FTE</p>
+        <p class="text-3xl font-bold text-gray-800 mt-1">{{ reportData().computeTower.contractualFte | number : "1.1-1" }}</p>
       </div>
-      <div class="bg-white p-4 rounded-lg shadow-sm text-center">
-        <p class="text-sm text-gray-500">Currently Deployed</p>
-        <p class="text-3xl font-bold text-gray-800 mt-1">
-          {{ reportData().floatingFte.deployed | number : "1.1-1" }}
-          <span class="text-xl">FTE</span>
-        </p>
+      <!-- Actual Deployed FTE -->
+      <div class="bg-gray-50 p-4 rounded-lg text-center">
+        <p class="text-sm text-gray-500">Actual Deployed FTE</p>
+        <p class="text-3xl font-bold text-gray-800 mt-1">{{ reportData().finalWorkload.actualDeployedFte | number : "1.1-1" }}</p>
       </div>
-      <div class="bg-white p-4 rounded-lg shadow-sm text-center">
-        <p class="text-sm text-gray-500">Available for Deployment</p>
-        <p class="text-3xl font-bold text-gray-800 mt-1">
-          {{ availableFte() | number : "1.1-1" }}
-          <span class="text-xl">FTE</span>
+      <!-- Floating FTE Deployed -->
+       <div class="bg-gray-50 p-4 rounded-lg text-center">
+        <p class="text-sm text-gray-500">Floating FTE Deployed</p>
+        <p class="text-3xl font-bold text-gray-800 mt-1">{{ reportData().floatingFte.deployed | number : "1.1-1" }}</p>
+      </div>
+      <!-- Staffing vs Contract -->
+      <div class="p-4 rounded-lg text-center" [class]="reportData().computeTower.staffingVsContract >= 0 ? 'bg-green-100' : 'bg-red-100'">
+        <p class="text-sm" [class]="reportData().computeTower.staffingVsContract >= 0 ? 'text-green-700' : 'text-red-700'">Staffing vs Contract</p>
+        <p class="text-3xl font-bold mt-1" [class]="reportData().computeTower.staffingVsContract >= 0 ? 'text-green-800' : 'text-red-800'">
+           {{ reportData().computeTower.staffingVsContract >= 0 ? '+' : '' }}{{ reportData().computeTower.staffingVsContract | number : "1.1-1" }}
         </p>
       </div>
     </div>
   </app-collapsible-section>
 
-  <!-- Compute Tower Deep Dive -->
-  <div
-    class="bg-white rounded-lg shadow-sm border border-gray-200 p-4 mb-6"
-  >
-    <div class="flex flex-wrap justify-between items-center">
-      <div>
-        <h2 class="text-xl font-bold text-gray-700">
-          {{ reportData().computeTower.name }}
-        </h2>
-        <p class="text-sm text-gray-500">
-          {{ reportData().computeTower.subName }}
-        </p>
-      </div>
-      <div class="flex gap-8 text-right">
-        <div>
-          <p class="text-sm text-gray-500">Contractual FTE</p>
-          <p class="text-lg font-bold">
-            {{ reportData().computeTower.contractualFte | number : "1.1-1" }}
-          </p>
-        </div>
-        <div>
-          <p class="text-sm text-gray-500">Staffing vs Contract</p>
-          <p class="text-lg font-bold">
-            {{
-              reportData().computeTower.staffingVsContract | number : "1.1-1"
-            }}
-          </p>
-        </div>
-      </div>
-    </div>
-    <hr class="my-4" />
-    <h3 class="text-lg font-semibold text-center mb-2">
-      Workload Composition
-    </h3>
-    <app-doughnut-chart [data]="workloadComposition()" />
-  </div>
 
   <!-- Act 1: Ticket-Driven Work -->
-  @if(ticketDrivenWork(); as tdw) {
-    <app-collapsible-section title="Act 1: Ticket-Driven Work" [totalFte]="finalTicketDrivenFte()">
+  @if (ticketDrivenWork(); as tdw) {
+    <app-collapsible-section 
+      title="Act 1: Ticket-Driven Work" 
+      description="This section analyzes work generated from tickets (Incidents, Changes, Tasks). FTE is calculated based on the volume of tickets and the time spent to resolve them, with adjustments for outliers and manager discretion."
+      [totalFte]="finalTicketDrivenFte()">
       <div class="flex justify-between items-center -mt-2 mb-2">
          <div class="flex items-center gap-2">
             <button (click)="openAnalyticsModal('tickets')" class="p-1 text-gray-500 hover:text-blue-600" title="View Analytics">
@@ -173,7 +144,7 @@
             </tr>
           </thead>
           <tbody>
-          @for(item of tdw.items; track item.id) {
+          @for (item of tdw.items; track item.id) {
             <tr class="border-b transition-colors text-gray-900" [class]="(item.fte > 1.0 || (item.fteChange && item.fteChange > 0.2 && item.fteChangeDirection === 'up')) ? 'bg-yellow-50 hover:bg-yellow-100' : 'hover:bg-gray-50'">
               <td class="px-4 py-3 font-medium text-gray-900">{{ item.category }}</td>
               <td class="px-4 py-3 text-gray-700">{{ item.priority }}</td>
@@ -246,137 +217,150 @@
   }
 
   <!-- Act 2: Structured Activities -->
-  <form [formGroup]="activitiesForm" novalidate>
-    @for(category of structuredActivities(); track category.name; let catIndex = $index) {
-      <app-collapsible-section
-        [title]="category.name"
-        [totalFte]="category.totalFte"
-        [fteChange]="category.totalFteChange"
-        [fteChangeDirection]="category.totalFteChangeDirection">
-        <div class="flex justify-start -mt-2 mb-2">
-            <button (click)="exportStructuredActivities(category.name)" class="p-1 text-gray-500 hover:text-green-600" title="Download CSV">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clip-rule="evenodd" /></svg>
-            </button>
-        </div>
-        <div class="overflow-x-auto" [formArrayName]="category.name">
-          <table class="w-full text-sm text-left">
-            <thead class="text-xs text-gray-700 uppercase bg-gray-50 sticky top-0">
-              <tr>
-                <th class="px-4 py-3">Activity Name</th>
-                <th class="px-4 py-3">Frequency</th>
-                <th class="px-4 py-3 text-right">Instances</th>
-                <th class="px-4 py-3 text-right">Hrs/Instance</th>
-                <th class="px-4 py-3 text-right">Total Hours</th>
-                <th class="px-4 py-3 text-right">Adjustment %</th>
-                <th class="px-4 py-3 text-right">Final FTE</th>
-                <th class="px-4 py-3 text-center">MoM Trend</th>
-              </tr>
-            </thead>
-            <tbody>
-            @for(item of category.items; track item.id; let itemIndex = $index) {
-              <tr class="border-b transition-colors text-gray-900" [formGroupName]="itemIndex" [class]="(item.calculatedFte > 0.5 || (item.fteChange && item.fteChange > 0.2 && item.fteChangeDirection === 'up')) ? 'bg-yellow-50 hover:bg-yellow-100' : 'hover:bg-gray-50'">
-                <td class="px-4 py-3 font-medium text-gray-900">{{ item.activityName }}</td>
-                <td class="px-4 py-3">
-                  <select formControlName="frequency" class="w-full border-gray-300 rounded-md shadow-sm p-1 bg-gray-50 focus:bg-white text-gray-900 focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50">
-                    @for(freq of frequencies; track freq) {
-                      <option [value]="freq">{{ freq }}</option>
-                    }
-                  </select>
-                </td>
-                <td class="px-4 py-3 text-right">
-                  <input type="number" formControlName="instances" class="w-20 text-right border rounded-md p-1 bg-gray-50 focus:bg-white text-gray-900">
-                </td>
-                <td class="px-4 py-3 text-right">
-                  <input type="number" formControlName="hrsPerInstance" class="w-20 text-right border rounded-md p-1 bg-gray-50 focus:bg-white text-gray-900">
-                </td>
-                <td class="px-4 py-3 text-right text-gray-700">{{ item.totalHours | number: '1.2-2' }}</td>
-                 <td class="px-4 py-3 text-right">
-                  <input type="number" 
-                    class="w-20 text-right border rounded-md p-1 bg-gray-50 focus:bg-white text-gray-900"
-                    [placeholder]="reportData().ticketDrivenWork.managerAdjustment + '% (Global)'"
-                    [value]="item.adjustmentPct"
-                    (input)="onStructuredAdjustmentChange($event, category.name, item.id)">
-                </td>
-                <td class="px-4 py-3 text-right font-semibold text-blue-600">{{ item.calculatedFte | number: '1.3-3' }}</td>
-                <td class="px-4 py-3 text-center">
-                  @if (item.fteChange && item.fteChangeDirection) {
-                    <span class="inline-flex items-center text-xs font-semibold px-2 py-0.5 rounded-full" [class]="item.fteChangeDirection === 'up' ? 'bg-red-100 text-red-800' : 'bg-green-100 text-green-800'">
-                      @if (item.fteChangeDirection === 'up') {
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M5 10l7-7m0 0l7 7m-7-7v18" /></svg>
-                      } @else {
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M19 14l-7 7m0 0l-7-7m7 7V3" /></svg>
+  <div class="mb-6">
+    <div class="p-4 bg-white rounded-t-lg border-x border-t">
+      <h2 class="text-xl font-bold text-gray-700">Act 2: Structured Activities</h2>
+      <p class="text-sm text-gray-500 mt-1">This section analyzes planned, repeatable, and project-based work. This includes proactive tasks, continuous improvement efforts, governance meetings, and other non-ticketed activities that consume team capacity.</p>
+    </div>
+    <form [formGroup]="activitiesForm" novalidate>
+      @for (category of structuredActivities(); track category.name; let catIndex = $index) {
+        <app-collapsible-section
+          [startOpen]="false"
+          [title]="category.name"
+          [totalFte]="category.totalFte"
+          [fteChange]="category.totalFteChange"
+          [fteChangeDirection]="category.totalFteChangeDirection">
+          <div class="flex justify-start -mt-2 mb-2">
+              <button (click)="exportStructuredActivities(category.name)" class="p-1 text-gray-500 hover:text-green-600" title="Download CSV">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clip-rule="evenodd" /></svg>
+              </button>
+          </div>
+          <div class="overflow-x-auto" [formArrayName]="getCategoryFormName(category.name)">
+            <table class="w-full text-sm text-left">
+              <thead class="text-xs text-gray-700 uppercase bg-gray-50 sticky top-0">
+                <tr>
+                  <th class="px-4 py-3">Activity Name</th>
+                  <th class="px-4 py-3">Frequency</th>
+                  <th class="px-4 py-3 text-right">Instances</th>
+                  <th class="px-4 py-3 text-right">Hrs/Instance</th>
+                  <th class="px-4 py-3 text-right">Total Hours</th>
+                  <th class="px-4 py-3 text-right">Adjustment %</th>
+                  <th class="px-4 py-3 text-right">Final FTE</th>
+                  <th class="px-4 py-3 text-center">MoM Trend</th>
+                </tr>
+              </thead>
+              <tbody>
+              @for (item of category.items; track item.id; let itemIndex = $index) {
+                <tr [formGroupName]="itemIndex" class="border-b transition-colors text-gray-900" [class]="(item.calculatedFte > 0.5 || (item.fteChange && item.fteChange > 0.2 && item.fteChangeDirection === 'up')) ? 'bg-yellow-50 hover:bg-yellow-100' : 'hover:bg-gray-50'">
+                  <td class="px-4 py-3 font-medium text-gray-900">{{ item.activityName }}</td>
+                  <td class="px-4 py-3">
+                    <select formControlName="frequency" class="w-full border-gray-300 rounded-md shadow-sm p-1 bg-gray-50 focus:bg-white text-gray-900 focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50">
+                      @for (freq of frequencies; track freq) {
+                        <option [value]="freq">{{ freq }}</option>
                       }
-                      {{ item.fteChange | percent:'1.0-0' }}
-                    </span>
-                  } @else {
-                    <span class="text-gray-400">-</span>
-                  }
-                </td>
-              </tr>
-            }
-            </tbody>
-          </table>
-        </div>
-        <div class="mt-4 pt-4 border-t flex items-center gap-4">
-            <div class="flex-grow relative">
-                <input 
-                  type="text"
-                  placeholder="Search to add an activity..."
-                  class="w-full text-sm border-gray-300 rounded-md shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50 bg-white text-gray-900"
-                  [value]="activitySearchState()[category.name]?.term || ''"
-                  (input)="onActivitySearch(category.name, $event)"
-                  (focus)="toggleActivityDropdown(category.name, true)">
-                
-                @if (activitySearchState()[category.name]?.open) {
-                  <div class="absolute z-10 w-full mt-1 bg-white rounded-md shadow-lg border border-gray-200 max-h-60 overflow-y-auto">
-                    @if (filteredActivitiesByCategory()[category.name]?.length > 0) {
-                      @for (activity of filteredActivitiesByCategory()[category.name]; track activity.id) {
-                        <button 
-                          type="button"
-                          class="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-blue-50"
-                          (click)="selectAndAddActivity(category.name, activity)">
-                          {{ activity.name }}
-                        </button>
-                      }
+                    </select>
+                  </td>
+                  <td class="px-4 py-3 text-right">
+                    <input type="number" formControlName="instances" class="w-20 text-right border rounded-md p-1 bg-gray-50 focus:bg-white text-gray-900">
+                  </td>
+                  <td class="px-4 py-3 text-right">
+                    <input type="number" formControlName="hrsPerInstance" class="w-20 text-right border rounded-md p-1 bg-gray-50 focus:bg-white text-gray-900">
+                  </td>
+                  <td class="px-4 py-3 text-right text-gray-700">{{ item.totalHours | number: '1.2-2' }}</td>
+                   <td class="px-4 py-3 text-right">
+                    <input type="number" 
+                      class="w-20 text-right border rounded-md p-1 bg-gray-50 focus:bg-white text-gray-900"
+                      [placeholder]="reportData().ticketDrivenWork.managerAdjustment + '% (Global)'"
+                      [value]="item.adjustmentPct"
+                      (input)="onStructuredAdjustmentChange($event, category.name, item.id)">
+                  </td>
+                  <td class="px-4 py-3 text-right font-semibold text-blue-600">{{ item.calculatedFte | number: '1.3-3' }}</td>
+                  <td class="px-4 py-3 text-center">
+                    @if (item.fteChange && item.fteChangeDirection) {
+                      <span class="inline-flex items-center text-xs font-semibold px-2 py-0.5 rounded-full" [class]="item.fteChangeDirection === 'up' ? 'bg-red-100 text-red-800' : 'bg-green-100 text-green-800'">
+                        @if (item.fteChangeDirection === 'up') {
+                          <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M5 10l7-7m0 0l7 7m-7-7v18" /></svg>
+                        } @else {
+                          <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M19 14l-7 7m0 0l-7-7m7 7V3" /></svg>
+                        }
+                        {{ item.fteChange | percent:'1.0-0' }}
+                      </span>
                     } @else {
-                      <p class="px-4 py-2 text-sm text-gray-500">No activities found.</p>
+                      <span class="text-gray-400">-</span>
                     }
-                  </div>
-                }
-            </div>
+                  </td>
+                </tr>
+              }
+              </tbody>
+            </table>
+          </div>
+          <div class="mt-4 pt-4 border-t flex items-center gap-4">
+              <div class="flex-grow relative">
+                  <input 
+                    type="text"
+                    placeholder="Search to add an activity..."
+                    class="w-full text-sm border-gray-300 rounded-md shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50 bg-white text-gray-900"
+                    [value]="activitySearchState()[category.name]?.term || ''"
+                    (input)="onActivitySearch(category.name, $event)"
+                    (focus)="toggleActivityDropdown(category.name, true)">
+                  
+                  @if (activitySearchState()[category.name]?.open) {
+                    <div class="absolute z-10 w-full mt-1 bg-white rounded-md shadow-lg border border-gray-200 max-h-60 overflow-y-auto">
+                      @if (filteredActivitiesByCategory()[category.name]?.length > 0) {
+                        @for (activity of filteredActivitiesByCategory()[category.name]; track activity.id) {
+                          <button
+                            type="button"
+                            class="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-blue-50"
+                            (click)="selectAndAddActivity(category.name, activity)">
+                            {{ activity.name }}
+                          </button>
+                        }
+                      } @else {
+                        <p class="px-4 py-2 text-sm text-gray-500">No activities found.</p>
+                      }
+                    </div>
+                  }
+              </div>
+              <div class="border-l pl-4">
+                  <button type="button" (click)="openSuggestionModal(category.name)" class="text-sm text-gray-600 hover:underline whitespace-nowrap">Suggest New...</button>
+              </div>
+          </div>
+        </app-collapsible-section>
+      }
+    </form>
+  </div>
 
-            <div class="border-l pl-4">
-                <button type="button" (click)="openSuggestionModal(category.name)" class="text-sm text-gray-600 hover:underline whitespace-nowrap">Suggest New...</button>
-            </div>
+
+  <!-- Act 3: Final Workload & Insights -->
+  <app-collapsible-section 
+    title="Act 3: Final Workload & Insights"
+    description="The final calculation brings together ticket-driven and structured work to determine the total required FTE, comparing it against the actually deployed FTE to identify any staffing surplus or deficit."
+    [totalFte]="totalRequiredFte()">
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
+      <!-- Summary numbers -->
+      <div class="space-y-6">
+        <div class="bg-gray-50 p-4 rounded-lg text-center">
+          <p class="text-sm text-gray-500">Total Required FTE</p>
+          <p class="text-3xl font-bold text-gray-800 mt-1">{{ totalRequiredFte() | number : "1.3-3" }}</p>
         </div>
-      </app-collapsible-section>
-    }
-  </form>
-
-  <!-- Final Workload Summary -->
-  <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-     <h2 class="text-xl font-bold text-gray-700 text-center mb-4">Final Workload Summary</h2>
-    <div class="grid grid-cols-1 sm:grid-cols-3 gap-6">
-      <div class="bg-gray-50 p-4 rounded-lg text-center">
-        <p class="text-sm text-gray-500">Total Required FTE</p>
-        <p class="text-3xl font-bold text-gray-800 mt-1">
-          {{ totalRequiredFte() | number : "1.3-3" }}
-        </p>
+        <div class="bg-gray-50 p-4 rounded-lg text-center">
+          <p class="text-sm text-gray-500">Actual Deployed FTE</p>
+          <p class="text-3xl font-bold text-gray-800 mt-1">{{ reportData().finalWorkload.actualDeployedFte | number : "1.3-3" }}</p>
+        </div>
+        <div class="p-4 rounded-lg text-center" [class]="surplusFte() >= 0 ? 'bg-green-100' : 'bg-red-100'">
+          <p class="text-sm" [class]="surplusFte() >= 0 ? 'text-green-700' : 'text-red-700'">{{ surplusFte() >= 0 ? 'Surplus' : 'Deficit' }}</p>
+          <p class="text-3xl font-bold mt-1" [class]="surplusFte() >= 0 ? 'text-green-800' : 'text-red-800'">
+            {{ surplusFte() >= 0 ? '+' : ''}}{{ surplusFte() | number : "1.3-3" }}
+          </p>
+        </div>
       </div>
-      <div class="bg-gray-50 p-4 rounded-lg text-center">
-        <p class="text-sm text-gray-500">Actual Deployed FTE</p>
-        <p class="text-3xl font-bold text-gray-800 mt-1">
-          {{ reportData().finalWorkload.actualDeployedFte | number : "1.3-3" }}
-        </p>
-      </div>
-      <div class="p-4 rounded-lg text-center" [class]="surplusFte() >= 0 ? 'bg-green-100' : 'bg-red-100'">
-        <p class="text-sm" [class]="surplusFte() >= 0 ? 'text-green-700' : 'text-red-700'">{{ surplusFte() >= 0 ? 'Surplus' : 'Deficit' }}</p>
-        <p class="text-3xl font-bold mt-1" [class]="surplusFte() >= 0 ? 'text-green-800' : 'text-red-800'">
-          {{ surplusFte() >= 0 ? '+' : ''}}{{ surplusFte() | number : "1.3-3" }}
-        </p>
+      <!-- Doughnut Chart -->
+      <div>
+         <h3 class="text-lg font-semibold text-center mb-2">Workload Composition</h3>
+         <app-doughnut-chart [data]="workloadComposition()" />
       </div>
     </div>
-  </div>
+  </app-collapsible-section>
 </div>
 
 <!-- Suggestion Modal -->

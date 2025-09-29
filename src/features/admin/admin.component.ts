@@ -1,11 +1,10 @@
-import { Component, ChangeDetectionStrategy, inject, computed } from '@angular/core';
+import { Component, ChangeDetectionStrategy, inject, computed, OnInit, signal } from '@angular/core';
 import { DatePipe, DecimalPipe } from '@angular/common';
-// FIX: Import FormControl and remove FormBuilder.
-import { ReactiveFormsModule, Validators, FormGroup, ValidatorFn, AbstractControl, ValidationErrors, FormControl } from '@angular/forms';
+import { ReactiveFormsModule, Validators, FormGroup, ValidatorFn, AbstractControl, ValidationErrors, FormControl, FormArray } from '@angular/forms';
 import { AdminService } from '../../services/admin.service';
 import { AnalyticsService } from '../../services/analytics.service';
 import { Frequency } from '../../models/tower-report.model';
-import { FteCalculationModel } from '../../models/admin.model';
+import { FteCalculationModel, SlaConfig } from '../../models/admin.model';
 
 @Component({
   selector: 'app-admin',
@@ -14,12 +13,13 @@ import { FteCalculationModel } from '../../models/admin.model';
   templateUrl: './admin.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class AdminComponent {
+export class AdminComponent implements OnInit {
   private adminService = inject(AdminService);
   private analyticsService = inject(AnalyticsService);
 
   masterActivities = this.adminService.masterActivities;
   fteCalculationModel = this.adminService.fteCalculationModel;
+  slaConfigs = this.adminService.slaConfigs;
   
   pendingSuggestions = computed(() => 
     this.adminService.activitySuggestions().filter(s => s.status === 'pending')
@@ -30,6 +30,8 @@ export class AdminComponent {
   );
 
   activityForm: FormGroup;
+  slaForm!: FormGroup;
+  slaSaveStatus = signal<'idle' | 'saving' | 'saved'>('idle');
   
   // In a real app, this might come from a shared config
   activityCategories = [
@@ -42,6 +44,29 @@ export class AdminComponent {
 
   frequencies: Frequency[] = ['Ad-hoc', 'Weekly', 'Bi-Weekly', 'Monthly', 'Sprint'];
   fteModels: FteCalculationModel[] = ['Average', 'Median', 'P75', 'P90'];
+
+  databricksQuery = `-- This query pulls all active, high-priority incidents for the Watchtower.
+-- The backend service should execute this against your Databricks cluster.
+-- Ensure date columns are returned as ISO 8601 strings.
+
+SELECT 
+    incident_id AS id,
+    title,
+    priority,
+    assignee AS assignedTo,
+    created_timestamp AS createdDate,
+    sla_breach_timestamp AS slaBreachDate,
+    description,
+    affected_services AS affectedServices,
+    last_update_message AS lastUpdate
+FROM 
+    your_ticketing_database.active_incidents
+WHERE
+    priority IN ('P1', 'P2') AND status != 'Resolved'
+ORDER BY 
+    sla_breach_timestamp ASC;`;
+  
+  copiedQuery = signal(false);
 
   modelDescription = computed(() => {
     switch (this.fteCalculationModel()) {
@@ -59,7 +84,6 @@ export class AdminComponent {
   });
 
   constructor() {
-    // FIX: Replaced FormBuilder with direct instantiation of FormGroup and FormControl to fix 'Property 'group' does not exist on type 'unknown'' error.
     this.activityForm = new FormGroup({
       name: new FormControl('', Validators.required),
       category: new FormControl(this.activityCategories[0], Validators.required),
@@ -67,6 +91,48 @@ export class AdminComponent {
       defaultHrsPerInstance: new FormControl(1, [Validators.required, Validators.min(0.1)])
     }, {
       validators: this.duplicateActivityValidator()
+    });
+  }
+  
+  ngOnInit(): void {
+    this.buildSlaForm();
+  }
+
+  private buildSlaForm(): void {
+    const configs = this.slaConfigs();
+    this.slaForm = new FormGroup({
+      configs: new FormArray(
+        configs.map(config => new FormGroup({
+          priority: new FormControl(config.priority),
+          value: new FormControl(config.value, [Validators.required, Validators.min(1)]),
+          unit: new FormControl(config.unit, Validators.required),
+          businessHoursOnly: new FormControl(config.businessHoursOnly),
+          description: new FormControl(config.description, Validators.required)
+        }))
+      )
+    });
+  }
+
+  get slaConfigsArray(): FormArray {
+    return this.slaForm.get('configs') as FormArray;
+  }
+
+  saveSlaConfigs(): void {
+    if (this.slaForm.invalid) {
+      return;
+    }
+    this.slaSaveStatus.set('saving');
+    this.adminService.updateSlaConfigs(this.slaForm.value.configs);
+    setTimeout(() => {
+      this.slaSaveStatus.set('saved');
+      setTimeout(() => this.slaSaveStatus.set('idle'), 2000);
+    }, 500);
+  }
+  
+  copyDatabricksQuery(): void {
+    navigator.clipboard.writeText(this.databricksQuery).then(() => {
+      this.copiedQuery.set(true);
+      setTimeout(() => this.copiedQuery.set(false), 2000);
     });
   }
 

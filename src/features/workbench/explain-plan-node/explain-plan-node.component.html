@@ -7,22 +7,18 @@
   <div class="relative pt-2">
     <div class="p-2 rounded-md border" [class]="isExpensive() ? 'bg-red-50 border-red-400' : 'bg-gray-50 border-gray-300'">
       <p class="font-semibold text-sm" [class]="isExpensive() ? 'text-red-800' : 'text-gray-800'">
-        {{ node().operation }} @if(node().objectName){ <span class="font-mono text-blue-700">{{ node().objectName }}</span> }
+        {{ node.operation }} <span *ngIf="node.objectName" class="font-mono text-blue-700">{{ node.objectName }}</span>
       </p>
       <div class="flex gap-4 text-xs text-gray-600 mt-1">
-        <span>Cost: {{ node().cost }}</span>
-        <span>Rows: {{ node().rows | number }}</span>
-        <span>Bytes: {{ node().bytes | number }}</span>
+        <span>Cost: {{ node.cost }}</span>
+        <span>Rows: {{ node.rows | number }}</span>
+        <span>Bytes: {{ node.bytes | number }}</span>
       </div>
     </div>
 
     <!-- Children -->
-    @if(node().children && node().children!.length > 0) {
-      <div class="mt-2 space-y-2">
-        @for(child of node().children; track child.operation) {
-          <app-explain-plan-node [node]="child" />
-        }
-      </div>
-    }
+    <div *ngIf="node.children && node.children.length > 0" class="mt-2 space-y-2">
+      <app-explain-plan-node *ngFor="let child of node.children; trackBy: trackByOperation" [node]="child" />
+    </div>
   </div>
 </div>

@@ -1,4 +1,4 @@
-import { Component, ChangeDetectionStrategy, input, signal, computed, OnDestroy } from '@angular/core';
+import { Component, ChangeDetectionStrategy, Input, OnDestroy, ChangeDetectorRef, inject } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { Incident } from '../../../models/incident.model';
 
@@ -10,22 +10,14 @@ import { Incident } from '../../../models/incident.model';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class IncidentCardComponent implements OnDestroy {
-  incident = input.required<Incident>();
+  @Input({ required: true }) incident!: Incident;
 
-  private currentTime = signal(new Date());
   private timer: number | undefined;
-
-  private timeRemainingMs = computed(() => {
-    const breachTime = this.incident().slaBreachDate.getTime();
-    const now = this.currentTime().getTime();
-    return Math.max(0, breachTime - now);
-  });
-  
-  private timeRemainingHours = computed(() => this.timeRemainingMs() / (1000 * 60 * 60));
+  private cdr = inject(ChangeDetectorRef);
 
   constructor() {
     this.timer = window.setInterval(() => {
-      this.currentTime.set(new Date());
+      this.cdr.markForCheck();
     }, 1000);
   }
 
@@ -35,17 +27,27 @@ export class IncidentCardComponent implements OnDestroy {
     }
   }
 
-  statusColorClass = computed(() => {
-    const hours = this.timeRemainingHours();
+  get timeRemainingMs(): number {
+    const breachTime = this.incident.slaBreachDate.getTime();
+    const now = new Date().getTime();
+    return Math.max(0, breachTime - now);
+  }
+  
+  get timeRemainingHours(): number {
+    return this.timeRemainingMs / (1000 * 60 * 60);
+  }
+
+  get statusColorClass(): { border: string; text: string; bg: string } {
+    const hours = this.timeRemainingHours;
     if (hours <= 0) return { border: 'border-gray-300', text: 'text-gray-500', bg: 'bg-gray-50' };
     if (hours < 1) return { border: 'border-red-400', text: 'text-red-600', bg: 'bg-red-50' };
     if (hours < 8) return { border: 'border-orange-400', text: 'text-orange-600', bg: 'bg-orange-50' };
     if (hours < 24) return { border: 'border-yellow-400', text: 'text-yellow-600', bg: 'bg-yellow-50' };
     return { border: 'border-green-400', text: 'text-green-600', bg: 'bg-green-50' };
-  });
+  }
 
-  formattedTimeRemaining = computed(() => {
-    const totalMs = this.timeRemainingMs();
+  get formattedTimeRemaining(): string {
+    const totalMs = this.timeRemainingMs;
     if (totalMs <= 0) return 'Breached';
     
     const totalSeconds = Math.floor(totalMs / 1000);
@@ -61,14 +63,14 @@ export class IncidentCardComponent implements OnDestroy {
     if (days === 0 && hours === 0) parts.push(`${seconds}s`);
 
     return parts.join(' ') || '0s';
-  });
+  }
 
-  priorityClass = computed(() => {
-    switch (this.incident().priority) {
+  get priorityClass(): string {
+    switch (this.incident.priority) {
       case 'P1': return 'bg-red-600 text-white';
       case 'P2': return 'bg-orange-500 text-white';
       case 'P3': return 'bg-yellow-500 text-black';
       default: return 'bg-gray-500 text-white';
     }
-  });
+  }
 }

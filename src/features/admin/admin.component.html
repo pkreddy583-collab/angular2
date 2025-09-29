@@ -86,10 +86,95 @@
            }
         </div>
       </div>
+
+       <!-- SLA Timings Configuration Card -->
+      <div class="bg-white rounded-lg shadow-md">
+        <div class="p-5 border-b flex justify-between items-center">
+          <h2 class="text-xl font-bold text-gray-700">SLA Timings Configuration</h2>
+        </div>
+        <div class="p-5">
+          <form [formGroup]="slaForm" (ngSubmit)="saveSlaConfigs()">
+            <div formArrayName="configs" class="overflow-x-auto">
+              <table class="w-full text-sm">
+                <thead class="text-xs text-gray-700 uppercase bg-gray-50">
+                  <tr>
+                    <th class="px-4 py-3 text-left">Priority</th>
+                    <th class="px-4 py-3 text-left w-2/5">Description</th>
+                    <th class="px-4 py-3 text-left">SLA Value</th>
+                    <th class="px-4 py-3 text-left">Unit</th>
+                    <th class="px-4 py-3 text-center">Business Hours Only</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (configGroup of slaConfigsArray.controls; track configGroup; let i = $index) {
+                    <tr [formGroupName]="i" class="border-b">
+                      <td class="px-4 py-3 font-bold text-gray-800">{{ slaConfigs()[i].priority }}</td>
+                      <td class="px-4 py-3">
+                        <input type="text" formControlName="description" class="w-full border-gray-300 rounded-md shadow-sm sm:text-sm bg-white text-gray-900 focus:border-blue-500 focus:ring-blue-500">
+                      </td>
+                      <td class="px-4 py-3">
+                        <input type="number" formControlName="value" class="w-24 border-gray-300 rounded-md shadow-sm sm:text-sm bg-white text-gray-900 focus:border-blue-500 focus:ring-blue-500">
+                      </td>
+                      <td class="px-4 py-3">
+                        <select formControlName="unit" class="border-gray-300 rounded-md shadow-sm sm:text-sm bg-white text-gray-900 focus:border-blue-500 focus:ring-blue-500">
+                          <option value="hours">Hours</option>
+                          <option value="days">Days</option>
+                        </select>
+                      </td>
+                      <td class="px-4 py-3 text-center">
+                        <input type="checkbox" formControlName="businessHoursOnly" class="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500">
+                      </td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+            <div class="mt-6 flex justify-end items-center gap-4">
+              @if (slaSaveStatus() === 'saved') {
+                <span class="text-sm font-medium text-green-600">Changes saved successfully!</span>
+              }
+              <button type="submit" [disabled]="slaForm.invalid || slaSaveStatus() === 'saving'" class="px-4 py-2 bg-blue-600 text-white font-semibold rounded-md hover:bg-blue-700 disabled:bg-gray-400">
+                {{ slaSaveStatus() === 'saving' ? 'Saving...' : 'Save SLA Settings' }}
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+
     </div>
 
     <!-- Right Column: Forms -->
     <div class="lg:col-span-1 space-y-6">
+      <div class="bg-white rounded-lg shadow-md p-6 sticky top-24">
+        <h2 class="text-xl font-bold text-gray-700 mb-4">FTE Calculation Settings</h2>
+        <div class="space-y-4">
+          <div>
+            <label for="fteModel" class="block text-sm font-medium text-gray-700">Ticket-Driven Work Model</label>
+            <select id="fteModel" [value]="fteCalculationModel()" (change)="onFteModelChange($event)" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm bg-white text-gray-900">
+              @for(model of fteModels; track model) {
+                <option [value]="model">{{ model }}</option>
+              }
+            </select>
+             <p class="mt-2 text-xs text-gray-500">{{ modelDescription() }}</p>
+          </div>
+        </div>
+      </div>
+      
+       <!-- Watchtower Data Source Card -->
+      <div class="bg-white rounded-lg shadow-md p-6 sticky top-24">
+        <h2 class="text-xl font-bold text-gray-700 mb-2">Watchtower Data Source</h2>
+        <p class="text-sm text-gray-600 mb-4">Configure your backend to use the following Databricks SQL query to populate the SLA Watchtower dashboard.</p>
+        <div class="relative bg-gray-800 p-4 rounded-md mt-2">
+          <pre><code class="language-sql text-sm text-gray-300 whitespace-pre-wrap">{{ databricksQuery }}</code></pre>
+          <button (click)="copyDatabricksQuery()" class="absolute top-3 right-3 bg-gray-700 text-gray-300 hover:bg-gray-600 px-3 py-1 rounded text-xs font-medium flex items-center">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+            </svg>
+            {{ copiedQuery() ? 'Copied!' : 'Copy' }}
+          </button>
+        </div>
+      </div>
+
       <div class="bg-white rounded-lg shadow-md p-6 sticky top-24">
         <h2 class="text-xl font-bold text-gray-700 mb-4">Add New Master Activity</h2>
         <form [formGroup]="activityForm" (ngSubmit)="addMasterActivity()" class="space-y-4">
@@ -151,21 +236,6 @@
             </button>
           </div>
         </form>
-      </div>
-
-      <div class="bg-white rounded-lg shadow-md p-6 sticky top-24">
-        <h2 class="text-xl font-bold text-gray-700 mb-4">FTE Calculation Settings</h2>
-        <div class="space-y-4">
-          <div>
-            <label for="fteModel" class="block text-sm font-medium text-gray-700">Ticket-Driven Work Model</label>
-            <select id="fteModel" [value]="fteCalculationModel()" (change)="onFteModelChange($event)" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm bg-white text-gray-900">
-              @for(model of fteModels; track model) {
-                <option [value]="model">{{ model }}</option>
-              }
-            </select>
-             <p class="mt-2 text-xs text-gray-500">{{ modelDescription() }}</p>
-          </div>
-        </div>
       </div>
 
     </div>

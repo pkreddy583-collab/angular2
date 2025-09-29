@@ -1,12 +1,13 @@
 import { Component, ChangeDetectionStrategy, inject, OnInit, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
+import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormGroup, FormArray, FormControl, Validators } from '@angular/forms';
 import { JourneyBuilderService } from '../../../services/journey-builder.service';
 
 @Component({
   selector: 'app-journey-builder',
   standalone: true,
-  imports: [RouterLink, ReactiveFormsModule],
+  imports: [RouterLink, ReactiveFormsModule, CommonModule],
   templateUrl: './journey-builder.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })

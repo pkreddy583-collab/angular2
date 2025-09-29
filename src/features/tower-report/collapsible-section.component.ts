@@ -1,10 +1,10 @@
-import { Component, ChangeDetectionStrategy, input, signal } from '@angular/core';
-import { DecimalPipe, PercentPipe } from '@angular/common';
+import { Component, ChangeDetectionStrategy, signal, Input, OnInit } from '@angular/core';
+import { CommonModule, DecimalPipe, PercentPipe } from '@angular/common';
 
 @Component({
   selector: 'app-collapsible-section',
   standalone: true,
-  imports: [DecimalPipe, PercentPipe],
+  imports: [CommonModule, DecimalPipe, PercentPipe],
   template: `
     <div class="bg-white rounded-lg shadow-sm border border-gray-200 mb-6">
       <button
@@ -12,23 +12,25 @@ import { DecimalPipe, PercentPipe } from '@angular/common';
         class="w-full flex justify-between items-center p-4 text-left"
         [attr.aria-expanded]="isOpen()"
       >
-        <h2 class="text-xl font-bold text-gray-700">{{ title() }}</h2>
-        <div class="flex items-center gap-4">
-          @if (fteChange() !== undefined && fteChangeDirection()) {
-            <span class="inline-flex items-center text-xs font-semibold px-2 py-0.5 rounded-full" [class]="fteChangeDirection() === 'up' ? 'bg-red-100 text-red-800' : 'bg-green-100 text-green-800'">
-              @if (fteChangeDirection() === 'up') {
+        <div class="flex-grow">
+          <h2 class="text-xl font-bold text-gray-700">{{ title }}</h2>
+          <p *ngIf="description" class="text-sm text-gray-500 mt-1 pr-4">{{ description }}</p>
+        </div>
+        <div class="flex items-center gap-4 flex-shrink-0">
+          <ng-container *ngIf="fteChange !== undefined && fteChangeDirection">
+            <span class="inline-flex items-center text-xs font-semibold px-2 py-0.5 rounded-full" [class]="fteChangeDirection === 'up' ? 'bg-red-100 text-red-800' : 'bg-green-100 text-green-800'">
+              <ng-container *ngIf="fteChangeDirection === 'up'; else downArrow">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M5 10l7-7m0 0l7 7m-7-7v18" /></svg>
-              } @else {
+              </ng-container>
+              <ng-template #downArrow>
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M19 14l-7 7m0 0l-7-7m7 7V3" /></svg>
-              }
-              {{ fteChange() | percent:'1.0-0' }}
+              </ng-template>
+              {{ fteChange | percent:'1.0-0' }}
             </span>
-          }
-          @if (totalFte() !== null) {
-          <span class="font-bold text-blue-600 text-lg"
-            >{{ totalFte() | number : "1.3-3" }} FTE</span
-          >
-          }
+          </ng-container>
+          <ng-container *ngIf="totalFte !== null">
+            <span class="font-bold text-blue-600 text-lg">{{ totalFte | number : "1.3-3" }} FTE</span>
+          </ng-container>
           <svg
             xmlns="http://www.w3.org/2000/svg"
             class="h-5 w-5 text-gray-500 transition-transform"
@@ -44,23 +46,26 @@ import { DecimalPipe, PercentPipe } from '@angular/common';
           </svg>
         </div>
       </button>
-      @if (isOpen()) {
-      <div class="px-4 pb-4">
+      <div *ngIf="isOpen()" class="px-4 pb-4 border-t border-gray-100 pt-4">
         <ng-content></ng-content>
       </div>
-      }
     </div>
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class CollapsibleSectionComponent {
-  title = input.required<string>();
-  totalFte = input<number | null>(null);
-  startOpen = input(true);
-  fteChange = input<number | undefined>();
-  fteChangeDirection = input<'up' | 'down' | undefined>();
+export class CollapsibleSectionComponent implements OnInit {
+  @Input({ required: true }) title!: string;
+  @Input() description: string | null = null;
+  @Input() totalFte: number | null = null;
+  @Input() startOpen: boolean = true;
+  @Input() fteChange: number | undefined;
+  @Input() fteChangeDirection: 'up' | 'down' | undefined;
 
-  isOpen = signal(this.startOpen());
+  isOpen = signal(true);
+
+  ngOnInit() {
+    this.isOpen.set(this.startOpen);
+  }
 
   toggle() {
     this.isOpen.update((v) => !v);

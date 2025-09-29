@@ -1,5 +1,5 @@
 import { Component, ChangeDetectionStrategy, inject, signal, computed, effect } from '@angular/core';
-import { DatePipe, DecimalPipe } from '@angular/common';
+import { CommonModule, DatePipe, DecimalPipe } from '@angular/common';
 import { ControlmService } from '../../services/controlm.service';
 import { SreService } from '../../services/sre.service';
 import { GeminiService } from '../../services/gemini.service';
@@ -21,7 +21,7 @@ type ActionStatus = 'idle' | 'loading' | 'success' | 'failed';
 @Component({
   selector: 'app-workbench',
   standalone: true,
-  imports: [DatePipe, DecimalPipe, ExplainPlanNodeComponent],
+  imports: [CommonModule, DatePipe, DecimalPipe, ExplainPlanNodeComponent],
   templateUrl: './workbench.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -274,4 +274,14 @@ export class WorkbenchComponent {
     this.savingsOpportunities.set(opportunities);
     this.isLoadingSavings.set(false);
   }
+
+  // --- TrackBy Functions ---
+  trackByJobId(index: number, job: ControlMJob): string { return job.id; }
+  trackBySuggestionTitle(index: number, suggestion: AiSuggestion): string { return suggestion.title; }
+  trackByIncidentId(index: number, incident: { id: string }): string { return incident.id; }
+  trackByTime(index: number, event: TimelineEvent): string { return event.time; }
+  trackByAppId(index: number, app: { id: string }): string { return app.id; }
+  trackByOppDescription(index: number, opp: SavingsOpportunity): string { return opp.description; }
+  trackByQueryId(index: number, query: SlowQuery): string { return query.id; }
+  trackByActionItem(index: number, item: ActionItem): string { return item.description; }
 }

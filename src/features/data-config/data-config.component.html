@@ -30,7 +30,7 @@
 
   <div class="space-y-8">
     <!-- Service Journey Config -->
-    @if(configs().serviceJourney; as config) {
+    <ng-container *ngIf="configs().serviceJourney as config">
       <div class="bg-white rounded-lg shadow-md overflow-hidden">
         <div class="p-5">
           <h2 class="text-xl font-bold text-gray-800">{{ config.title }}</h2>
@@ -46,10 +46,10 @@
           </button>
         </div>
       </div>
-    }
+    </ng-container>
 
     <!-- SLA Compliance Config -->
-    @if(configs().slaCompliance; as config) {
+    <ng-container *ngIf="configs().slaCompliance as config">
       <div class="bg-white rounded-lg shadow-md overflow-hidden">
         <div class="p-5">
           <h2 class="text-xl font-bold text-gray-800">{{ config.title }}</h2>
@@ -65,6 +65,6 @@
           </button>
         </div>
       </div>
-    }
+    </ng-container>
   </div>
 </main>

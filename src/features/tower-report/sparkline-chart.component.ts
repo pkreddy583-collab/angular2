@@ -1,28 +1,30 @@
-import { Component, ChangeDetectionStrategy, input, computed } from '@angular/core';
+import { Component, ChangeDetectionStrategy, Input } from '@angular/core';
+import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'app-sparkline-chart',
   standalone: true,
-  imports: [],
+  imports: [CommonModule],
   template: `
-    @if (path()) {
+    <ng-container *ngIf="path; else noData">
       <svg class="w-24 h-8" viewBox="0 0 100 20" preserveAspectRatio="none">
-        <path [attr.d]="path()" fill="none" [attr.stroke]="color()" stroke-width="2"/>
+        <path [attr.d]="path" fill="none" [attr.stroke]="color" stroke-width="2"/>
       </svg>
-    } @else {
+    </ng-container>
+    <ng-template #noData>
       <div class="w-24 h-8 flex items-center justify-center">
         <span class="text-xs text-gray-400">-</span>
       </div>
-    }
+    </ng-template>
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class SparklineChartComponent {
-  data = input<number[] | undefined>();
-  color = input<string>('#4f46e5');
+  @Input() data: number[] | undefined;
+  @Input() color: string = '#4f46e5';
 
-  path = computed(() => {
-    const data = this.data();
+  get path(): string {
+    const data = this.data;
     if (!data || data.length < 2) {
       return '';
     }
@@ -40,5 +42,5 @@ export class SparklineChartComponent {
     });
 
     return `M ${points.join(' L ')}`;
-  });
+  }
 }

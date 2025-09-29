@@ -19,3 +19,11 @@ export interface ActivitySuggestion {
   submittedBy: string; // In a real app, this would be the logged-in user
   dateSubmitted: Date;
 }
+
+export interface SlaConfig {
+  priority: 'P1' | 'P2' | 'P3' | 'P4';
+  value: number;
+  unit: 'hours' | 'days';
+  businessHoursOnly: boolean;
+  description: string;
+}
