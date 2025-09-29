@@ -42,6 +42,7 @@
         <button (click)="selectSection('towerReportTrends')" [class]="activeSection() === 'towerReportTrends' ? 'bg-blue-100 text-blue-700' : 'text-gray-600 hover:bg-gray-100'" class="w-full flex items-center px-3 py-2 text-sm font-medium rounded-md text-left">Deep Dive Trends</button>
         <button (click)="selectSection('fteBalancing')" [class]="activeSection() === 'fteBalancing' ? 'bg-blue-100 text-blue-700' : 'text-gray-600 hover:bg-gray-100'" class="w-full flex items-center px-3 py-2 text-sm font-medium rounded-md text-left">FTE Balancing</button>
         <button (click)="selectSection('handovers')" [class]="activeSection() === 'handovers' ? 'bg-blue-100 text-blue-700' : 'text-gray-600 hover:bg-gray-100'" class="w-full flex items-center px-3 py-2 text-sm font-medium rounded-md text-left">Handover Hub</button>
+        <button (click)="selectSection('onCallRoster')" [class]="activeSection() === 'onCallRoster' ? 'bg-blue-100 text-blue-700' : 'text-gray-600 hover:bg-gray-100'" class="w-full flex items-center px-3 py-2 text-sm font-medium rounded-md text-left">On-call Roster</button>
         <button (click)="selectSection('compliance')" [class]="activeSection() === 'compliance' ? 'bg-blue-100 text-blue-700' : 'text-gray-600 hover:bg-gray-100'" class="w-full flex items-center px-3 py-2 text-sm font-medium rounded-md text-left">Email Compliance</button>
         <button (click)="selectSection('admin')" [class]="activeSection() === 'admin' ? 'bg-blue-100 text-blue-700' : 'text-gray-600 hover:bg-gray-100'" class="w-full flex items-center px-3 py-2 text-sm font-medium rounded-md text-left">Admin & Master Data</button>
         <button (click)="selectSection('postmortems')" [class]="activeSection() === 'postmortems' ? 'bg-blue-100 text-blue-700' : 'text-gray-600 hover:bg-gray-100'" class="w-full flex items-center px-3 py-2 text-sm font-medium rounded-md text-left">Postmortem Reports</button>
@@ -246,7 +247,7 @@
       <!-- FTE Balancing Section -->
       @if (activeSection() === 'fteBalancing') {
          <div class="bg-white rounded-lg shadow-md overflow-hidden">
-          <!-- ... FTE Balancing Content ... -->
+            <!-- ... FTE Balancing Content ... -->
         </div>
       }
 
@@ -254,6 +255,51 @@
       @if (activeSection() === 'handovers') {
         <div class="bg-white rounded-lg shadow-md overflow-hidden">
             <!-- ... Handover Hub Content ... -->
+        </div>
+      }
+
+       <!-- On-call Roster Section -->
+      @if (activeSection() === 'onCallRoster') {
+        <div class="bg-white rounded-lg shadow-md overflow-hidden">
+          <div class="p-5">
+            <h2 class="text-xl font-bold text-gray-800">On-call Roster</h2>
+            <p class="mt-1 text-sm text-gray-600">Schema for managing on-call schedules with external user data synchronization.</p>
+          </div>
+          <div class="border-b border-gray-200 px-5">
+            <nav class="-mb-px flex space-x-6" aria-label="Tabs">
+              <button (click)="selectTab('onCallRoster', 'logic')" [class]="activeTab()['onCallRoster'] === 'logic' ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'" class="whitespace-nowrap py-3 px-1 border-b-2 font-medium text-sm">API & Backend Logic</button>
+              <button (click)="selectTab('onCallRoster', 'db')" [class]="activeTab()['onCallRoster'] === 'db' ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'" class="whitespace-nowrap py-3 px-1 border-b-2 font-medium text-sm">Database Schema</button>
+              <button (click)="selectTab('onCallRoster', 'json')" [class]="activeTab()['onCallRoster'] === 'json' ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'" class="whitespace-nowrap py-3 px-1 border-b-2 font-medium text-sm">API JSON Response</button>
+            </nav>
+          </div>
+          @if(activeTab()['onCallRoster'] === 'logic') {
+            <div class="p-5 text-sm markup" [innerHTML]="onCallRosterApiLogic"></div>
+          }
+          @if(activeTab()['onCallRoster'] === 'db') {
+            <div class="p-5 space-y-4">
+              <div>
+                <h3 class="font-semibold text-gray-700">MySQL DDL (CREATE TABLE)</h3>
+                <div class="relative bg-gray-800 p-4 rounded-md mt-2">
+                  <pre><code class="language-sql text-sm text-gray-300 whitespace-pre-wrap">{{ onCallRosterDdl }}</code></pre>
+                  <button (click)="copyToClipboard('onCallRosterDdl', onCallRosterDdl)" class="absolute top-3 right-3 bg-gray-700 text-gray-300 hover:bg-gray-600 px-3 py-1 rounded text-xs font-medium">{{ copied() === 'onCallRosterDdl' ? 'Copied!' : 'Copy' }}</button>
+                </div>
+              </div>
+              <div>
+                <h3 class="font-semibold text-gray-700">Sample DML (INSERT)</h3>
+                <div class="relative bg-gray-800 p-4 rounded-md mt-2">
+                  <pre><code class="language-sql text-sm text-gray-300 whitespace-pre-wrap">{{ onCallRosterDml }}</code></pre>
+                  <button (click)="copyToClipboard('onCallRosterDml', onCallRosterDml)" class="absolute top-3 right-3 bg-gray-700 text-gray-300 hover:bg-gray-600 px-3 py-1 rounded text-xs font-medium">{{ copied() === 'onCallRosterDml' ? 'Copied!' : 'Copy' }}</button>
+                </div>
+              </div>
+            </div>
+          }
+          @if(activeTab()['onCallRoster'] === 'json') {
+            @let content = prettyPrintJson(onCallRosterSample());
+            <div class="relative bg-gray-800 p-4">
+              <pre><code class="language-json text-sm text-gray-300 whitespace-pre-wrap">{{ content }}</code></pre>
+              <button (click)="copyToClipboard('onCallRosterJson', content)" class="absolute top-3 right-3 bg-gray-700 text-gray-300 hover:bg-gray-600 px-3 py-1 rounded text-xs font-medium">{{ copied() === 'onCallRosterJson' ? 'Copied!' : 'Copy' }}</button>
+            </div>
+          }
         </div>
       }
 
