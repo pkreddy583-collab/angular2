@@ -16,6 +16,7 @@ import { ComplianceTrackerComponent } from './features/compliance-tracker/compli
 import { PredictiveInsightsComponent } from './features/predictive-insights/predictive-insights.component';
 import { DeepDiveTrendsComponent } from './features/tower-report/deep-dive-trends/deep-dive-trends.component';
 import { AiRoiDashboardComponent } from './features/ai-roi-dashboard/ai-roi-dashboard.component';
+import { OnCallRosterComponent } from './features/on-call-roster/on-call-roster.component';
 
 export const routes: Routes = [
   // Incident Feature Routes
@@ -30,6 +31,9 @@ export const routes: Routes = [
 
   // Handover Hub Feature Route
   { path: 'handover-hub', component: HandoverHubComponent, title: 'Handover Hub' },
+
+  // On-call Roster Route
+  { path: 'on-call-roster', component: OnCallRosterComponent, title: 'On-call Roster' },
 
   // Compliance Tracker Route
   { path: 'compliance-tracker', component: ComplianceTrackerComponent, title: 'EOD/BOD Compliance' },
