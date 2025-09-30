@@ -56,34 +56,34 @@
             </tr>
           </thead>
           <tbody>
-            <tr *ngFor="let item of tableData(); trackBy: trackByMonth" class="border-b hover:bg-gray-50">
-              <td class="px-6 py-4 font-medium text-gray-900">{{ item.monthDisplay }}</td>
-              <td class="px-6 py-4 text-right font-semibold text-blue-600">{{ item.totalRequiredFte | number:'1.2-2' }}</td>
-              <td class="px-6 py-4 text-center">
-                <ng-container *ngIf="item.requiredFteChange !== 0; else noChange">
-                   <span class="inline-flex items-center text-xs font-semibold px-2 py-0.5 rounded-full" [class]="item.requiredFteChange > 0 ? 'bg-red-100 text-red-800' : 'bg-green-100 text-green-800'">
-                     {{ item.requiredFteChange > 0 ? '+' : '' }}{{ item.requiredFteChange | percent:'1.0-0' }}
-                   </span>
-                </ng-container>
-                <ng-template #noChange>
-                  <span class="text-gray-400">-</span>
-                </ng-template>
-              </td>
-              <td class="px-6 py-4 text-right font-semibold text-green-600">{{ item.actualDeployedFte | number:'1.2-2' }}</td>
-               <td class="px-6 py-4 text-center">
-                <ng-container *ngIf="item.deployedFteChange !== 0; else noChange">
-                   <span class="inline-flex items-center text-xs font-semibold px-2 py-0.5 rounded-full" [class]="item.deployedFteChange > 0 ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'">
-                     {{ item.deployedFteChange > 0 ? '+' : '' }}{{ item.deployedFteChange | percent:'1.0-0' }}
-                   </span>
-                </ng-container>
-                <ng-template #noChange>
-                   <span class="text-gray-400">-</span>
-                </ng-template>
-              </td>
-              <td class="px-6 py-4 text-right font-semibold" [class]="item.surplusDeficit > 0 ? 'text-green-700' : 'text-red-700'">
-                {{ item.surplusDeficit > 0 ? '+' : '' }}{{ item.surplusDeficit | number:'1.2-2' }}
-              </td>
-            </tr>
+            @for (item of tableData(); track item.month) {
+              <tr class="border-b hover:bg-gray-50">
+                <td class="px-6 py-4 font-medium text-gray-900">{{ item.monthDisplay }}</td>
+                <td class="px-6 py-4 text-right font-semibold text-blue-600">{{ item.totalRequiredFte | number:'1.2-2' }}</td>
+                <td class="px-6 py-4 text-center">
+                  @if (item.requiredFteChange !== 0) {
+                     <span class="inline-flex items-center text-xs font-semibold px-2 py-0.5 rounded-full" [class]="item.requiredFteChange > 0 ? 'bg-red-100 text-red-800' : 'bg-green-100 text-green-800'">
+                       {{ item.requiredFteChange > 0 ? '+' : '' }}{{ item.requiredFteChange | percent:'1.0-0' }}
+                     </span>
+                  } @else {
+                    <span class="text-gray-400">-</span>
+                  }
+                </td>
+                <td class="px-6 py-4 text-right font-semibold text-green-600">{{ item.actualDeployedFte | number:'1.2-2' }}</td>
+                 <td class="px-6 py-4 text-center">
+                  @if (item.deployedFteChange !== 0) {
+                     <span class="inline-flex items-center text-xs font-semibold px-2 py-0.5 rounded-full" [class]="item.deployedFteChange > 0 ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'">
+                       {{ item.deployedFteChange > 0 ? '+' : '' }}{{ item.deployedFteChange | percent:'1.0-0' }}
+                     </span>
+                  } @else {
+                     <span class="text-gray-400">-</span>
+                  }
+                </td>
+                <td class="px-6 py-4 text-right font-semibold" [class]="item.surplusDeficit > 0 ? 'text-green-700' : 'text-red-700'">
+                  {{ item.surplusDeficit > 0 ? '+' : '' }}{{ item.surplusDeficit | number:'1.2-2' }}
+                </td>
+              </tr>
+            }
           </tbody>
         </table>
       </div>

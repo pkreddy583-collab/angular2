@@ -15,66 +15,73 @@
   </header>
 
   <div class="space-y-6">
-    <div *ngFor="let item of slaDetails()" class="bg-white rounded-lg shadow-md overflow-hidden">
-      <div class="p-5 border-b border-gray-200">
-        <div class="flex flex-wrap justify-between items-start gap-3">
-          <h2 class="text-lg font-bold text-gray-800">{{ item.name }}</h2>
-          <div class="flex items-center gap-4">
-            <div class="w-48">
-              <div class="flex justify-between mb-1">
-                <span class="text-xs font-medium text-gray-600">{{ item.current }}ms</span>
-                <span class="text-xs font-medium text-gray-400">{{ item.limit }}ms</span>
-              </div>
-              <div class="w-full bg-gray-200 rounded-full h-2">
-                <div class="h-2 rounded-full" [class]="(item.current / item.limit) * 100 < 50 ? 'bg-green-500' : (item.current / item.limit) * 100 < 80 ? 'bg-yellow-500' : 'bg-red-500'" [style.width]="(item.current / item.limit) * 100 + '%'"></div>
-              </div>
-            </div>
-             <span class="text-xs font-semibold px-2 py-0.5 rounded-full" [class]="item.status === 'High' ? 'bg-yellow-200 text-yellow-800' : 'bg-red-200 text-red-800'">
-              {{ item.status }}
-            </span>
-          </div>
-        </div>
-      </div>
-      
-      <div class="p-5 grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div class="md:col-span-1">
-          <h3 class="text-sm font-semibold text-gray-600 mb-2">Compliance (Last 7 Days)</h3>
-          <div class="flex items-end justify-between h-24 bg-gray-50 p-2 rounded">
-            <div *ngFor="let day of item.complianceHistory" class="flex-1 flex flex-col items-center justify-end">
-              <div class="w-4/5 rounded-t" [class]="day.value > 99.8 ? 'bg-green-400' : day.value > 99.5 ? 'bg-yellow-400' : 'bg-red-400'" [style.height]="(day.value - 99) * 100 + 'px'"></div>
-              <span class="text-xs text-gray-500 mt-1">{{ day.period }}</span>
-            </div>
-          </div>
-        </div>
-        <div class="md:col-span-2">
-          <h3 class="text-sm font-semibold text-gray-600 mb-2">Related Incidents</h3>
-          <div *ngIf="item.relatedIncidents.length > 0; else noIncidents">
-            <div class="space-y-2">
-              <div *ngFor="let incident of item.relatedIncidents" class="bg-gray-50 p-3 rounded-md text-sm">
-                <div class="flex justify-between">
-                  <p class="font-semibold text-gray-700">{{ incident.id }}: {{ incident.title }}</p>
-                  <span class="font-medium" [class]="incident.resolved ? 'text-green-600' : 'text-red-600'">
-                    {{ incident.resolved ? 'Resolved' : 'Active' }}
-                  </span>
+    @for (item of slaDetails(); track item.name) {
+      <div class="bg-white rounded-lg shadow-md overflow-hidden">
+        <div class="p-5 border-b border-gray-200">
+          <div class="flex flex-wrap justify-between items-start gap-3">
+            <h2 class="text-lg font-bold text-gray-800">{{ item.name }}</h2>
+            <div class="flex items-center gap-4">
+              <div class="w-48">
+                <div class="flex justify-between mb-1">
+                  <span class="text-xs font-medium text-gray-600">{{ item.current }}ms</span>
+                  <span class="text-xs font-medium text-gray-400">{{ item.limit }}ms</span>
                 </div>
-                <p class="text-xs text-gray-500">{{ incident.date }}</p>
+                <div class="w-full bg-gray-200 rounded-full h-2">
+                  <div class="h-2 rounded-full" [class]="(item.current / item.limit) * 100 < 50 ? 'bg-green-500' : (item.current / item.limit) * 100 < 80 ? 'bg-yellow-500' : 'bg-red-500'" [style.width]="(item.current / item.limit) * 100 + '%'"></div>
+                </div>
               </div>
+               <span class="text-xs font-semibold px-2 py-0.5 rounded-full" [class]="item.status === 'High' ? 'bg-yellow-200 text-yellow-800' : 'bg-red-200 text-red-800'">
+                {{ item.status }}
+              </span>
             </div>
           </div>
-          <ng-template #noIncidents>
-            <p class="text-sm text-gray-500">No related incidents in the last 7 days.</p>
-          </ng-template>
+        </div>
+        
+        <div class="p-5 grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div class="md:col-span-1">
+            <h3 class="text-sm font-semibold text-gray-600 mb-2">Compliance (Last 7 Days)</h3>
+            <div class="flex items-end justify-between h-24 bg-gray-50 p-2 rounded">
+              @for (day of item.complianceHistory; track day.period) {
+                <div class="flex-1 flex flex-col items-center justify-end">
+                  <div class="w-4/5 rounded-t" [class]="day.value > 99.8 ? 'bg-green-400' : day.value > 99.5 ? 'bg-yellow-400' : 'bg-red-400'" [style.height]="(day.value - 99) * 100 + 'px'"></div>
+                  <span class="text-xs text-gray-500 mt-1">{{ day.period }}</span>
+                </div>
+              }
+            </div>
+          </div>
+          <div class="md:col-span-2">
+            <h3 class="text-sm font-semibold text-gray-600 mb-2">Related Incidents</h3>
+            @if (item.relatedIncidents.length > 0) {
+              <div>
+                <div class="space-y-2">
+                  @for (incident of item.relatedIncidents; track incident.id) {
+                    <div class="bg-gray-50 p-3 rounded-md text-sm">
+                      <div class="flex justify-between">
+                        <p class="font-semibold text-gray-700">{{ incident.id }}: {{ incident.title }}</p>
+                        <span class="font-medium" [class]="incident.resolved ? 'text-green-600' : 'text-red-600'">
+                          {{ incident.resolved ? 'Resolved' : 'Active' }}
+                        </span>
+                      </div>
+                      <p class="text-xs text-gray-500">{{ incident.date }}</p>
+                    </div>
+                  }
+                </div>
+              </div>
+            } @else {
+              <p class="text-sm text-gray-500">No related incidents in the last 7 days.</p>
+            }
+          </div>
+        </div>
+        
+        <div class="bg-blue-50/50 p-4 border-t border-blue-200">
+           <div class="flex items-start">
+              <svg class="h-5 w-5 mr-2 text-blue-500 flex-shrink-0 mt-0.5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 01-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 013.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 013.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 01-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 00-2.456 2.456zM16.898 20.572L16.5 21.75l-.398-1.178a3.375 3.375 0 00-2.456-2.456L12.5 18l1.178-.398a3.375 3.375 0 002.456-2.456L16.5 14.25l.398 1.178a3.375 3.375 0 002.456 2.456L20.25 18l-1.178.398a3.375 3.375 0 00-2.456 2.456z" /></svg>
+              <p class="text-sm text-blue-800">
+                <strong class="font-semibold">AI Insight:</strong> {{ item.aiInsight }}
+              </p>
+            </div>
         </div>
       </div>
-      
-      <div class="bg-blue-50/50 p-4 border-t border-blue-200">
-         <div class="flex items-start">
-            <svg class="h-5 w-5 mr-2 text-blue-500 flex-shrink-0 mt-0.5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 01-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 013.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 013.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 01-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 00-2.456 2.456zM16.898 20.572L16.5 21.75l-.398-1.178a3.375 3.375 0 00-2.456-2.456L12.5 18l1.178-.398a3.375 3.375 0 002.456-2.456L16.5 14.25l.398 1.178a3.375 3.375 0 002.456 2.456L20.25 18l-1.178.398a3.375 3.375 0 00-2.456 2.456z" /></svg>
-            <p class="text-sm text-blue-800">
-              <strong class="font-semibold">AI Insight:</strong> {{ item.aiInsight }}
-            </p>
-          </div>
-      </div>
-    </div>
+    }
   </div>
 </main>

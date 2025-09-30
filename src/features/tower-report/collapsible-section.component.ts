@@ -14,23 +14,24 @@ import { CommonModule, DecimalPipe, PercentPipe } from '@angular/common';
       >
         <div class="flex-grow">
           <h2 class="text-xl font-bold text-gray-700">{{ title }}</h2>
-          <p *ngIf="description" class="text-sm text-gray-500 mt-1 pr-4">{{ description }}</p>
+          @if (description) {
+            <p class="text-sm text-gray-500 mt-1 pr-4">{{ description }}</p>
+          }
         </div>
         <div class="flex items-center gap-4 flex-shrink-0">
-          <ng-container *ngIf="fteChange !== undefined && fteChangeDirection">
+          @if (fteChange !== undefined && fteChangeDirection) {
             <span class="inline-flex items-center text-xs font-semibold px-2 py-0.5 rounded-full" [class]="fteChangeDirection === 'up' ? 'bg-red-100 text-red-800' : 'bg-green-100 text-green-800'">
-              <ng-container *ngIf="fteChangeDirection === 'up'; else downArrow">
+              @if (fteChangeDirection === 'up') {
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M5 10l7-7m0 0l7 7m-7-7v18" /></svg>
-              </ng-container>
-              <ng-template #downArrow>
+              } @else {
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M19 14l-7 7m0 0l-7-7m7 7V3" /></svg>
-              </ng-template>
+              }
               {{ fteChange | percent:'1.0-0' }}
             </span>
-          </ng-container>
-          <ng-container *ngIf="totalFte !== null">
+          }
+          @if (totalFte !== null) {
             <span class="font-bold text-blue-600 text-lg">{{ totalFte | number : "1.3-3" }} FTE</span>
-          </ng-container>
+          }
           <svg
             xmlns="http://www.w3.org/2000/svg"
             class="h-5 w-5 text-gray-500 transition-transform"
@@ -46,9 +47,11 @@ import { CommonModule, DecimalPipe, PercentPipe } from '@angular/common';
           </svg>
         </div>
       </button>
-      <div *ngIf="isOpen()" class="px-4 pb-4 border-t border-gray-100 pt-4">
-        <ng-content></ng-content>
-      </div>
+      @if (isOpen()) {
+        <div class="px-4 pb-4 border-t border-gray-100 pt-4">
+          <ng-content></ng-content>
+        </div>
+      }
     </div>
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,
