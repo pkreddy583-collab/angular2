@@ -20,6 +20,7 @@ export class AdminComponent implements OnInit {
   masterActivities = this.adminService.masterActivities;
   fteCalculationModel = this.adminService.fteCalculationModel;
   slaConfigs = this.adminService.slaConfigs;
+  supportGroupConfigs = this.adminService.supportGroupConfigs;
   
   pendingSuggestions = computed(() => 
     this.adminService.activitySuggestions().filter(s => s.status === 'pending')
@@ -204,5 +205,10 @@ ORDER BY
       Default_Hours_Per_Instance: a.defaultHrsPerInstance,
     }));
     this.analyticsService.exportToCsv(dataToExport, 'master_activity_list');
+  }
+
+  onSupportGroupChange(portfolioId: string, appId: string | null, level: 'l1' | 'l2' | 'l3', event: Event): void {
+    const groupName = (event.target as HTMLInputElement).value;
+    this.adminService.updateSupportGroup(portfolioId, appId, level, groupName);
   }
 }

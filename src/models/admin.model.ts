@@ -27,3 +27,25 @@ export interface SlaConfig {
   businessHoursOnly: boolean;
   description: string;
 }
+
+export interface SupportGroupConfig {
+  l1: string;
+  l2: string;
+  l3: string;
+}
+
+export interface ApplicationSupportConfig {
+  id: string;
+  name: string;
+  // Overrides for portfolio-level support groups.
+  // If a property is undefined, it inherits from the portfolio.
+  supportGroups?: Partial<SupportGroupConfig>;
+}
+
+export interface PortfolioSupportConfig {
+  id: string;
+  name: string;
+  // Default support groups for all applications in this portfolio.
+  supportGroups: SupportGroupConfig;
+  applications: ApplicationSupportConfig[];
+}

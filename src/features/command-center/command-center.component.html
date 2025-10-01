@@ -1,0 +1,471 @@
+<div class="p-4 sm:p-6 lg:p-8 space-y-6 bg-gray-50">
+  
+  <!-- Global Portfolio Slicer -->
+  <div class="global-slicer-container bg-white p-3 rounded-md shadow-sm border border-gray-200">
+    <label for="portfolio-slicer" class="text-sm font-medium text-gray-700 mr-2">Global Slicer:</label>
+    <select id="portfolio-slicer" (change)="onPortfolioChange($event)" class="w-full md:w-auto border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm">
+      @for(portfolio of portfolios; track portfolio.id) {
+        <option [value]="portfolio.id" [selected]="portfolio.id === selectedPortfolioId()">{{ portfolio.name }}</option>
+      }
+    </select>
+  </div>
+  
+  <!-- Top Row: KPIs -->
+  <div class="grid grid-cols-1 md:grid-cols-4 gap-6 relative group">
+     <button (click)="togglePin('top-kpis', 'Top KPIs')" class="absolute top-2 right-2 p-1.5 rounded-full bg-gray-200/50 text-gray-400 opacity-0 group-hover:opacity-100 hover:bg-blue-100 hover:text-blue-600 transition-opacity z-10" [title]="isPinned('top-kpis') ? 'Unpin from dashboard' : 'Pin to dashboard'">
+      @if (isPinned('top-kpis')) {
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5.293 3.293a1 1 0 011.414 0L10 6.586l3.293-3.293a1 1 0 111.414 1.414L11.414 8l3.293 3.293a1 1 0 01-1.414 1.414L10 9.414l-3.293 3.293a1 1 0 01-1.414-1.414L8.586 8 5.293 4.707a1 1 0 010-1.414z" clip-rule="evenodd" /></svg>
+      } @else {
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor"><path d="M8 3a1 1 0 011-1h2a1 1 0 110 2H9a1 1 0 01-1-1z" /><path d="M6 3a2 2 0 00-2 2v11a2 2 0 002 2h8a2 2 0 002-2V5a2 2 0 00-2-2 3 3 0 01-3 3H9a3 3 0 01-3-3z" /></svg>
+      }
+    </button>
+    @for (kpi of topKpis; track kpi.label) {
+      <div class="bg-white rounded-lg shadow-sm p-4 border border-gray-200">
+        <div class="flex justify-between items-start">
+          <p class="text-sm text-gray-500 font-semibold flex items-center gap-2">
+             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" /></svg>
+            {{ kpi.label }}
+          </p>
+           @if (kpi.hasChart) {
+            <div class="w-12 h-6">
+              <svg viewBox="0 0 100 25" preserveAspectRatio="none">
+                <path d="M 0 15 L 20 10 L 40 18 L 60 12 L 80 20 L 100 15" fill="none" stroke="#d1d5db" stroke-width="3"/>
+              </svg>
+            </div>
+          }
+        </div>
+        <p class="text-3xl font-bold text-gray-800 mt-1">{{ kpi.value }}</p>
+        @if (kpi.change) {
+          <div class="flex items-center text-xs mt-1" [class]="kpi.changeDirection === 'up' ? 'text-red-600' : 'text-green-600'">
+            @if (kpi.changeDirection === 'up') {
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M5 15l7-7 7 7" /></svg>
+            } @else {
+               <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" /></svg>
+            }
+            <span>{{ kpi.change }} from yesterday</span>
+          </div>
+        }
+      </div>
+    }
+  </div>
+
+  <div class="bg-blue-700 text-white rounded-lg shadow-lg p-4 grid grid-cols-2 md:grid-cols-5 gap-4 text-center relative group">
+     <button (click)="togglePin('main-kpis', 'Main KPIs')" class="absolute top-2 right-2 p-1.5 rounded-full bg-blue-600/50 text-blue-200 opacity-0 group-hover:opacity-100 hover:bg-blue-500 hover:text-white transition-opacity z-10" [title]="isPinned('main-kpis') ? 'Unpin from dashboard' : 'Pin to dashboard'">
+      @if (isPinned('main-kpis')) {
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5.293 3.293a1 1 0 011.414 0L10 6.586l3.293-3.293a1 1 0 111.414 1.414L11.414 8l3.293 3.293a1 1 0 01-1.414 1.414L10 9.414l-3.293 3.293a1 1 0 01-1.414-1.414L8.586 8 5.293 4.707a1 1 0 010-1.414z" clip-rule="evenodd" /></svg>
+      } @else {
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor"><path d="M8 3a1 1 0 011-1h2a1 1 0 110 2H9a1 1 0 01-1-1z" /><path d="M6 3a2 2 0 00-2 2v11a2 2 0 002 2h8a2 2 0 002-2V5a2 2 0 00-2-2 3 3 0 01-3 3H9a3 3 0 01-3-3z" /></svg>
+      }
+    </button>
+    @for (kpi of mainKpis(); track kpi.label) {
+      <div class="relative" (mouseenter)="onKpiMouseEnter($event, kpi.label)" (mouseleave)="onKpiMouseLeave()">
+        <p class="text-xs text-blue-200 uppercase">{{ kpi.label }}</p>
+        <p class="text-3xl font-bold">{{ kpi.value }}</p>
+        @if (kpi.change) {
+           <div class="flex items-center justify-center text-xs mt-1 text-blue-100">
+            @if (kpi.changeDirection === 'up') {
+               <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 15l7-7 7 7" /></svg>
+            } @else if(kpi.changeDirection === 'down') {
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" /></svg>
+            }
+            <span>{{ kpi.change }} from yesterday</span>
+          </div>
+        } @else {
+          <p class="text-xs text-blue-200 mt-1">Tickets logged and resolved in same day</p>
+        }
+      </div>
+    }
+  </div>
+
+  <div class="bg-white rounded-lg shadow-md p-6 relative group">
+     <button (click)="togglePin('ticket-trend-line-chart', 'Ticket Trend')" class="absolute top-2 right-2 p-1.5 rounded-full bg-gray-200/50 text-gray-400 opacity-0 group-hover:opacity-100 hover:bg-blue-100 hover:text-blue-600 transition-opacity z-10" [title]="isPinned('ticket-trend-line-chart') ? 'Unpin from dashboard' : 'Pin to dashboard'">
+      @if (isPinned('ticket-trend-line-chart')) {
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5.293 3.293a1 1 0 011.414 0L10 6.586l3.293-3.293a1 1 0 111.414 1.414L11.414 8l3.293 3.293a1 1 0 01-1.414 1.414L10 9.414l-3.293 3.293a1 1 0 01-1.414-1.414L8.586 8 5.293 4.707a1 1 0 010-1.414z" clip-rule="evenodd" /></svg>
+      } @else {
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor"><path d="M8 3a1 1 0 011-1h2a1 1 0 110 2H9a1 1 0 01-1-1z" /><path d="M6 3a2 2 0 00-2 2v11a2 2 0 002 2h8a2 2 0 002-2V5a2 2 0 00-2-2 3 3 0 01-3 3H9a3 3 0 01-3-3z" /></svg>
+      }
+    </button>
+    <h2 class="text-lg font-bold text-gray-700 mb-1">Last 10 days ticket trend</h2>
+    <p class="text-sm text-gray-500 mb-4">Trend for Logged, Resolved and Open Tickets (Age > 3 days) of last 10 days</p>
+    <div class="h-72">
+      <app-line-chart [data]="lineChartData" [height]="280"></app-line-chart>
+    </div>
+  </div>
+
+  <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+    <div class="bg-white rounded-lg shadow-md p-6 relative group">
+       <button (click)="togglePin('level-wise-pie-chart', 'Level-wise Un-resolved Status')" class="absolute top-2 right-2 p-1.5 rounded-full bg-gray-200/50 text-gray-400 opacity-0 group-hover:opacity-100 hover:bg-blue-100 hover:text-blue-600 transition-opacity z-10" [title]="isPinned('level-wise-pie-chart') ? 'Unpin from dashboard' : 'Pin to dashboard'">
+        @if (isPinned('level-wise-pie-chart')) {
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5.293 3.293a1 1 0 011.414 0L10 6.586l3.293-3.293a1 1 0 111.414 1.414L11.414 8l3.293 3.293a1 1 0 01-1.414 1.414L10 9.414l-3.293 3.293a1 1 0 01-1.414-1.414L8.586 8 5.293 4.707a1 1 0 010-1.414z" clip-rule="evenodd" /></svg>
+        } @else {
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor"><path d="M8 3a1 1 0 011-1h2a1 1 0 110 2H9a1 1 0 01-1-1z" /><path d="M6 3a2 2 0 00-2 2v11a2 2 0 002 2h8a2 2 0 002-2V5a2 2 0 00-2-2 3 3 0 01-3 3H9a3 3 0 01-3-3z" /></svg>
+        }
+      </button>
+      <h2 class="text-lg font-bold text-gray-700 mb-1">Level wise un-resolved ticket status</h2>
+      <p class="text-sm text-gray-500 mb-2">Current status of un-resolved tickets (Age > 3 days)</p>
+      <app-pie-chart [data]="pieDataLevelWise" [height]="200" [width]="200"></app-pie-chart>
+    </div>
+    <div class="bg-white rounded-lg shadow-md p-6 relative group">
+       <button (click)="togglePin('unresolved-pie-chart', 'Un-resolved Ticket Status')" class="absolute top-2 right-2 p-1.5 rounded-full bg-gray-200/50 text-gray-400 opacity-0 group-hover:opacity-100 hover:bg-blue-100 hover:text-blue-600 transition-opacity z-10" [title]="isPinned('unresolved-pie-chart') ? 'Unpin from dashboard' : 'Pin to dashboard'">
+        @if (isPinned('unresolved-pie-chart')) {
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5.293 3.293a1 1 0 011.414 0L10 6.586l3.293-3.293a1 1 0 111.414 1.414L11.414 8l3.293 3.293a1 1 0 01-1.414 1.414L10 9.414l-3.293 3.293a1 1 0 01-1.414-1.414L8.586 8 5.293 4.707a1 1 0 010-1.414z" clip-rule="evenodd" /></svg>
+        } @else {
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor"><path d="M8 3a1 1 0 011-1h2a1 1 0 110 2H9a1 1 0 01-1-1z" /><path d="M6 3a2 2 0 00-2 2v11a2 2 0 002 2h8a2 2 0 002-2V5a2 2 0 00-2-2 3 3 0 01-3 3H9a3 3 0 01-3-3z" /></svg>
+        }
+      </button>
+       <h2 class="text-lg font-bold text-gray-700 mb-1">Un-resolved ticket status</h2>
+      <p class="text-sm text-gray-500 mb-2">Level wise status of un-resolved tickets (Age > 5 days)</p>
+       <app-pie-chart [data]="pieDataUnresolved" [height]="200" [width]="200"></app-pie-chart>
+    </div>
+  </div>
+
+  <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+    <div class="bg-white rounded-lg shadow-md p-6 relative group">
+       <button (click)="togglePin('unresolved-metrics', 'Un-resolved Ticket Metrics')" class="absolute top-2 right-2 p-1.5 rounded-full bg-gray-200/50 text-gray-400 opacity-0 group-hover:opacity-100 hover:bg-blue-100 hover:text-blue-600 transition-opacity z-10" [title]="isPinned('unresolved-metrics') ? 'Unpin from dashboard' : 'Pin to dashboard'">
+        @if (isPinned('unresolved-metrics')) {
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5.293 3.293a1 1 0 011.414 0L10 6.586l3.293-3.293a1 1 0 111.414 1.414L11.414 8l3.293 3.293a1 1 0 01-1.414 1.414L10 9.414l-3.293 3.293a1 1 0 01-1.414-1.414L8.586 8 5.293 4.707a1 1 0 010-1.414z" clip-rule="evenodd" /></svg>
+        } @else {
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor"><path d="M8 3a1 1 0 011-1h2a1 1 0 110 2H9a1 1 0 01-1-1z" /><path d="M6 3a2 2 0 00-2 2v11a2 2 0 002 2h8a2 2 0 002-2V5a2 2 0 00-2-2 3 3 0 01-3 3H9a3 3 0 01-3-3z" /></svg>
+        }
+      </button>
+      <div class="flex justify-between items-start mb-2">
+        <div>
+          <h2 class="text-lg font-bold text-gray-700">Un-resolved ticket metrics</h2>
+          <p class="text-sm text-gray-500">Metrics for un-resolved tickets</p>
+        </div>
+        <p class="text-5xl font-bold text-gray-800">{{ unresolvedMetrics.total }}</p>
+      </div>
+      <div class="grid grid-cols-5 gap-4 text-center text-sm pt-4 border-t">
+        <div><p class="font-bold text-lg">{{ unresolvedMetrics.p3 }}</p><p class="text-gray-500">P3</p></div>
+        <div><p class="font-bold text-lg">{{ unresolvedMetrics.p4 }}</p><p class="text-gray-500">P4</p></div>
+        <div><p class="font-bold text-lg">{{ unresolvedMetrics.open }}</p><p class="text-gray-500">Open State</p></div>
+        <div><p class="font-bold text-lg">{{ unresolvedMetrics.assigned }}</p><p class="text-gray-500">Assigned</p></div>
+        <div><p class="font-bold text-lg">{{ unresolvedMetrics.withLevel2 }}</p><p class="text-gray-500">With L2</p></div>
+      </div>
+    </div>
+    <div class="bg-white rounded-lg shadow-md p-6 relative group">
+       <button (click)="togglePin('effectiveness', 'Effectiveness')" class="absolute top-2 right-2 p-1.5 rounded-full bg-gray-200/50 text-gray-400 opacity-0 group-hover:opacity-100 hover:bg-blue-100 hover:text-blue-600 transition-opacity z-10" [title]="isPinned('effectiveness') ? 'Unpin from dashboard' : 'Pin to dashboard'">
+        @if (isPinned('effectiveness')) {
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5.293 3.293a1 1 0 011.414 0L10 6.586l3.293-3.293a1 1 0 111.414 1.414L11.414 8l3.293 3.293a1 1 0 01-1.414 1.414L10 9.414l-3.293 3.293a1 1 0 01-1.414-1.414L8.586 8 5.293 4.707a1 1 0 010-1.414z" clip-rule="evenodd" /></svg>
+        } @else {
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor"><path d="M8 3a1 1 0 011-1h2a1 1 0 110 2H9a1 1 0 01-1-1z" /><path d="M6 3a2 2 0 00-2 2v11a2 2 0 002 2h8a2 2 0 002-2V5a2 2 0 00-2-2 3 3 0 01-3 3H9a3 3 0 01-3-3z" /></svg>
+        }
+      </button>
+      <h2 class="text-lg font-bold text-gray-700 mb-1">Effectiveness</h2>
+      <p class="text-sm text-gray-500 mb-4">% of effectiveness for Auto-resolved, L1, L2 and L3</p>
+      <div class="grid grid-cols-4 gap-4 text-center pt-2">
+        <div>
+          <p class="text-4xl font-bold text-blue-600">{{ effectiveness.autoResolved }}</p>
+          <p class="text-sm text-gray-500">Auto-resolved</p>
+        </div>
+        <div>
+          <p class="text-4xl font-bold text-blue-600">{{ effectiveness.level1 }}</p>
+          <p class="text-sm text-gray-500">Level 1</p>
+        </div>
+        <div>
+          <p class="text-4xl font-bold text-blue-600">{{ effectiveness.level2 }}</p>
+          <p class="text-sm text-gray-500">Level 2</p>
+        </div>
+         <div>
+          <p class="text-4xl font-bold text-blue-600">{{ effectiveness.level3 }}</p>
+          <p class="text-sm text-gray-500">Level 3</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="bg-white rounded-lg shadow-md relative group">
+    <div class="p-4 border-b flex justify-between items-center">
+      <div>
+        <h2 class="text-lg font-bold text-gray-700">Ticket Severity - Value Stream</h2>
+      </div>
+      <div class="flex items-center gap-2">
+        <button (click)="togglePin('ticket-severity-grid', 'Ticket Severity')" class="p-1.5 rounded-full bg-gray-200/50 text-gray-400 opacity-0 group-hover:opacity-100 hover:bg-blue-100 hover:text-blue-600 transition-opacity z-10" [title]="isPinned('ticket-severity-grid') ? 'Unpin from dashboard' : 'Pin to dashboard'">
+          @if (isPinned('ticket-severity-grid')) { <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5.293 3.293a1 1 0 011.414 0L10 6.586l3.293-3.293a1 1 0 111.414 1.414L11.414 8l3.293 3.293a1 1 0 01-1.414 1.414L10 9.414l-3.293 3.293a1 1 0 01-1.414-1.414L8.586 8 5.293 4.707a1 1 0 010-1.414z" clip-rule="evenodd" /></svg> } @else { <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor"><path d="M8 3a1 1 0 011-1h2a1 1 0 110 2H9a1 1 0 01-1-1z" /><path d="M6 3a2 2 0 00-2 2v11a2 2 0 002 2h8a2 2 0 002-2V5a2 2 0 00-2-2 3 3 0 01-3 3H9a3 3 0 01-3-3z" /></svg> }
+        </button>
+        <button (click)="exportData('severity')" class="p-1 text-gray-400 hover:text-green-600" title="Download as CSV"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clip-rule="evenodd" /></svg></button>
+      </div>
+    </div>
+    <div class="px-4 border-b">
+      <div class="mt-2 border-b border-gray-200">
+        <nav class="-mb-px flex space-x-4" aria-label="Tabs">
+          @for (tab of severityAgeTabs; track tab) {
+            <button (click)="activeSeverityAgeTab.set(tab)" [class]="activeSeverityAgeTab() === tab ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'" class="whitespace-nowrap py-2 px-1 border-b-2 font-medium text-sm">{{ tab }}</button>
+          }
+        </nav>
+      </div>
+    </div>
+    <div class="overflow-x-auto">
+      <table class="w-full text-sm">
+        <thead class="text-xs text-gray-700 bg-gray-50">
+          <tr class="divide-x divide-gray-200">
+            <th class="p-3 text-left w-1/4">
+              <button (click)="handleSort('severity', 'stream')" class="sort-button" [class.active]="sortConfigs().severity.key === 'stream'" [attr.data-direction]="sortConfigs().severity.direction">
+                Value Stream
+                <span class="sort-icon"></span>
+              </button>
+            </th>
+            <th class="p-3 text-right bg-red-100/50">
+               <button (click)="handleSort('severity', 'urgent')" class="sort-button justify-end" [class.active]="sortConfigs().severity.key === 'urgent'" [attr.data-direction]="sortConfigs().severity.direction">
+                Urgent
+                <span class="sort-icon"></span>
+              </button>
+            </th>
+            <th class="p-3 text-right bg-orange-100/50">
+              <button (click)="handleSort('severity', 'high')" class="sort-button justify-end" [class.active]="sortConfigs().severity.key === 'high'" [attr.data-direction]="sortConfigs().severity.direction">
+                High
+                <span class="sort-icon"></span>
+              </button>
+            </th>
+            <th class="p-3 text-right bg-yellow-100/50">
+               <button (click)="handleSort('severity', 'medHigh')" class="sort-button justify-end" [class.active]="sortConfigs().severity.key === 'medHigh'" [attr.data-direction]="sortConfigs().severity.direction">
+                Med-High
+                <span class="sort-icon"></span>
+              </button>
+            </th>
+            <th class="p-3 text-right bg-blue-100/50">
+              <button (click)="handleSort('severity', 'medium')" class="sort-button justify-end" [class.active]="sortConfigs().severity.key === 'medium'" [attr.data-direction]="sortConfigs().severity.direction">
+                Medium
+                <span class="sort-icon"></span>
+              </button>
+            </th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-gray-200">
+          @for (item of sortedSeverityData(); track item.stream) {
+            <tr class="divide-x divide-gray-200 hover:bg-gray-50">
+              <td class="p-3 font-semibold text-gray-800">{{ item.stream }}</td>
+              <td class="p-3 text-right font-mono font-semibold text-gray-800">{{ item.urgent }}</td>
+              <td class="p-3 text-right font-mono font-semibold text-gray-800">{{ item.high }}</td>
+              <td class="p-3 text-right font-mono font-semibold text-gray-800">{{ item.medHigh }}</td>
+              <td class="p-3 text-right font-mono font-semibold text-gray-800">{{ item.medium }}</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="bg-white rounded-lg shadow-md relative group">
+    <div class="p-4 border-b flex justify-between items-center">
+      <div>
+        <h2 class="text-lg font-bold text-gray-700">Daily open ticket trend (age > 3 days)</h2>
+      </div>
+       <div class="flex items-center gap-2">
+        <button (click)="togglePin('open-ticket-trend-grid', 'Open Ticket Trend')" class="p-1.5 rounded-full bg-gray-200/50 text-gray-400 opacity-0 group-hover:opacity-100 hover:bg-blue-100 hover:text-blue-600 transition-opacity z-10" [title]="isPinned('open-ticket-trend-grid') ? 'Unpin from dashboard' : 'Pin to dashboard'">
+          @if (isPinned('open-ticket-trend-grid')) { <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5.293 3.293a1 1 0 011.414 0L10 6.586l3.293-3.293a1 1 0 111.414 1.414L11.414 8l3.293 3.293a1 1 0 01-1.414 1.414L10 9.414l-3.293 3.293a1 1 0 01-1.414-1.414L8.586 8 5.293 4.707a1 1 0 010-1.414z" clip-rule="evenodd" /></svg> } @else { <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor"><path d="M8 3a1 1 0 011-1h2a1 1 0 110 2H9a1 1 0 01-1-1z" /><path d="M6 3a2 2 0 00-2 2v11a2 2 0 002 2h8a2 2 0 002-2V5a2 2 0 00-2-2 3 3 0 01-3 3H9a3 3 0 01-3-3z" /></svg> }
+        </button>
+        <button (click)="exportData('openTrend')" class="p-1 text-gray-400 hover:text-green-600" title="Download as CSV"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clip-rule="evenodd" /></svg></button>
+      </div>
+    </div>
+    <div class="overflow-x-auto">
+      <table class="w-full text-sm">
+        <thead class="text-xs text-gray-700 bg-gray-50">
+          <tr>
+            <th class="p-3 text-left w-1/4">
+              <button (click)="handleSort('openTrend', 'name')" class="sort-button" [class.active]="sortConfigs().openTrend.key === 'name'" [attr.data-direction]="sortConfigs().openTrend.direction">
+                Value Stream
+                <span class="sort-icon"></span>
+              </button>
+            </th>
+            <th class="p-3 text-left w-24">Trend</th>
+            @for (date of trendDates; track date; let i = $index) {
+              <th class="p-3 text-right">
+                <button (click)="handleSort('openTrend', 'values', i)" class="sort-button justify-end" [class.active]="sortConfigs().openTrend.key === 'values' && sortConfigs().openTrend.index === i" [attr.data-direction]="sortConfigs().openTrend.direction">
+                  {{ date }}
+                  <span class="sort-icon"></span>
+                </button>
+              </th>
+            }
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-gray-200">
+          @for (item of sortedOpenTrendData(); track item.name) {
+            <tr class="hover:bg-gray-50">
+              <td class="p-3 font-semibold text-gray-800">
+                <a href="#" class="hover:underline text-blue-600">{{ item.name }}</a>
+              </td>
+              <td class="p-3"><app-sparkline-chart [data]="item.sparkline" /></td>
+              @for (value of item.values; track $index) {
+                <td class="p-3 text-right font-mono font-semibold text-gray-800">{{ value }}</td>
+              }
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="bg-white rounded-lg shadow-md relative group">
+    <div class="p-4 border-b flex justify-between items-center">
+      <div>
+        <h2 class="text-lg font-bold text-gray-700">Daily logged ticket trend - Top 10 applications</h2>
+      </div>
+      <div class="flex items-center gap-2">
+        <button (click)="togglePin('application-trend-grid', 'Logged Ticket Trend (Apps)')" class="p-1.5 rounded-full bg-gray-200/50 text-gray-400 opacity-0 group-hover:opacity-100 hover:bg-blue-100 hover:text-blue-600 transition-opacity z-10" [title]="isPinned('application-trend-grid') ? 'Unpin from dashboard' : 'Pin to dashboard'">
+          @if (isPinned('application-trend-grid')) { <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5.293 3.293a1 1 0 011.414 0L10 6.586l3.293-3.293a1 1 0 111.414 1.414L11.414 8l3.293 3.293a1 1 0 01-1.414 1.414L10 9.414l-3.293 3.293a1 1 0 01-1.414-1.414L8.586 8 5.293 4.707a1 1 0 010-1.414z" clip-rule="evenodd" /></svg> } @else { <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor"><path d="M8 3a1 1 0 011-1h2a1 1 0 110 2H9a1 1 0 01-1-1z" /><path d="M6 3a2 2 0 00-2 2v11a2 2 0 002 2h8a2 2 0 002-2V5a2 2 0 00-2-2 3 3 0 01-3 3H9a3 3 0 01-3-3z" /></svg> }
+        </button>
+        <button (click)="exportData('appTrend')" class="p-1 text-gray-400 hover:text-green-600" title="Download as CSV"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clip-rule="evenodd" /></svg></button>
+      </div>
+    </div>
+    <div class="overflow-x-auto">
+      <table class="w-full text-sm">
+        <thead class="text-xs text-gray-700 bg-gray-50">
+          <tr>
+            <th class="p-3 text-left w-1/4">
+              <button (click)="handleSort('appTrend', 'name')" class="sort-button" [class.active]="sortConfigs().appTrend.key === 'name'" [attr.data-direction]="sortConfigs().appTrend.direction">
+                Application Name
+                <span class="sort-icon"></span>
+              </button>
+            </th>
+            <th class="p-3 text-left w-24">Trend</th>
+            @for (date of trendDates; track date; let i = $index) {
+              <th class="p-3 text-right">
+                <button (click)="handleSort('appTrend', 'values', i)" class="sort-button justify-end" [class.active]="sortConfigs().appTrend.key === 'values' && sortConfigs().appTrend.index === i" [attr.data-direction]="sortConfigs().appTrend.direction">
+                  {{ date }}
+                  <span class="sort-icon"></span>
+                </button>
+              </th>
+            }
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-gray-200">
+          @for (item of sortedAppTrendData(); track item.name) {
+            <tr class="hover:bg-gray-50">
+              <td class="p-3 font-semibold text-gray-800">
+                <a href="#" class="hover:underline text-blue-600">{{ item.name }}</a>
+              </td>
+              <td class="p-3"><app-sparkline-chart [data]="item.sparkline" /></td>
+              @for (value of item.values; track $index) {
+                <td class="p-3 text-right font-mono font-semibold text-gray-800">{{ value }}</td>
+              }
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="bg-white rounded-lg shadow-md relative group">
+    <div class="p-4 border-b flex justify-between items-center">
+      <div>
+        <h2 class="text-lg font-bold text-gray-700">Daily logged ticket trend - Value Stream</h2>
+      </div>
+      <div class="flex items-center gap-2">
+        <button (click)="togglePin('value-stream-trend-grid', 'Logged Ticket Trend (Streams)')" class="p-1.5 rounded-full bg-gray-200/50 text-gray-400 opacity-0 group-hover:opacity-100 hover:bg-blue-100 hover:text-blue-600 transition-opacity z-10" [title]="isPinned('value-stream-trend-grid') ? 'Unpin from dashboard' : 'Pin to dashboard'">
+          @if (isPinned('value-stream-trend-grid')) { <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5.293 3.293a1 1 0 011.414 0L10 6.586l3.293-3.293a1 1 0 111.414 1.414L11.414 8l3.293 3.293a1 1 0 01-1.414 1.414L10 9.414l-3.293 3.293a1 1 0 01-1.414-1.414L8.586 8 5.293 4.707a1 1 0 010-1.414z" clip-rule="evenodd" /></svg> } @else { <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor"><path d="M8 3a1 1 0 011-1h2a1 1 0 110 2H9a1 1 0 01-1-1z" /><path d="M6 3a2 2 0 00-2 2v11a2 2 0 002 2h8a2 2 0 002-2V5a2 2 0 00-2-2 3 3 0 01-3 3H9a3 3 0 01-3-3z" /></svg> }
+        </button>
+        <button (click)="exportData('valueStreamTrend')" class="p-1 text-gray-400 hover:text-green-600" title="Download as CSV"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clip-rule="evenodd" /></svg></button>
+      </div>
+    </div>
+    <div class="overflow-x-auto">
+      <table class="w-full text-sm">
+        <thead class="text-xs text-gray-700 bg-gray-50">
+          <tr>
+            <th class="p-3 text-left w-1/4">
+              <button (click)="handleSort('valueStreamTrend', 'name')" class="sort-button" [class.active]="sortConfigs().valueStreamTrend.key === 'name'" [attr.data-direction]="sortConfigs().valueStreamTrend.direction">
+                Value Stream
+                <span class="sort-icon"></span>
+              </button>
+            </th>
+            <th class="p-3 text-left w-24">Trend</th>
+             @for (date of trendDates; track date; let i = $index) {
+              <th class="p-3 text-right">
+                <button (click)="handleSort('valueStreamTrend', 'values', i)" class="sort-button justify-end" [class.active]="sortConfigs().valueStreamTrend.key === 'values' && sortConfigs().valueStreamTrend.index === i" [attr.data-direction]="sortConfigs().valueStreamTrend.direction">
+                  {{ date }}
+                  <span class="sort-icon"></span>
+                </button>
+              </th>
+            }
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-gray-200">
+          @for (item of sortedValueStreamTrendData(); track item.name) {
+            <tr class="hover:bg-gray-50">
+              <td class="p-3 font-semibold text-gray-800">
+                <a href="#" class="hover:underline text-blue-600">{{ item.name }}</a>
+              </td>
+              <td class="p-3"><app-sparkline-chart [data]="item.sparkline" /></td>
+              @for (value of item.values; track $index) {
+                <td class="p-3 text-right font-mono font-semibold text-gray-800">{{ value }}</td>
+              }
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+   <div class="bg-white rounded-lg shadow-md relative group">
+    <div class="p-4 border-b flex justify-between items-center">
+      <div>
+        <h2 class="text-lg font-bold text-gray-700">Un-resolved ticket trend - Top 10 applications</h2>
+      </div>
+      <div class="flex items-center gap-2">
+        <button (click)="togglePin('unresolved-app-trend-grid', 'Unresolved Trend (Apps)')" class="p-1.5 rounded-full bg-gray-200/50 text-gray-400 opacity-0 group-hover:opacity-100 hover:bg-blue-100 hover:text-blue-600 transition-opacity z-10" [title]="isPinned('unresolved-app-trend-grid') ? 'Unpin from dashboard' : 'Pin to dashboard'">
+          @if (isPinned('unresolved-app-trend-grid')) { <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5.293 3.293a1 1 0 011.414 0L10 6.586l3.293-3.293a1 1 0 111.414 1.414L11.414 8l3.293 3.293a1 1 0 01-1.414 1.414L10 9.414l-3.293 3.293a1 1 0 01-1.414-1.414L8.586 8 5.293 4.707a1 1 0 010-1.414z" clip-rule="evenodd" /></svg> } @else { <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor"><path d="M8 3a1 1 0 011-1h2a1 1 0 110 2H9a1 1 0 01-1-1z" /><path d="M6 3a2 2 0 00-2 2v11a2 2 0 002 2h8a2 2 0 002-2V5a2 2 0 00-2-2 3 3 0 01-3 3H9a3 3 0 01-3-3z" /></svg> }
+        </button>
+        <button (click)="exportData('unresolvedAppTrendDetailed')" class="p-1 text-gray-400 hover:text-green-600" title="Download as CSV"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clip-rule="evenodd" /></svg></button>
+      </div>
+    </div>
+    <div class="overflow-x-auto">
+      <table class="w-full text-sm">
+        <thead class="text-xs text-gray-700 uppercase bg-gray-50">
+          <tr>
+            <th class="p-3 text-left">
+              <button (click)="handleSort('unresolvedAppTrendDetailed', 'name')" class="sort-button" [class.active]="sortConfigs().unresolvedAppTrendDetailed.key === 'name'" [attr.data-direction]="sortConfigs().unresolvedAppTrendDetailed.direction">
+                Application Name
+                <span class="sort-icon"></span>
+              </button>
+            </th>
+            <th class="p-3 text-right">
+               <button (click)="handleSort('unresolvedAppTrendDetailed', 'openTickets')" class="sort-button justify-end" [class.active]="sortConfigs().unresolvedAppTrendDetailed.key === 'openTickets'" [attr.data-direction]="sortConfigs().unresolvedAppTrendDetailed.direction">
+                Open Tickets (Age > 3 days)
+                <span class="sort-icon"></span>
+              </button>
+            </th>
+            <th class="p-3 text-center" colspan="3">Level wise Spread</th>
+            <th class="p-3 text-center" colspan="3">Status wise Spread</th>
+          </tr>
+          <tr class="text-xs bg-gray-50">
+            <th class="p-1"></th>
+            <th class="p-1"></th>
+            <th class="p-1 text-right border-l"><button (click)="handleSort('unresolvedAppTrendDetailed', 'l1')" class="sort-button justify-end" [class.active]="sortConfigs().unresolvedAppTrendDetailed.key === 'l1'" [attr.data-direction]="sortConfigs().unresolvedAppTrendDetailed.direction">L1<span class="sort-icon"></span></button></th>
+            <th class="p-1 text-right"><button (click)="handleSort('unresolvedAppTrendDetailed', 'l2')" class="sort-button justify-end" [class.active]="sortConfigs().unresolvedAppTrendDetailed.key === 'l2'" [attr.data-direction]="sortConfigs().unresolvedAppTrendDetailed.direction">L2<span class="sort-icon"></span></button></th>
+            <th class="p-1 text-right"><button (click)="handleSort('unresolvedAppTrendDetailed', 'l3')" class="sort-button justify-end" [class.active]="sortConfigs().unresolvedAppTrendDetailed.key === 'l3'" [attr.data-direction]="sortConfigs().unresolvedAppTrendDetailed.direction">L3<span class="sort-icon"></span></button></th>
+            <th class="p-1 text-right border-l"><button (click)="handleSort('unresolvedAppTrendDetailed', 'assignedTo')" class="sort-button justify-end" [class.active]="sortConfigs().unresolvedAppTrendDetailed.key === 'assignedTo'" [attr.data-direction]="sortConfigs().unresolvedAppTrendDetailed.direction">Assigned To<span class="sort-icon"></span></button></th>
+            <th class="p-1 text-right"><button (click)="handleSort('unresolvedAppTrendDetailed', 'open')" class="sort-button justify-end" [class.active]="sortConfigs().unresolvedAppTrendDetailed.key === 'open'" [attr.data-direction]="sortConfigs().unresolvedAppTrendDetailed.direction">Open<span class="sort-icon"></span></button></th>
+            <th class="p-1 text-right"><button (click)="handleSort('unresolvedAppTrendDetailed', 'pending')" class="sort-button justify-end" [class.active]="sortConfigs().unresolvedAppTrendDetailed.key === 'pending'" [attr.data-direction]="sortConfigs().unresolvedAppTrendDetailed.direction">Pending<span class="sort-icon"></span></button></th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-gray-200">
+          @for (item of sortedUnresolvedAppTrendDataDetailed(); track item.name) {
+            <tr class="hover:bg-gray-50">
+              <td class="p-3 font-semibold text-gray-800"><a href="#" class="hover:underline text-blue-600">{{ item.name }}</a></td>
+              <td class="p-3 text-right font-mono font-semibold text-gray-800">{{ item.openTickets }}</td>
+              <td class="p-3 text-right font-mono font-semibold text-gray-800">{{ item.l1 }}%</td>
+              <td class="p-3 text-right font-mono font-semibold text-gray-800">{{ item.l2 }}%</td>
+              <td class="p-3 text-right font-mono font-semibold text-gray-800">{{ item.l3 }}%</td>
+              <td class="p-3 text-right font-mono font-semibold text-gray-800">{{ item.assignedTo }}</td>
+              <td class="p-3 text-right font-mono font-semibold text-gray-800">{{ item.open }}</td>
+              <td class="p-3 text-right font-mono font-semibold text-gray-800">{{ item.pending }}</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  @if (hoveredKpi(); as kpi) {
+    <div class="kpi-popup" [style.top.px]="kpi.top" [style.left.px]="kpi.left">
+      <div class="space-y-2">
+        @for(item of kpi.data; track item.key) {
+          <div class="flex justify-between items-baseline gap-4">
+            <span class="text-sm text-gray-500">{{ item.key }}</span>
+            <span class="text-lg font-bold text-gray-800">{{ item.value }}</span>
+          </div>
+        }
+      </div>
+    </div>
+  }
+</div>

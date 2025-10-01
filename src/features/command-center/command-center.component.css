@@ -1,0 +1,85 @@
+/* Add styles for sortable table headers */
+.sort-button {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem; /* 4px */
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  font-weight: inherit;
+  font-family: inherit;
+  font-size: inherit;
+  color: inherit;
+  width: 100%;
+}
+
+.sort-button:hover {
+  color: #2563eb; /* blue-600 */
+}
+
+.sort-button .sort-icon {
+  width: 0.75rem; /* 12px */
+  height: 0.75rem;
+  opacity: 0.5;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke-width='3' stroke='currentColor' class='w-6 h-6'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' d='M8.25 15L12 18.75 15.75 15m-7.5-6L12 5.25 15.75 9' /%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: contain;
+}
+
+.sort-button:hover .sort-icon {
+  opacity: 1;
+}
+
+.sort-button.active .sort-icon {
+  opacity: 1;
+  color: #2563eb; /* blue-600 */
+}
+
+/* Ascending icon */
+.sort-button.active[data-direction="asc"] .sort-icon {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke-width='3' stroke='%232563eb'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' d='M4.5 15.75l7.5-7.5 7.5 7.5' /%3E%3C/svg%3E");
+}
+
+/* Descending icon */
+.sort-button.active[data-direction="desc"] .sort-icon {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke-width='3' stroke='%232563eb'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' d='M19.5 8.25l-7.5 7.5-7.5-7.5' /%3E%3C/svg%3E");
+}
+
+.sort-button.justify-end {
+  justify-content: flex-end;
+}
+
+/* KPI Popup styles */
+.kpi-popup {
+  position: absolute;
+  z-index: 50;
+  background-color: #374151; /* gray-700 */
+  color: white;
+  border-radius: 0.5rem; /* rounded-lg */
+  padding: 0.75rem; /* p-3 */
+  box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+  width: 200px;
+  transform: translateX(-50%);
+  transition: opacity 0.2s ease-in-out, transform 0.2s ease-in-out;
+  opacity: 1;
+}
+
+.kpi-popup::after {
+  content: '';
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  margin-left: -5px;
+  border-width: 5px;
+  border-style: solid;
+  border-color: transparent transparent #374151 transparent;
+}
+
+/* Global Slicer Styles */
+.global-slicer-container {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}

@@ -1,5 +1,5 @@
 import { Injectable, signal } from '@angular/core';
-import { MasterActivity, ActivitySuggestion, FteCalculationModel, SlaConfig } from '../models/admin.model';
+import { MasterActivity, ActivitySuggestion, FteCalculationModel, SlaConfig, PortfolioSupportConfig, SupportGroupConfig } from '../models/admin.model';
 
 @Injectable({
   providedIn: 'root',
@@ -38,10 +38,40 @@ export class AdminService {
     { priority: 'P4', value: 2, unit: 'days', businessHoursOnly: true, description: 'Low impact incident with minimal business effect.' },
   ]);
 
+  private _supportGroupConfigs = signal<PortfolioSupportConfig[]>([
+    {
+      id: 'msp',
+      name: 'Member & Provider Services',
+      supportGroups: {
+        l1: 'MSP_L1_Support',
+        l2: 'MSP_L2_SRE',
+        l3: 'MSP_L3_Engineering',
+      },
+      applications: [
+        { id: 'sales', name: 'Sales', supportGroups: { l2: 'Sales_L2_SRE_Team' } }, // L2 override
+        { id: 'enrolment', name: 'Enrolment' }, // Inherits all
+      ],
+    },
+    {
+      id: 'fco',
+      name: 'Financial & Core Operations',
+      supportGroups: {
+        l1: 'FCO_L1_Helpdesk',
+        l2: 'FCO_L2_SRE',
+        l3: 'FCO_L3_Engineering',
+      },
+      applications: [
+        { id: 'claims', name: 'Claims' }, // Inherits all
+        { id: 'billing', name: 'Billing', supportGroups: { l1: 'Billing_L1_Specialists', l2: 'Billing_L2_DevOps' } }, // L1 and L2 override
+      ],
+    },
+  ]);
+
   masterActivities = this._masterActivities.asReadonly();
   activitySuggestions = this._activitySuggestions.asReadonly();
   fteCalculationModel = this._fteCalculationModel.asReadonly();
   slaConfigs = this._slaConfigs.asReadonly();
+  supportGroupConfigs = this._supportGroupConfigs.asReadonly();
 
   setFteCalculationModel(model: FteCalculationModel) {
     this._fteCalculationModel.set(model);
@@ -97,6 +127,37 @@ export class AdminService {
         suggestion.status = 'rejected';
       }
       return [...suggestions];
+    });
+  }
+
+  updateSupportGroup(portfolioId: string, appId: string | null, level: keyof SupportGroupConfig, groupName: string): void {
+    this._supportGroupConfigs.update(configs => {
+      const portfolio = configs.find(p => p.id === portfolioId);
+      if (!portfolio) return configs;
+  
+      if (appId) {
+        // Update an application
+        const app = portfolio.applications.find(a => a.id === appId);
+        if (app) {
+          if (!app.supportGroups) {
+            app.supportGroups = {};
+          }
+          // If the new name is the same as the inherited one, or empty, remove the override
+          if (groupName === portfolio.supportGroups[level] || groupName === '') {
+            delete app.supportGroups[level];
+            // if supportGroups is now empty, remove it
+            if (Object.keys(app.supportGroups).length === 0) {
+              delete app.supportGroups;
+            }
+          } else {
+            app.supportGroups[level] = groupName;
+          }
+        }
+      } else {
+        // Update a portfolio
+        portfolio.supportGroups[level] = groupName;
+      }
+      return [...configs];
     });
   }
 }

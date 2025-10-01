@@ -34,8 +34,9 @@ export class ApiDataHubComponent {
 
   // Signals for managing UI state
   copied = signal<string | null>(null);
-  activeSection = signal<string>('incidents');
+  activeSection = signal<string>('commandCenter');
   activeTab = signal<{ [key: string]: string }>({
+    commandCenter: 'guide',
     incidents: 'logic',
     predictiveBriefing: 'logic',
     serviceJourney: 'api',
@@ -50,6 +51,7 @@ export class ApiDataHubComponent {
     postmortems: 'logic',
     aiRoi: 'logic',
   });
+  activeIngestionSource = signal<'servicenow' | 'databricks'>('servicenow');
 
   // Example data for JSON response previews
   incidentSample = computed(() => this.incidentService.getIncidents()().slice(0, 2));
@@ -96,7 +98,82 @@ export class ApiDataHubComponent {
         "confidence": "Medium"
       }
   ]));
+  commandCenterSample = computed(() => ({
+    "portfolios": [
+      { "id": "msp", "name": "Member & Provider Services" },
+      { "id": "fco", "name": "Financial & Core Operations" }
+    ],
+    "topKpis": [
+      {"value": "95.5%", "label": "Resolution SLA"},
+      {"value": "92Hrs", "label": "Avg TAT"},
+      {"value": "111%", "label": "BMI"},
+      {"value": "85.29%", "label": "FTR"}
+    ],
+    "mainKpis": {
+      "totalLogged": "3,024",
+      "totalResolved": "3,622",
+      "reopenedTickets": "2",
+      "openTickets": "6,769",
+      "achievement": "753"
+    },
+    "lineChartData": {
+      "labels": ["Sep 21", "Sep 22", "Sep 23", "Sep 24", "Sep 25", "Sep 26", "Sep 27", "Sep 28", "Sep 29", "Sep 30"],
+      "datasets": [
+        { "label": "Logged", "color": "#3b82f6", "data": [4008, 4010, 4082, 2984, 3874, 3490, 4241, 4506, 3622, 3024] },
+        { "label": "Resolved", "color": "#22c55e", "data": [4712, 3713, 3713, 4304, 3573, 6377, 5689, 4993, 4015, 3622] },
+        { "label": "Open Tickets", "color": "#f97316", "data": [4088, 4019, 3914, 4304, 3874, 6377, 8448, 7938, 6674, 6769] }
+      ]
+    },
+    "pieDataLevelWise": [
+      { "name": "Level 1", "value": 3274, "label": "3274 (48%)" },
+      { "name": "Level 2", "value": 3150, "label": "3150 (47%)" },
+      { "name": "Level 3", "value": 343, "label": "343 (5%)" }
+    ],
+    "pieDataUnresolved": [
+      { "name": "Pending", "value": 956, "label": "956 (32%)" },
+      { "name": "Assigned To", "value": 1573, "label": "1573 (53%)" },
+      { "name": "Open", "value": 227, "label": "227 (8%)" }
+    ],
+    "unresolvedMetrics": { "p3": 23, "p4": 52, "openState": 0, "assignedState": 1505 },
+    "effectiveness": { "auto": "4%", "l1": "71%", "l2": "21%", "l3": "4%" },
+    "allGrids": {
+      "ticketSeverity": [
+        { "stream": "Sales", "urgent": 7, "high": 4, "medHigh": 285, "medium": 4196 },
+        { "stream": "Enrolment", "urgent": 11, "high": 14, "medHigh": 261, "medium": 1712 }
+      ],
+      "openTicketTrend": [
+        { "name": "Sales", "values": [3926, 4300, 5264, 2101, 3813, 2419] },
+        { "name": "Enrolment", "values": [1887, 1543, 1725, 1032, 1606, 934] }
+      ],
+      "unresolvedApplicationTrend": [
+        { "name": "CRM", "openTickets": 258, "l1": 0, "l2": 100, "l3": 0, "assignedTo": 80, "open": 0, "pending": 178 },
+        { "name": "Producer", "openTickets": 188, "l1": 17, "l2": 83, "l3": 0, "assignedTo": 20, "open": 0, "pending": 156 }
+      ]
+    }
+  }));
+  
+  commandCenterSampleTables = `
+-----------------------------------------
+-- Fact_KPIDaily_ByPortfolio (Sample) --
+-----------------------------------------
+SummaryDate | PortfolioId | TicketsLogged | ResolutionSLA | AvgTAT_Hours | BMI   | FTR
+2025-09-30  | msp         | 1834          | 96.2          | 85.5         | 110.5 | 88.1
+2025-09-30  | fco         | 1190          | 94.8          | 98.1         | 105.2 | 82.4
 
+-------------------------------------------
+-- Fact_TrendDaily_ByDimension (Sample) --
+-------------------------------------------
+SummaryDate | DimensionType | DimensionName | LoggedCount | ResolvedCount | OpenCount
+2025-09-30  | ValueStream   | Sales         | 1697        | 1850          | 3926
+2025-09-29  | ValueStream   | Sales         | 2231        | 2105          | 4300
+2025-09-30  | Application   | CRM           | 73          | 85            | 258
+
+-----------------------------------------
+--       Audit_TableUpdates (Sample)   --
+-----------------------------------------
+TableName                       | UpdateTimestamp         | Status    | RecordsAffected
+usp_ConsolidateServiceNowData   | 2025-10-01 02:05:15.123 | Success   | 5843
+  `;
 
   // Method to copy code to clipboard
   copyToClipboard(key: string, content: string) {
@@ -124,6 +201,572 @@ export class ApiDataHubComponent {
   selectTab(section: string, tab: string) {
     this.activeTab.update(tabs => ({ ...tabs, [section]: tab }));
   }
+  
+  selectIngestionSource(source: 'servicenow' | 'databricks') {
+    this.activeIngestionSource.set(source);
+  }
+
+  // --- Ops Command Center ---
+  commandCenterGuide = `
+### 1. Set up the Database
+- Execute the DDL script from the **Database Schema** tab in your MS SQL Server instance to create all tables.
+- This includes staging tables for raw data, dimension tables for your organizational structure (portfolios, apps), and fact tables where pre-calculated daily metrics are stored. This model ensures the dashboard loads quickly.
+
+### 2. Configure & Run the Ingestion Script
+- Choose your data source (ServiceNow or Databricks) from the **Ingestion Script** tab.
+- Set up the Python script in an environment that can run on a schedule (e.g., a server with cron, a container, or an orchestration tool like Airflow).
+- Configure the required environment variables (database credentials, source API keys, etc.) as described in the script's comments.
+- Run the script once manually to perform the initial data load, then schedule it to run hourly for incremental updates.
+
+### 3. Schedule the Consolidation Stored Procedure
+- The \`usp_ConsolidateServiceNowData\` procedure (from the **Consolidation Logic** tab) does the heavy lifting. It transforms raw staging data into performant, aggregated fact tables. It calculates every KPI for each portfolio.
+- Schedule this stored procedure to run **once daily** in your MS SQL Server (e.g., using SQL Server Agent). It should run after business hours to process the completed day's data.
+- The procedure also logs its execution to the \`Audit_TableUpdates\` table, giving you a history of all data processing jobs.
+
+### 4. Implement the Backend API
+- Create a backend API endpoint (e.g., \`GET /api/command-center\`).
+- This endpoint should execute the \`usp_GetCommandCenterDashboardData\` stored procedure (from the **API Logic** tab).
+- The procedure accepts a \`@PortfolioId\` parameter, which you should pass from a query string in your API request (e.g., \`/api/command-center?portfolio=msp\`).
+- The stored procedure returns a single column containing the complete JSON payload. Your API should return this JSON string directly to the frontend.
+  `;
+  
+  commandCenterIngestionServiceNow = `import os
+import requests
+import pyodbc
+from datetime import datetime, timedelta
+
+# --- Configuration ---
+# Load from environment variables for security
+SNOW_INSTANCE = os.environ.get("SNOW_INSTANCE") # e.g., "yourinstance.service-now.com"
+SNOW_USER = os.environ.get("SNOW_USER")
+SNOW_PASSWORD = os.environ.get("SNOW_PASSWORD")
+DB_SERVER = os.environ.get("DB_SERVER")
+DB_NAME = os.environ.get("DB_NAME")
+DB_USER = os.environ.get("DB_USER")
+DB_PASSWORD = os.environ.get("DB_PASSWORD")
+
+# File to store the last run timestamp
+LAST_RUN_FILE = "last_run_timestamp.txt"
+
+def get_last_run_time():
+    """Reads the timestamp of the last successful run."""
+    try:
+        with open(LAST_RUN_FILE, "r") as f:
+            return f.read().strip()
+    except FileNotFoundError:
+        # If the file doesn't exist, go back 7 days for the initial load
+        return (datetime.utcnow() - timedelta(days=7)).strftime("%Y-%m-%d %H:%M:%S")
+
+def save_last_run_time(timestamp):
+    """Saves the timestamp for the current run."""
+    with open(LAST_RUN_FILE, "w") as f:
+        f.write(timestamp)
+
+def fetch_servicenow_data(last_run_time):
+    """Fetches incremental ticket data from the ServiceNow Table API."""
+    all_records = []
+    offset = 0
+    limit = 1000  # Max records per page
+
+    query = f"sys_updated_on>javascript:gs.dateGenerate('{last_run_time}','yyyy-MM-dd HH:mm:ss')"
+    
+    # IMPORTANT: Add any other fields required for your KPI calculations.
+    fields = "sys_id,number,state,priority,assignment_group,u_resolved_by_assignment_group,opened_at,resolved_at,sys_updated_on,u_value_stream,u_application,reopen_count,reassignment_count,made_sla"
+
+    url = f"https://{SNOW_INSTANCE}/api/now/table/incident"
+    print(f"Fetching records updated since {last_run_time}...")
+
+    while True:
+        params = { "sysparm_query": query, "sysparm_fields": fields, "sysparm_limit": limit, "sysparm_offset": offset }
+        response = requests.get(url, auth=(SNOW_USER, SNOW_PASSWORD), params=params)
+        response.raise_for_status() 
+        
+        records = response.json().get("result", [])
+        if not records:
+            break 
+        
+        all_records.extend(records)
+        offset += limit
+        print(f"Fetched {len(all_records)} records...")
+
+    return all_records
+
+def upsert_to_database(records):
+    """Connects to the Smart Database and performs a MERGE operation."""
+    conn_str = f"DRIVER={{ODBC Driver 17 for SQL Server}};SERVER={DB_SERVER};DATABASE={DB_NAME};UID={DB_USER};PWD={DB_PASSWORD}"
+    
+    with pyodbc.connect(conn_str) as cnxn:
+        cursor = cnxn.cursor()
+        
+        merge_sql = """
+        MERGE Staging_ServiceNow_Tickets AS T
+        USING (VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)) 
+               AS S (SysId, Number, State, Priority, AssignmentGroupName, ResolvedByAssignmentGroup, OpenedAt, ResolvedAt, SysUpdatedOn, ValueStream, Application, ReassignmentCount, MadeSLA, ReopenCount)
+        ON (T.SysId = S.SysId)
+        WHEN MATCHED AND T.SysUpdatedOn < S.SysUpdatedOn THEN
+            UPDATE SET
+                T.State = S.State,
+                T.Priority = S.Priority,
+                T.AssignmentGroupName = S.AssignmentGroupName,
+                T.ResolvedByAssignmentGroup = S.ResolvedByAssignmentGroup,
+                T.ResolvedAt = S.ResolvedAt,
+                T.SysUpdatedOn = S.SysUpdatedOn,
+                T.ReassignmentCount = S.ReassignmentCount,
+                T.MadeSLA = S.MadeSLA,
+                -- If ReopenCount increases, it's a reopen event
+                T.ReopenedAt = CASE WHEN ISNULL(T.ReopenCount, 0) < ISNULL(S.ReopenCount, 0) THEN S.SysUpdatedOn ELSE T.ReopenedAt END,
+                T.ReopenCount = S.ReopenCount
+        WHEN NOT MATCHED THEN
+            INSERT (SysId, Number, State, Priority, AssignmentGroupName, ResolvedByAssignmentGroup, OpenedAt, ResolvedAt, SysUpdatedOn, ValueStream, Application, ReassignmentCount, MadeSLA, ReopenCount)
+            VALUES (S.SysId, S.Number, S.State, S.Priority, S.AssignmentGroupName, S.ResolvedByAssignmentGroup, S.OpenedAt, S.ResolvedAt, S.SysUpdatedOn, S.ValueStream, S.Application, S.ReassignmentCount, S.MadeSLA, S.ReopenCount);
+        """
+        
+        for record in records:
+            # Helper to safely extract linked display values
+            def get_display_value(data, key):
+                field = data.get(key)
+                return field.get('display_value') if isinstance(field, dict) else field
+
+            params = (
+                record.get('sys_id'), record.get('number'), record.get('state'), record.get('priority'),
+                get_display_value(record, 'assignment_group'),
+                get_display_value(record, 'u_resolved_by_assignment_group'),
+                record.get('opened_at'), record.get('resolved_at'), record.get('sys_updated_on'),
+                record.get('u_value_stream'), record.get('u_application'),
+                int(record.get('reassignment_count', '0')),
+                record.get('made_sla') == 'true',
+                int(record.get('reopen_count', '0'))
+            )
+            cursor.execute(merge_sql, params)
+        
+        cnxn.commit()
+        print(f"Merged {len(records)} records into the staging table.")
+
+
+if __name__ == "__main__":
+    start_time = datetime.utcnow()
+    last_run = get_last_run_time()
+    
+    try:
+        new_records = fetch_servicenow_data(last_run)
+        if new_records:
+            upsert_to_database(new_records)
+        else:
+            print("No new records to process.")
+        
+        save_last_run_time(start_time.strftime("%Y-%m-%d %H:%M:%S"))
+        print("Process completed successfully.")
+        
+    except Exception as e:
+        print(f"An error occurred: {e}")
+`;
+
+  commandCenterIngestionDatabricks = `import os
+import pyodbc
+from databricks import sql
+from datetime import datetime, timedelta
+
+# --- Configuration ---
+DBRICKS_SERVER_HOSTNAME = os.environ.get("DBRICKS_SERVER_HOSTNAME")
+DBRICKS_HTTP_PATH = os.environ.get("DBRICKS_HTTP_PATH")
+DBRICKS_TOKEN = os.environ.get("DBRICKS_TOKEN")
+DB_SERVER = os.environ.get("DB_SERVER")
+# ... other MS SQL connection details
+
+LAST_RUN_FILE = "last_run_timestamp_databricks.txt"
+# ... (get_last_run_time and save_last_run_time functions are the same)
+
+def fetch_databricks_data(last_run_time):
+    """Fetches incremental ticket data from a Databricks SQL Warehouse."""
+    
+    query = f"""
+    SELECT 
+      SysId, Number, State, Priority, AssignmentGroupName, ResolvedByAssignmentGroup, OpenedAt, 
+      ResolvedAt, ReopenedAt, SysUpdatedOn, ValueStream, Application, ReassignmentCount, MadeSLA, ReopenCount
+    FROM your_catalog.your_schema.refined_tickets
+    WHERE SysUpdatedOn > '{last_run_time}'
+    """
+    
+    with sql.connect(
+        server_hostname=DBRICKS_SERVER_HOSTNAME,
+        http_path=DBRICKS_HTTP_PATH,
+        access_token=DBRICKS_TOKEN
+    ) as connection:
+        with connection.cursor() as cursor:
+            cursor.execute(query)
+            result = cursor.fetchall()
+            return result # Returns a list of rows
+
+def bulk_upsert_to_database(rows):
+    """Bulk loads data into a temp table and merges it."""
+    conn_str = f"..."
+    
+    with pyodbc.connect(conn_str) as cnxn:
+        cursor = cnxn.cursor()
+        
+        # Create a temporary table with the same structure as Staging_ServiceNow_Tickets
+        cursor.execute("CREATE TABLE #TempTickets (...)")
+
+        # Use fast_executemany for high-performance bulk insert
+        cursor.fast_executemany = True
+        insert_sql = "INSERT INTO #TempTickets (...) VALUES (?, ?, ...)"
+        cursor.executemany(insert_sql, [tuple(row) for row in rows])
+
+        # Perform the MERGE from the temp table (same as ServiceNow version)
+        merge_sql = "MERGE Staging_ServiceNow_Tickets AS T USING #TempTickets AS S ON T.SysId = S.SysId WHEN MATCHED THEN UPDATE SET ... WHEN NOT MATCHED THEN INSERT ..."
+        cursor.execute(merge_sql)
+        cnxn.commit()
+        print(f"Merged {cursor.rowcount} rows.")
+
+if __name__ == "__main__":
+    # ... main execution logic is the same ...
+`;
+
+  commandCenterDdl = `-- =============================================
+-- Author:      IT Operations Hub AI
+-- Create date: 2025-10-02
+-- Description: Complete production-grade schema for the Ops Command Center.
+-- =============================================
+
+-- =========================================================================================
+-- 1. DIMENSION & CONFIGURATION TABLES
+-- =========================================================================================
+CREATE TABLE Dim_Portfolio (
+    PortfolioId         VARCHAR(50) PRIMARY KEY,
+    PortfolioName       VARCHAR(100) NOT NULL UNIQUE,
+    ManagerName         VARCHAR(100),
+    LeadName            VARCHAR(100)
+);
+
+CREATE TABLE Dim_Application (
+    ApplicationName     VARCHAR(255) PRIMARY KEY,
+    PortfolioId         VARCHAR(50),
+    FOREIGN KEY (PortfolioId) REFERENCES Dim_Portfolio(PortfolioId)
+);
+
+CREATE TABLE Dim_SupportGroup (
+    GroupName           VARCHAR(100) PRIMARY KEY,
+    SupportLevel        VARCHAR(10) NOT NULL -- 'L1', 'L2', 'L3', 'Auto'
+);
+
+-- =========================================================================================
+-- 2. STAGING TABLE (Raw data from ingestion)
+-- =========================================================================================
+CREATE TABLE Staging_ServiceNow_Tickets (
+    SysId                     VARCHAR(32) PRIMARY KEY NOT NULL,
+    Number                    VARCHAR(50),
+    State                     VARCHAR(50), 
+    Priority                  VARCHAR(50),
+    AssignmentGroupName       VARCHAR(255),
+    ResolvedByAssignmentGroup VARCHAR(255),
+    OpenedAt                  DATETIME,
+    ResolvedAt                DATETIME,
+    ReopenedAt                DATETIME,
+    SysUpdatedOn              DATETIME,
+    ValueStream               VARCHAR(255),
+    Application               VARCHAR(255),
+    ReassignmentCount         INT,
+    ReopenCount               INT,
+    MadeSLA                   BIT
+);
+
+-- =========================================================================================
+-- 3. FACT & SNAPSHOT TABLES (Aggregated data, populated daily by consolidation)
+-- =========================================================================================
+CREATE TABLE Fact_KPIDaily_ByPortfolio (
+    SummaryDate         DATE,
+    PortfolioId         VARCHAR(50),
+    TicketsLogged       INT,
+    TicketsResolved     INT,
+    TicketsReopened     INT,
+    SameDayResolved     INT,
+    ResolutionSLA       DECIMAL(5, 2),
+    AvgTAT_Hours        DECIMAL(10, 2),
+    BMI                 DECIMAL(5, 2), -- Backlog Management Index
+    FTR                 DECIMAL(5, 2), -- First Time Resolution
+    EffectivenessAuto   DECIMAL(5, 2),
+    EffectivenessL1     DECIMAL(5, 2),
+    EffectivenessL2     DECIMAL(5, 2),
+    EffectivenessL3     DECIMAL(5, 2),
+    PRIMARY KEY (SummaryDate, PortfolioId),
+    FOREIGN KEY (PortfolioId) REFERENCES Dim_Portfolio(PortfolioId)
+);
+
+CREATE TABLE Fact_AgingDaily_ByPortfolio (
+    SummaryDate         DATE,
+    PortfolioId         VARCHAR(50),
+    AgeBucket           VARCHAR(20), -- e.g., '0-1 day', '1-3 days'
+    TicketCount         INT,
+    PRIMARY KEY (SummaryDate, PortfolioId, AgeBucket),
+    FOREIGN KEY (PortfolioId) REFERENCES Dim_Portfolio(PortfolioId)
+);
+
+CREATE TABLE Fact_Ticket_History (
+    HistoryDate         DATE PRIMARY KEY,
+    TicketsLogged       INT,
+    TicketsResolved     INT,
+    OpenTickets         INT
+);
+
+CREATE TABLE Fact_TrendDaily_ByDimension (
+    SummaryDate       DATE,
+    DimensionType     VARCHAR(50), -- 'ValueStream' or 'Application'
+    DimensionName     VARCHAR(255),
+    LoggedCount       INT,
+    ResolvedCount     INT,
+    OpenCount         INT,
+    PRIMARY KEY (SummaryDate, DimensionType, DimensionName)
+);
+
+CREATE TABLE Snap_UnresolvedTickets (
+    TicketId              VARCHAR(50) PRIMARY KEY,
+    ApplicationName       VARCHAR(255),
+    ValueStream           VARCHAR(255),
+    PortfolioId           VARCHAR(50),
+    AgeDays               INT,
+    Priority              VARCHAR(10),
+    Status                VARCHAR(100), 
+    TicketLevel           VARCHAR(20)
+);
+
+-- =========================================================================================
+-- 4. AUDIT TABLE (For tracking data pipeline execution)
+-- =========================================================================================
+CREATE TABLE Audit_TableUpdates (
+    AuditId             INT PRIMARY KEY IDENTITY,
+    ProcedureName       VARCHAR(128) NOT NULL,
+    UpdateTimestamp     DATETIME DEFAULT GETDATE(),
+    Status              VARCHAR(20) NOT NULL,
+    RecordsAffected     INT,
+    DurationSeconds     INT,
+    MessageText         VARCHAR(MAX)
+);
+`;
+  
+  commandCenterConsolidationSp = `CREATE OR ALTER PROCEDURE usp_ConsolidateServiceNowData
+    @SummaryDate DATE
+AS
+BEGIN
+    SET NOCOUNT ON;
+    DECLARE @StartTime DATETIME = GETDATE(), @RecordsAffected INT = 0, @Message VARCHAR(MAX);
+
+    BEGIN TRY
+        DECLARE @StartDate DATETIME = CAST(@SummaryDate AS DATETIME);
+        DECLARE @EndDate DATETIME = DATEADD(day, 1, @StartDate);
+        
+        -- Idempotency: Clean up previous data for this date
+        DELETE FROM Fact_KPIDaily_ByPortfolio WHERE SummaryDate = @SummaryDate;
+        DELETE FROM Fact_AgingDaily_ByPortfolio WHERE SummaryDate = @SummaryDate;
+        DELETE FROM Fact_TrendDaily_ByDimension WHERE SummaryDate = @SummaryDate;
+
+        -- 1. Sync Dimension Tables (Portfolio, Application)
+        MERGE Dim_Portfolio AS T USING (SELECT DISTINCT ValueStream FROM Staging_ServiceNow_Tickets WHERE ValueStream IS NOT NULL) AS S ON T.PortfolioName = S.ValueStream
+        WHEN NOT MATCHED THEN INSERT (PortfolioId, PortfolioName) VALUES (LOWER(REPLACE(S.ValueStream, ' ', '')), S.ValueStream);
+
+        MERGE Dim_Application AS T USING (SELECT DISTINCT Application, ValueStream FROM Staging_ServiceNow_Tickets WHERE Application IS NOT NULL) AS S
+        ON T.ApplicationName = S.Application
+        WHEN NOT MATCHED THEN INSERT (ApplicationName, PortfolioId) VALUES (S.Application, (SELECT PortfolioId FROM Dim_Portfolio WHERE PortfolioName = S.ValueStream));
+
+        -- 2. Unresolved Snapshot (core data for many calculations)
+        TRUNCATE TABLE Snap_UnresolvedTickets;
+        INSERT INTO Snap_UnresolvedTickets (TicketId, ApplicationName, ValueStream, PortfolioId, AgeDays, Priority, Status, TicketLevel)
+        SELECT s.Number, s.Application, s.ValueStream, da.PortfolioId, DATEDIFF(day, s.OpenedAt, @SummaryDate), s.Priority, s.State,
+               CASE WHEN s.AssignmentGroupName LIKE '%L1%' THEN 'Level 1' WHEN s.AssignmentGroupName LIKE '%L2%' THEN 'Level 2' WHEN s.AssignmentGroupName LIKE '%L3%' THEN 'Level 3' ELSE 'Unknown' END
+        FROM Staging_ServiceNow_Tickets s LEFT JOIN Dim_Application da ON s.Application = da.ApplicationName
+        WHERE s.State NOT IN ('Resolved', 'Closed', 'Cancelled');
+        SET @RecordsAffected = @RecordsAffected + @@ROWCOUNT;
+
+        -- 3. History Table (for main line chart)
+        MERGE Fact_Ticket_History AS T
+        USING (SELECT @SummaryDate, COUNT(CASE WHEN OpenedAt >= @StartDate AND OpenedAt < @EndDate THEN 1 END), COUNT(CASE WHEN ResolvedAt >= @StartDate AND ResolvedAt < @EndDate THEN 1 END), (SELECT COUNT(*) FROM Snap_UnresolvedTickets) FROM Staging_ServiceNow_Tickets) AS S (d, l, r, o)
+        ON T.HistoryDate = S.d
+        WHEN MATCHED THEN UPDATE SET TicketsLogged = S.l, TicketsResolved = S.r, OpenTickets = S.o
+        WHEN NOT MATCHED THEN INSERT (HistoryDate, TicketsLogged, TicketsResolved, OpenTickets) VALUES (S.d, S.l, S.r, S.o);
+
+        -- 4. KPIs by Portfolio
+        INSERT INTO Fact_KPIDaily_ByPortfolio (SummaryDate, PortfolioId, TicketsLogged, TicketsResolved, TicketsReopened, SameDayResolved, ResolutionSLA, AvgTAT_Hours, BMI, FTR, EffectivenessAuto, EffectivenessL1, EffectivenessL2, EffectivenessL3)
+        SELECT @SummaryDate, p.PortfolioId,
+            COUNT(CASE WHEN s.OpenedAt >= @StartDate AND s.OpenedAt < @EndDate THEN 1 END) AS Logged,
+            COUNT(CASE WHEN s.ResolvedAt >= @StartDate AND s.ResolvedAt < @EndDate THEN 1 END) AS Resolved,
+            COUNT(CASE WHEN s.ReopenedAt >= @StartDate AND s.ReopenedAt < @EndDate THEN 1 END) AS Reopened,
+            COUNT(CASE WHEN s.OpenedAt >= @StartDate AND s.OpenedAt < @EndDate AND s.ResolvedAt >= @StartDate AND s.ResolvedAt < @EndDate THEN 1 END) AS SameDay,
+            (CAST(SUM(CASE WHEN s.ResolvedAt >= @StartDate AND s.ResolvedAt < @EndDate AND s.MadeSLA = 1 THEN 1 ELSE 0 END) AS FLOAT) * 100.0) / NULLIF(COUNT(CASE WHEN s.ResolvedAt >= @StartDate AND s.ResolvedAt < @EndDate THEN 1 END), 0) AS ResSLA,
+            AVG(CASE WHEN s.ResolvedAt >= @StartDate AND s.ResolvedAt < @EndDate THEN CAST(DATEDIFF(hour, s.OpenedAt, s.ResolvedAt) AS FLOAT) END) AS AvgTAT,
+            (CAST(COUNT(CASE WHEN s.ResolvedAt >= @StartDate AND s.ResolvedAt < @EndDate THEN 1 END) AS FLOAT) * 100.0) / NULLIF(COUNT(CASE WHEN s.OpenedAt >= @StartDate AND s.OpenedAt < @EndDate THEN 1 END), 0) AS BMI,
+            (CAST(SUM(CASE WHEN s.ResolvedAt >= @StartDate AND s.ResolvedAt < @EndDate AND ISNULL(s.ReassignmentCount, 0) = 0 THEN 1 ELSE 0 END) AS FLOAT) * 100.0) / NULLIF(COUNT(CASE WHEN s.ResolvedAt >= @StartDate AND s.ResolvedAt < @EndDate THEN 1 END), 0) AS FTR,
+            (CAST(SUM(CASE WHEN s.ResolvedAt >= @StartDate AND s.ResolvedAt < @EndDate AND s.ResolvedByAssignmentGroup LIKE '%Auto%' THEN 1 ELSE 0 END) AS FLOAT) * 100.0) / NULLIF(COUNT(CASE WHEN s.ResolvedAt >= @StartDate AND s.ResolvedAt < @EndDate THEN 1 END), 0) AS EffAuto,
+            (CAST(SUM(CASE WHEN s.ResolvedAt >= @StartDate AND s.ResolvedAt < @EndDate AND s.ResolvedByAssignmentGroup LIKE '%L1%' THEN 1 ELSE 0 END) AS FLOAT) * 100.0) / NULLIF(COUNT(CASE WHEN s.ResolvedAt >= @StartDate AND s.ResolvedAt < @EndDate THEN 1 END), 0) AS EffL1,
+            (CAST(SUM(CASE WHEN s.ResolvedAt >= @StartDate AND s.ResolvedAt < @EndDate AND s.ResolvedByAssignmentGroup LIKE '%L2%' THEN 1 ELSE 0 END) AS FLOAT) * 100.0) / NULLIF(COUNT(CASE WHEN s.ResolvedAt >= @StartDate AND s.ResolvedAt < @EndDate THEN 1 END), 0) AS EffL2,
+            (CAST(SUM(CASE WHEN s.ResolvedAt >= @StartDate AND s.ResolvedAt < @EndDate AND s.ResolvedByAssignmentGroup LIKE '%L3%' THEN 1 ELSE 0 END) AS FLOAT) * 100.0) / NULLIF(COUNT(CASE WHEN s.ResolvedAt >= @StartDate AND s.ResolvedAt < @EndDate THEN 1 END), 0) AS EffL3
+        FROM Dim_Portfolio p JOIN Dim_Application a ON p.PortfolioId = a.PortfolioId JOIN Staging_ServiceNow_Tickets s ON a.ApplicationName = s.Application
+        GROUP BY p.PortfolioId;
+        SET @RecordsAffected = @RecordsAffected + @@ROWCOUNT;
+
+        -- 5. Daily Trend Data by Dimension
+        INSERT INTO Fact_TrendDaily_ByDimension(SummaryDate, DimensionType, DimensionName, LoggedCount, ResolvedCount, OpenCount)
+        SELECT @SummaryDate, 'ValueStream', ValueStream, COUNT(CASE WHEN OpenedAt >= @StartDate AND OpenedAt < @EndDate THEN 1 END), COUNT(CASE WHEN ResolvedAt >= @StartDate AND ResolvedAt < @EndDate THEN 1 END), COUNT(CASE WHEN State NOT IN ('Resolved','Closed','Cancelled') THEN 1 END) FROM Staging_ServiceNow_Tickets WHERE ValueStream IS NOT NULL GROUP BY ValueStream
+        UNION ALL
+        SELECT @SummaryDate, 'Application', Application, COUNT(CASE WHEN OpenedAt >= @StartDate AND OpenedAt < @EndDate THEN 1 END), COUNT(CASE WHEN ResolvedAt >= @StartDate AND ResolvedAt < @EndDate THEN 1 END), COUNT(CASE WHEN State NOT IN ('Resolved','Closed','Cancelled') THEN 1 END) FROM Staging_ServiceNow_Tickets WHERE Application IS NOT NULL GROUP BY Application;
+        SET @RecordsAffected = @RecordsAffected + @@ROWCOUNT;
+
+        -- 6. Aging Buckets
+        INSERT INTO Fact_AgingDaily_ByPortfolio (SummaryDate, PortfolioId, AgeBucket, TicketCount)
+        SELECT @SummaryDate, PortfolioId, CASE WHEN AgeDays <= 1 THEN '0-1 day' WHEN AgeDays <= 3 THEN '1-3 days' WHEN AgeDays <= 5 THEN '3-5 days' WHEN AgeDays <= 10 THEN '5-10 days' WHEN AgeDays <= 30 THEN '10-30 days' ELSE '>30 days' END, COUNT(*)
+        FROM Snap_UnresolvedTickets WHERE PortfolioId IS NOT NULL
+        GROUP BY PortfolioId, CASE WHEN AgeDays <= 1 THEN '0-1 day' WHEN AgeDays <= 3 THEN '1-3 days' WHEN AgeDays <= 5 THEN '3-5 days' WHEN AgeDays <= 10 THEN '5-10 days' WHEN AgeDays <= 30 THEN '10-30 days' ELSE '>30 days' END;
+        SET @RecordsAffected = @RecordsAffected + @@ROWCOUNT;
+
+        -- Log success
+        SET @Message = 'Successfully consolidated data for ' + CONVERT(VARCHAR, @SummaryDate);
+        INSERT INTO Audit_TableUpdates (ProcedureName, Status, RecordsAffected, DurationSeconds, MessageText)
+        VALUES ('usp_ConsolidateServiceNowData', 'Success', @RecordsAffected, DATEDIFF(second, @StartTime, GETDATE()), @Message);
+
+    END TRY
+    BEGIN CATCH
+        SET @Message = 'Failed to consolidate data. Error: ' + ERROR_MESSAGE();
+        INSERT INTO Audit_TableUpdates (ProcedureName, Status, DurationSeconds, MessageText)
+        VALUES ('usp_ConsolidateServiceNowData', 'Failed', DATEDIFF(second, @StartTime, GETDATE()), @Message);
+        THROW; -- Re-throw error to calling process
+    END CATCH
+END;
+GO`;
+
+  commandCenterApiSp = `CREATE OR ALTER PROCEDURE usp_GetCommandCenterDashboardData
+    @PortfolioId VARCHAR(50) = NULL -- NULL or 'all' means no filter
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    DECLARE @Today DATE = (SELECT MAX(SummaryDate) FROM Fact_KPIDaily_ByPortfolio);
+    DECLARE @PortfolioFilterId VARCHAR(50) = CASE WHEN @PortfolioId = 'all' THEN NULL ELSE @PortfolioId END;
+    
+    -- This single SELECT statement builds the entire JSON payload.
+    SELECT (
+        SELECT
+            -- 1. Portfolio Slicer Data
+            (SELECT PortfolioId AS id, PortfolioName AS name FROM Dim_Portfolio FOR JSON PATH) AS portfolios,
+
+            -- 2. Top KPIs (system-wide aggregates)
+            (SELECT
+                (SELECT FORMAT(AVG(ResolutionSLA), 'N1') + '%' AS value, 'Resolution SLA' as label FROM Fact_KPIDaily_ByPortfolio WHERE SummaryDate = @Today FOR JSON PATH, WITHOUT_ARRAY_WRAPPER),
+                (SELECT FORMAT(AVG(AvgTAT_Hours), 'N0') + 'Hrs' AS value, 'Avg TAT' as label FROM Fact_KPIDaily_ByPortfolio WHERE SummaryDate = @Today FOR JSON PATH, WITHOUT_ARRAY_WRAPPER),
+                (SELECT FORMAT(AVG(BMI), 'N0') + '%' AS value, 'BMI' as label FROM Fact_KPIDaily_ByPortfolio WHERE SummaryDate = @Today FOR JSON PATH, WITHOUT_ARRAY_WRAPPER),
+                (SELECT FORMAT(AVG(FTR), 'N2') + '%' AS value, 'FTR' as label FROM Fact_KPIDaily_ByPortfolio WHERE SummaryDate = @Today FOR JSON PATH, WITHOUT_ARRAY_WRAPPER)
+            FOR JSON PATH) AS topKpis,
+
+            -- 3. Main KPIs (FILTERED by portfolio)
+            (SELECT 
+                FORMAT(ISNULL(SUM(TicketsLogged), 0), '#,##0') AS totalLogged,
+                FORMAT(ISNULL(SUM(TicketsResolved), 0), '#,##0') AS totalResolved,
+                FORMAT(ISNULL(SUM(TicketsReopened), 0), '#,##0') AS reopenedTickets,
+                (SELECT FORMAT(COUNT(*), '#,##0') FROM Snap_UnresolvedTickets WHERE (@PortfolioFilterId IS NULL OR PortfolioId = @PortfolioFilterId)) AS openTickets,
+                FORMAT(ISNULL(SUM(SameDayResolved), 0), '#,##0') AS achievement
+            FROM Fact_KPIDaily_ByPortfolio
+            WHERE SummaryDate = @Today AND (@PortfolioFilterId IS NULL OR PortfolioId = @PortfolioFilterId)
+            FOR JSON PATH, WITHOUT_ARRAY_WRAPPER) as mainKpis,
+
+            -- 4. Line Chart Data (system-wide)
+            (SELECT
+                JSON_QUERY('["' + STRING_AGG(FORMAT(HistoryDate, 'MMM dd'), '","' ORDER BY HistoryDate) + '"]') as labels,
+                JSON_QUERY('[' +
+                    '{"label":"Logged","color":"#3b82f6","data":[' + STRING_AGG(CAST(ISNULL(TicketsLogged, 0) AS VARCHAR), ',' ORDER BY HistoryDate) + ']},' +
+                    '{"label":"Resolved","color":"#22c55e","data":[' + STRING_AGG(CAST(ISNULL(TicketsResolved, 0) AS VARCHAR), ',' ORDER BY HistoryDate) + ']},' +
+                    '{"label":"Open Tickets","color":"#f97316","data":[' + STRING_AGG(CAST(ISNULL(OpenTickets, 0) AS VARCHAR), ',' ORDER BY HistoryDate) + ']}' +
+                ']') as datasets
+            FROM (SELECT TOP 10 * FROM Fact_Ticket_History ORDER BY HistoryDate DESC) AS h
+            FOR JSON PATH, WITHOUT_ARRAY_WRAPPER) AS lineChartData,
+            
+            -- 5. Pie Charts (FILTERED by portfolio)
+            (SELECT JSON_QUERY((SELECT TicketLevel as name, COUNT(*) as value, CAST(COUNT(*) AS VARCHAR) + ' (' + FORMAT(CAST(COUNT(*) AS FLOAT) * 100 / (SELECT COUNT(*) FROM Snap_UnresolvedTickets WHERE (@PortfolioFilterId IS NULL OR PortfolioId = @PortfolioFilterId)), 'N0') + '%)' as label FROM Snap_UnresolvedTickets WHERE (@PortfolioFilterId IS NULL OR PortfolioId = @PortfolioFilterId) GROUP BY TicketLevel FOR JSON PATH))) AS pieDataLevelWise,
+            (SELECT JSON_QUERY((SELECT Status as name, COUNT(*) as value, CAST(COUNT(*) AS VARCHAR) + ' (' + FORMAT(CAST(COUNT(*) AS FLOAT) * 100 / (SELECT COUNT(*) FROM Snap_UnresolvedTickets WHERE (@PortfolioFilterId IS NULL OR PortfolioId = @PortfolioFilterId)), 'N0') + '%)' as label FROM Snap_UnresolvedTickets WHERE (@PortfolioFilterId IS NULL OR PortfolioId = @PortfolioFilterId) GROUP BY Status FOR JSON PATH))) AS pieDataUnresolved,
+            
+            -- 6. Other KPI cards
+            (SELECT
+                (SELECT ISNULL(FORMAT(AVG(EffectivenessAuto), 'N0'), '0') + '%' FROM Fact_KPIDaily_ByPortfolio WHERE SummaryDate = @Today AND (@PortfolioFilterId IS NULL OR PortfolioId = @PortfolioFilterId)) AS auto,
+                (SELECT ISNULL(FORMAT(AVG(EffectivenessL1), 'N0'), '0') + '%' FROM Fact_KPIDaily_ByPortfolio WHERE SummaryDate = @Today AND (@PortfolioFilterId IS NULL OR PortfolioId = @PortfolioFilterId)) AS l1,
+                (SELECT ISNULL(FORMAT(AVG(EffectivenessL2), 'N0'), '0') + '%' FROM Fact_KPIDaily_ByPortfolio WHERE SummaryDate = @Today AND (@PortfolioFilterId IS NULL OR PortfolioId = @PortfolioFilterId)) AS l2,
+                (SELECT ISNULL(FORMAT(AVG(EffectivenessL3), 'N0'), '0') + '%' FROM Fact_KPIDaily_ByPortfolio WHERE SummaryDate = @Today AND (@PortfolioFilterId IS NULL OR PortfolioId = @PortfolioFilterId)) AS l3
+            FOR JSON PATH, WITHOUT_ARRAY_WRAPPER) AS effectiveness,
+
+            (SELECT
+                (SELECT COUNT(*) FROM Snap_UnresolvedTickets WHERE Priority = '3' AND (@PortfolioFilterId IS NULL OR PortfolioId = @PortfolioFilterId)) AS p3,
+                (SELECT COUNT(*) FROM Snap_UnresolvedTickets WHERE Priority = '4' AND (@PortfolioFilterId IS NULL OR PortfolioId = @PortfolioFilterId)) AS p4,
+                (SELECT COUNT(*) FROM Snap_UnresolvedTickets WHERE Status = 'Open' AND (@PortfolioFilterId IS NULL OR PortfolioId = @PortfolioFilterId)) AS openState,
+                (SELECT COUNT(*) FROM Snap_UnresolvedTickets WHERE Status = 'Assigned' AND (@PortfolioFilterId IS NULL OR PortfolioId = @PortfolioFilterId)) AS assignedState
+            FOR JSON PATH, WITHOUT_ARRAY_WRAPPER) AS unresolvedMetrics,
+
+            -- 7. All Data Grids (FILTERED by portfolio)
+            (SELECT 
+                (SELECT JSON_QUERY((
+                    SELECT ValueStream AS stream, SUM(CASE WHEN Priority = '1' THEN 1 ELSE 0 END) AS urgent, SUM(CASE WHEN Priority = '2' THEN 1 ELSE 0 END) AS high, SUM(CASE WHEN Priority = '3' THEN 1 ELSE 0 END) AS medHigh, SUM(CASE WHEN Priority = '4' THEN 1 ELSE 0 END) AS medium
+                    FROM Snap_UnresolvedTickets WHERE (@PortfolioFilterId IS NULL OR PortfolioId = @PortfolioFilterId) GROUP BY ValueStream FOR JSON PATH
+                ))) AS ticketSeverity,
+
+                (SELECT JSON_QUERY((
+                    SELECT t.DimensionName AS name, JSON_QUERY('[' + STRING_AGG(CAST(t.OpenCount AS VARCHAR), ',') WITHIN GROUP (ORDER BY t.SummaryDate ASC) + ']') AS values
+                    FROM (SELECT TOP 60 * FROM Fact_TrendDaily_ByDimension WHERE DimensionType = 'ValueStream' AND (@PortfolioFilterId IS NULL OR DimensionName IN (SELECT ValueStream FROM Dim_Application WHERE PortfolioId = @PortfolioFilterId)) ORDER BY SummaryDate DESC) AS t
+                    GROUP BY t.DimensionName FOR JSON PATH
+                ))) AS openTicketTrend,
+                
+                (SELECT JSON_QUERY((
+                    SELECT ApplicationName AS name, COUNT(*) AS openTickets,
+                           FORMAT(CAST(SUM(CASE WHEN TicketLevel = 'Level 1' THEN 1 ELSE 0 END) AS FLOAT) * 100 / COUNT(*), 'N0') AS l1,
+                           FORMAT(CAST(SUM(CASE WHEN TicketLevel = 'Level 2' THEN 1 ELSE 0 END) AS FLOAT) * 100 / COUNT(*), 'N0') AS l2,
+                           FORMAT(CAST(SUM(CASE WHEN TicketLevel = 'Level 3' THEN 1 ELSE 0 END) AS FLOAT) * 100 / COUNT(*), 'N0') AS l3,
+                           SUM(CASE WHEN Status = 'Assigned' THEN 1 ELSE 0 END) as assignedTo,
+                           SUM(CASE WHEN Status = 'Open' THEN 1 ELSE 0 END) as open,
+                           SUM(CASE WHEN Status = 'Pending' THEN 1 ELSE 0 END) as pending
+                    FROM Snap_UnresolvedTickets WHERE (@PortfolioFilterId IS NULL OR PortfolioId = @PortfolioFilterId) GROUP BY ApplicationName FOR JSON PATH
+                ))) AS unresolvedApplicationTrend
+
+                -- Add similar sub-queries for the other data grids (logged trends) using Fact_TrendDaily_ByDimension
+            FOR JSON PATH, WITHOUT_ARRAY_WRAPPER) as allGrids
+            
+        FOR JSON PATH, WITHOUT_ARRAY_WRAPPER
+    ) AS JsonResult;
+END;
+GO
+`;
+
+  commandCenterApiExample = `
+<h3>Endpoint: <code>GET /api/command-center?portfolio=msp</code></h3>
+<p>Retrieves the consolidated data payload for the Ops Command Center dashboard. The optional <code>portfolio</code> query parameter filters the data.</p>
+<h4>Node.js (Express) with <code>mssql</code> package Example:</h4>
+<pre><code class="language-javascript">const express = require('express');
+const sql = require('mssql');
+const app = express();
+
+const dbConfig = { ... };
+
+app.get('/api/command-center', async (req, res) => {
+    const portfolioId = req.query.portfolio || null;
+    try {
+        await sql.connect(dbConfig);
+        const request = new sql.Request();
+        if (portfolioId &amp;&amp; portfolioId !== 'all') {
+            request.input('PortfolioId', sql.VarChar, portfolioId);
+        } else {
+            request.input('PortfolioId', sql.VarChar, null);
+        }
+        const result = await request.execute('usp_GetCommandCenterDashboardData');
+        
+        if (result.recordset.length > 0 && result.recordset[0].JsonResult) {
+            res.setHeader('Content-Type', 'application/json');
+            res.send(result.recordset[0].JsonResult);
+        } else {
+            res.status(404).send({ message: 'No dashboard data found.' });
+        }
+    } catch (err) {
+        console.error('API Error:', err);
+        res.status(500).send({ message: 'Error fetching dashboard data.' });
+    } finally {
+        sql.close();
+    }
+});
+
+app.listen(3000, () => console.log('Server running on port 3000'));
+</code></pre>
+`;
 
   // --- DDL and DML Section ---
 
@@ -316,30 +959,31 @@ GROUP BY DATE(created_at)
 ORDER BY incident_date ASC;
 </code></pre>
 <p><strong>Step 2: Call AI Model (Python Pseudocode)</strong></p>
-<pre><code>import google.generativeai as genai
+<pre><code>import { GoogleGenAI, Type } from "@google/genai";
 
-ai = genai.GenerativeModel('gemini-2.5-flash')
-historical_data = "..." # String from SQL query results
+const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+const historical_data = "..." // String from SQL query results
 
-prompt = f"""
+const prompt = \`
 Act as an SRE data scientist. Based on the following 90-day incident history, forecast the likely incident volume for the next 7 days.
-History: {historical_data}
-"""
+History: \${historical_data}
+\`;
 
-response = ai.generate_content(
-    prompt,
-    generation_config={
-        "response_mime_type": "application/json",
-        "response_schema": {
-            "type": "object",
-            "properties": {
-                "prediction": {"type": "string"},
-                "confidence": {"type": "string", "enum": ["High", "Medium", "Low"]}
+const response = await ai.models.generateContent({
+    model: 'gemini-2.5-flash',
+    contents: prompt,
+    config: {
+        responseMimeType: "application/json",
+        responseSchema: {
+            type: Type.OBJECT,
+            properties: {
+                prediction: {type: Type.STRING},
+                confidence: {type: Type.STRING, enum: ["High", "Medium", "Low"]}
             }
         }
     }
-)
-incident_forecast = json.loads(response.text)
+});
+const incident_forecast = JSON.parse(response.text);
 </code></pre>
 `;
 

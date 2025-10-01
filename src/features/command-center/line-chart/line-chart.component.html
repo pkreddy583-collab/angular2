@@ -1,0 +1,16 @@
+<div class="relative w-full h-full flex flex-col">
+  <div #chartContainer class="w-full flex-grow">
+    <!-- D3 will render the SVG chart inside this div -->
+  </div>
+   <!-- Legend -->
+  <div class="flex justify-center items-center space-x-4 text-xs pt-2">
+    @for (dataset of data.datasets; track dataset.label) {
+      <div class="flex items-center">
+        <div class="w-2.5 h-2.5 rounded-full mr-1.5" [style.background-color]="dataset.color"></div>
+        <span class="text-gray-600">{{ dataset.label }}</span>
+      </div>
+    }
+  </div>
+  <!-- Tooltip -->
+  <div class="tooltip"></div>
+</div>

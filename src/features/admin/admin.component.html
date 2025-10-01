@@ -87,6 +87,78 @@
         </div>
       </div>
 
+      <!-- Support Group Configuration Card -->
+      <div class="bg-white rounded-lg shadow-md">
+        <div class="p-5 border-b">
+          <h2 class="text-xl font-bold text-gray-700">Support Group Configuration</h2>
+          <p class="text-sm text-gray-500 mt-1">Assign L1, L2, and L3 support groups for each portfolio and application.</p>
+        </div>
+        <div class="p-5 space-y-6">
+          @for(portfolio of supportGroupConfigs(); track portfolio.id) {
+            <div class="bg-gray-50 rounded-lg border border-gray-200 p-4">
+              <h3 class="font-bold text-lg text-blue-700">{{ portfolio.name }}</h3>
+              <p class="text-xs text-gray-500 mb-3">Default groups for this portfolio.</p>
+              
+              <div class="grid grid-cols-1 md:grid-cols-3 gap-4 border-b pb-4 mb-4">
+                <div>
+                  <label [for]="portfolio.id + '-l1'" class="block text-sm font-medium text-gray-600">L1 Support Group</label>
+                  <input type="text" [id]="portfolio.id + '-l1'"
+                        class="mt-1 block w-full text-sm border-gray-300 rounded-md shadow-sm bg-white text-gray-900"
+                        [value]="portfolio.supportGroups.l1"
+                        (input)="onSupportGroupChange(portfolio.id, null, 'l1', $event)">
+                </div>
+                <div>
+                  <label [for]="portfolio.id + '-l2'" class="block text-sm font-medium text-gray-600">L2 Support Group</label>
+                  <input type="text" [id]="portfolio.id + '-l2'"
+                        class="mt-1 block w-full text-sm border-gray-300 rounded-md shadow-sm bg-white text-gray-900"
+                        [value]="portfolio.supportGroups.l2"
+                        (input)="onSupportGroupChange(portfolio.id, null, 'l2', $event)">
+                </div>
+                <div>
+                  <label [for]="portfolio.id + '-l3'" class="block text-sm font-medium text-gray-600">L3 Support Group</label>
+                  <input type="text" [id]="portfolio.id + '-l3'"
+                        class="mt-1 block w-full text-sm border-gray-300 rounded-md shadow-sm bg-white text-gray-900"
+                        [value]="portfolio.supportGroups.l3"
+                        (input)="onSupportGroupChange(portfolio.id, null, 'l3', $event)">
+                </div>
+              </div>
+
+              <h4 class="font-semibold text-gray-800">Application Overrides</h4>
+              <div class="space-y-3 mt-2">
+                @for(app of portfolio.applications; track app.id) {
+                  <div>
+                    <p class="font-medium text-gray-700">{{ app.name }}</p>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-1">
+                      <div>
+                        <input type="text" [id]="app.id + '-l1'"
+                              class="mt-1 block w-full text-sm border-gray-300 rounded-md shadow-sm bg-white text-gray-900 placeholder-gray-400"
+                              [value]="app.supportGroups?.l1 || ''"
+                              [placeholder]="portfolio.supportGroups.l1 + ' (Inherited)'"
+                              (input)="onSupportGroupChange(portfolio.id, app.id, 'l1', $event)">
+                      </div>
+                      <div>
+                        <input type="text" [id]="app.id + '-l2'"
+                              class="mt-1 block w-full text-sm border-gray-300 rounded-md shadow-sm bg-white text-gray-900 placeholder-gray-400"
+                              [value]="app.supportGroups?.l2 || ''"
+                              [placeholder]="portfolio.supportGroups.l2 + ' (Inherited)'"
+                              (input)="onSupportGroupChange(portfolio.id, app.id, 'l2', $event)">
+                      </div>
+                      <div>
+                        <input type="text" [id]="app.id + '-l3'"
+                              class="mt-1 block w-full text-sm border-gray-300 rounded-md shadow-sm bg-white text-gray-900 placeholder-gray-400"
+                              [value]="app.supportGroups?.l3 || ''"
+                              [placeholder]="portfolio.supportGroups.l3 + ' (Inherited)'"
+                              (input)="onSupportGroupChange(portfolio.id, app.id, 'l3', $event)">
+                      </div>
+                    </div>
+                  </div>
+                }
+              </div>
+            </div>
+          }
+        </div>
+      </div>
+
        <!-- SLA Timings Configuration Card -->
       <div class="bg-white rounded-lg shadow-md">
         <div class="p-5 border-b flex justify-between items-center">

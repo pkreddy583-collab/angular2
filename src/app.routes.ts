@@ -18,10 +18,14 @@ import { DeepDiveTrendsComponent } from './features/tower-report/deep-dive-trend
 import { AiRoiDashboardComponent } from './features/ai-roi-dashboard/ai-roi-dashboard.component';
 import { OnCallRosterComponent } from './features/on-call-roster/on-call-roster.component';
 import { JourneyBuilderComponent } from './features/observability/journey-builder/journey-builder.component';
+import { CommandCenterComponent } from './features/command-center/command-center.component';
+import { MyDashboardComponent } from './features/my-dashboard/my-dashboard.component';
 
 export const routes: Routes = [
   // Incident Feature Routes
   { path: '', component: DashboardComponent, title: 'SLA Watchtower' },
+  { path: 'command-center', component: CommandCenterComponent, title: 'Operations Command Center' },
+  { path: 'my-dashboard', component: MyDashboardComponent, title: 'My Dashboard' },
   { path: 'incident/:id', component: IncidentDetailsComponent, title: 'Incident Details' },
   { path: 'ai-roi', component: AiRoiDashboardComponent, title: 'AI ROI Dashboard' },
   

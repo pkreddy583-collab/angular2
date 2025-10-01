@@ -6,16 +6,15 @@ import { CommonModule } from '@angular/common';
   standalone: true,
   imports: [CommonModule],
   template: `
-    <ng-container *ngIf="path; else noData">
+    @if (path) {
       <svg class="w-24 h-8" viewBox="0 0 100 20" preserveAspectRatio="none">
         <path [attr.d]="path" fill="none" [attr.stroke]="color" stroke-width="2"/>
       </svg>
-    </ng-container>
-    <ng-template #noData>
+    } @else {
       <div class="w-24 h-8 flex items-center justify-center">
         <span class="text-xs text-gray-400">-</span>
       </div>
-    </ng-template>
+    }
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,
 })

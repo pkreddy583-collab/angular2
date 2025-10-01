@@ -1,0 +1,168 @@
+<main class="container mx-auto p-4 sm:p-6 lg:p-8">
+  <!-- Header -->
+  <header class="mb-8">
+    <div class="flex flex-wrap items-center justify-between gap-4">
+      <div>
+        <h1 class="text-3xl font-bold text-gray-800 flex items-center">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 mr-3 text-blue-500" viewBox="0 0 20 20" fill="currentColor"><path d="M5 4a1 1 0 00-2 0v7.268a2 2 0 000 3.464V16a1 1 0 102 0v-1.268a2 2 0 000-3.464V4zM11 4a1 1 0 10-2 0v1.268a2 2 0 000 3.464V16a1 1 0 102 0V8.732a2 2 0 000-3.464V4zM16 3a1 1 0 011 1v7.268a2 2 0 010 3.464V16a1 1 0 11-2 0v-1.268a2 2 0 010-3.464V4a1 1 0 011-1z" /></svg>
+          My Dashboard
+        </h1>
+        <p class="mt-1 text-gray-500">Your personal, customizable view of key operational metrics.</p>
+      </div>
+      <a routerLink="/command-center" class="text-sm font-medium text-blue-600 hover:text-blue-800 hover:underline">
+        Pin more widgets &rarr;
+      </a>
+    </div>
+  </header>
+
+  @if (pinnedWidgets().length === 0) {
+    <div class="text-center py-20 bg-white rounded-lg border-2 border-dashed">
+      <svg xmlns="http://www.w3.org/2000/svg" class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M8 3a1 1 0 011-1h2a1 1 0 110 2H9a1 1 0 01-1-1z" />
+        <path stroke-linecap="round" stroke-linejoin="round" d="M6 3a2 2 0 00-2 2v11a2 2 0 002 2h8a2 2 0 002-2V5a2 2 0 00-2-2 3 3 0 01-3 3H9a3 3 0 01-3-3z" />
+        <path stroke-linecap="round" stroke-linejoin="round" d="M12 18.75a.75.75 0 00.75-.75V13.5a.75.75 0 00-1.5 0v4.5a.75.75 0 00.75.75z" />
+        <path stroke-linecap="round" stroke-linejoin="round" d="M12 8.25a.75.75 0 01.75-.75h.008a.75.75 0 01.75.75v.008a.75.75 0 01-.75.75H12a.75.75 0 01-.75-.75V8.25z" />
+      </svg>
+      <p class="mt-2 font-semibold text-gray-700">Your dashboard is empty.</p>
+      <p class="text-sm text-gray-500">Go to the <a routerLink="/command-center" class="text-blue-600 hover:underline">Ops Command Center</a> to pin widgets.</p>
+    </div>
+  } @else {
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-6 auto-rows-min">
+      @for(widget of pinnedWidgets(); track widget.id) {
+        <div class="relative group" [class]="(widget.id === 'ticket-trend-line-chart' || widget.id === 'application-trend-grid' || widget.id === 'value-stream-trend-grid' || widget.id === 'main-kpis') ? 'md:col-span-4' : 'md:col-span-2'">
+          <button (click)="unpin(widget.id)" class="absolute -top-2 -right-2 z-10 p-1 rounded-full bg-red-500 text-white opacity-0 group-hover:opacity-100 hover:bg-red-600 transition-opacity" title="Unpin from dashboard">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5.293 3.293a1 1 0 011.414 0L10 6.586l3.293-3.293a1 1 0 111.414 1.414L11.414 8l3.293 3.293a1 1 0 01-1.414 1.414L10 9.414l-3.293 3.293a1 1 0 01-1.414-1.414L8.586 8 5.293 4.707a1 1 0 010-1.414z" clip-rule="evenodd" /></svg>
+          </button>
+
+          @switch (widget.id) {
+            @case('top-kpis') {
+              <div class="bg-white rounded-lg shadow-md p-4 grid grid-cols-1 sm:grid-cols-3 gap-6 h-full">
+                @for (kpi of topKpis; track kpi.label) {
+                  <div class="flex justify-between items-center">
+                    <div>
+                      <p class="text-sm text-gray-500">{{ kpi.label }}</p>
+                      <p class="text-3xl font-bold text-gray-800">{{ kpi.value }}</p>
+                    </div>
+                  </div>
+                }
+              </div>
+            }
+            @case('main-kpis') {
+              <div class="bg-blue-700 text-white rounded-lg shadow-lg p-4 grid grid-cols-2 md:grid-cols-5 gap-4 text-center">
+                @for (kpi of mainKpis; track kpi.label) {
+                  <div>
+                    <p class="text-xs text-blue-200 uppercase">{{ kpi.label }}</p>
+                    <p class="text-3xl font-bold">{{ kpi.value }}</p>
+                  </div>
+                }
+              </div>
+            }
+            @case('ticket-trend-line-chart') {
+              <div class="bg-white rounded-lg shadow-md p-6 h-full">
+                <h2 class="text-lg font-bold text-gray-700 mb-4">Last 10 days ticket trend</h2>
+                <div class="h-72">
+                  <app-line-chart [data]="lineChartData" [height]="280"></app-line-chart>
+                </div>
+              </div>
+            }
+            @case('level-wise-pie-chart') {
+              <div class="bg-white rounded-lg shadow-md p-6 h-full">
+                <h2 class="text-lg font-bold text-gray-700 mb-2">Level wise un-resolved ticket status</h2>
+                <app-pie-chart [data]="pieDataLevelWise" [height]="150" [width]="150"></app-pie-chart>
+              </div>
+            }
+            @case('unresolved-pie-chart') {
+              <div class="bg-white rounded-lg shadow-md p-6 h-full">
+                <h2 class="text-lg font-bold text-gray-700 mb-2">Un-resolved ticket status</h2>
+                <app-pie-chart [data]="pieDataUnresolved" [height]="150" [width]="150"></app-pie-chart>
+              </div>
+            }
+             @case('unresolved-metrics') {
+              <div class="bg-white rounded-lg shadow-md p-6 h-full">
+                <h2 class="text-lg font-bold text-gray-700 mb-2">Un-resolved ticket metrics</h2>
+                <div class="flex justify-between items-center border-b pb-4">
+                  <p class="text-5xl font-bold text-gray-800">{{ unresolvedMetrics.total }}</p>
+                </div>
+                <div class="flex justify-between items-center pt-4">
+                  <div>
+                    <p class="text-2xl font-bold">{{ unresolvedMetrics.assigned }}</p>
+                    <p class="text-sm text-gray-500">Assigned State</p>
+                  </div>
+                </div>
+              </div>
+            }
+            @case('effectiveness') {
+              <div class="bg-white rounded-lg shadow-md p-6 h-full">
+                <h2 class="text-lg font-bold text-gray-700 mb-2">Effectiveness</h2>
+                <div class="grid grid-cols-3 gap-4 text-center pt-6">
+                  <div>
+                    <p class="text-4xl font-bold text-blue-600">{{ effectiveness.autoResolved }}</p>
+                    <p class="text-sm text-gray-500">Auto-resolved</p>
+                  </div>
+                  <div>
+                    <p class="text-4xl font-bold text-blue-600">{{ effectiveness.level1 }}</p>
+                    <p class="text-sm text-gray-500">Level 1</p>
+                  </div>
+                  <div>
+                    <p class="text-4xl font-bold text-blue-600">{{ effectiveness.level2 }}</p>
+                    <p class="text-sm text-gray-500">Level 2</p>
+                  </div>
+                </div>
+              </div>
+            }
+            @case('application-trend-grid') {
+               <div class="bg-white rounded-lg shadow-md h-full">
+                <div class="p-4 border-b">
+                  <h2 class="text-lg font-bold text-gray-700">Daily logged ticket trend - Top 10 applications</h2>
+                </div>
+                <div class="overflow-x-auto">
+                  <table class="w-full text-sm">
+                    <thead class="text-xs text-gray-700 bg-gray-50">
+                      <tr>
+                        <th class="p-3 text-left w-1/3">Application Name</th>
+                        <th class="p-3 text-left w-24">Trend</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      @for (item of applicationTrendData; track item.name) {
+                        <tr class="border-b hover:bg-gray-50">
+                          <td class="p-3 font-semibold text-gray-800">{{ item.name }}</td>
+                          <td class="p-3"><app-sparkline-chart [data]="item.sparkline" color="#3b82f6" /></td>
+                        </tr>
+                      }
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            }
+            @case('value-stream-trend-grid') {
+              <div class="bg-white rounded-lg shadow-md h-full">
+                <div class="p-4 border-b">
+                  <h2 class="text-lg font-bold text-gray-700">Daily logged ticket trend - Value Stream</h2>
+                </div>
+                <div class="overflow-x-auto">
+                  <table class="w-full text-sm">
+                    <thead class="text-xs text-gray-700 bg-gray-50">
+                      <tr>
+                        <th class="p-3 text-left w-1/3">Value Stream</th>
+                        <th class="p-3 text-left w-24">Trend</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      @for (item of valueStreamTrendData; track item.name) {
+                        <tr class="border-b hover:bg-gray-50">
+                          <td class="p-3 font-semibold text-gray-800">{{ item.name }}</td>
+                          <td class="p-3"><app-sparkline-chart [data]="item.sparkline" color="#3b82f6" /></td>
+                        </tr>
+                      }
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            }
+          }
+        </div>
+      }
+    </div>
+  }
+</main>
