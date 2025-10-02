@@ -1,0 +1,13 @@
+/* D3 Chart Styles */
+:host ::ng-deep .tick line {
+  stroke: #e5e7eb; /* gray-200 */
+}
+
+:host ::ng-deep .domain {
+  display: none;
+}
+
+:host ::ng-deep .tick text {
+  font-size: 10px;
+  fill: #6b7280; /* gray-500 */
+}

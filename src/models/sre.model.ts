@@ -45,6 +45,10 @@ export interface WebApp {
   certificates: SSLCertificate[];
   deployments: Deployment[];
   logs: LogEntry[];
+  slo: {
+    availability: number;
+    latency: number;
+  };
 }
 
 export interface AiInsight {

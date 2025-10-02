@@ -1,4 +1,4 @@
-import { Injectable, signal } from '@angular/core';
+import { Injectable, signal, computed } from '@angular/core';
 import { WebApp, MetricDataPoint, SreInvestigation, LogEntry, SSLCertificate } from '../models/sre.model';
 
 // Helper function to generate time-series metric data
@@ -69,6 +69,7 @@ const initialWebApps: WebApp[] = [
         p95Latency: 1850,
         cpuUtilization: 75,
         memUtilization: 68,
+        slo: { availability: 99.95, latency: 2000 },
         metrics: {
             latency: generateMetricData(30, 800, 1200, 'up', 25),
             errorRate: generateMetricData(30, 0.5, 1.5, 'up'),
@@ -94,6 +95,7 @@ const initialWebApps: WebApp[] = [
         p95Latency: 3200,
         cpuUtilization: 92,
         memUtilization: 85,
+        slo: { availability: 99.99, latency: 500 },
         metrics: {
             latency: generateMetricData(30, 1000, 2000),
             errorRate: generateMetricData(30, 1, 3, 'up'),
@@ -112,10 +114,8 @@ const initialWebApps: WebApp[] = [
 ];
 
 const initialInvestigations: SreInvestigation[] = [
-    { id: 'inv-001', title: 'High P95 Latency Detected', appId: 'app-enrollment-hub', appName: 'Enrollment Hub', status: 'Warning', timestamp: new Date(now.getTime() - 10 * 60000) },
-    { id: 'inv-002', title: 'Certificate Expired', appId: 'app-public-site', appName: 'Public Website', status: 'Critical', timestamp: new Date(now.getTime() - 2 * 24 * 3600000) },
-    { id: 'inv-003', title: 'Elevated Error Rate', appId: 'app-public-site', appName: 'Public Website', status: 'Critical', timestamp: new Date(now.getTime() - 30 * 60000) },
-    { id: 'inv-004', title: 'Certificate Nearing Expiry', appId: 'app-enrollment-hub', appName: 'Enrollment Hub', status: 'Active', timestamp: new Date(now.getTime() - 5 * 24 * 3600000) },
+    { id: 'inv-001', title: 'Investigate High P95 Latency', appId: 'app-enrollment-hub', appName: 'Enrollment Hub', status: 'Warning', timestamp: new Date(now.getTime() - 2 * 3600000) },
+    { id: 'inv-002', title: '5xx Error Spike on www.example.com', appId: 'app-public-site', appName: 'Public Website', status: 'Critical', timestamp: new Date(now.getTime() - 30 * 60000) }
 ];
 
 
@@ -133,10 +133,36 @@ export class SreService {
   getInvestigations() {
     return this._investigations.asReadonly();
   }
-  
+
   getCertificates() {
-    // Flatten certificates from all apps
-    return this._webApps().flatMap(app => app.certificates);
+    return computed(() => 
+      this._webApps().flatMap(app => app.certificates.map(cert => ({ ...cert, appName: app.name })))
+    );
+  }
+  
+  onboardWebApp(appName: string, availabilitySlo: number, latencySlo: number): void {
+    const newApp: WebApp = {
+        id: `app-${appName.toLowerCase().replace(/\s/g, '-')}`,
+        name: appName,
+        healthStatus: 'Healthy',
+        apdex: 0.99,
+        errorRate: 0.1,
+        p95Latency: 450,
+        cpuUtilization: 30,
+        memUtilization: 45,
+        slo: { availability: availabilitySlo, latency: latencySlo },
+        metrics: {
+            latency: generateMetricData(30, 300, 500),
+            errorRate: generateMetricData(30, 0, 0.5),
+            cpu: generateMetricData(30, 20, 40),
+            memory: generateMetricData(30, 40, 50)
+        },
+        certificates: [],
+        deployments: [],
+        logs: generateLogs(appName, 0.1)
+    };
+
+    this._webApps.update(apps => [...apps, newApp].sort((a,b) => a.name.localeCompare(b.name)));
   }
 
   updateCertificateStatus(domain: string, newStatus: 'Valid') {

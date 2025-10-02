@@ -1,0 +1,128 @@
+<main class="h-[calc(100vh-80px)] flex bg-gray-100">
+  <!-- Sidebar for Applications -->
+  <aside class="w-1/4 bg-white border-r border-gray-200 p-4 flex flex-col">
+    <div class="flex justify-between items-center mb-4">
+      <h2 class="text-lg font-bold text-gray-800">Monitored Apps</h2>
+      <button (click)="openOnboardModal()" class="p-1 text-blue-600 hover:bg-blue-100 rounded-full" title="Onboard New App">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v6m3-3H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+      </button>
+    </div>
+    <div class="flex-grow space-y-2 overflow-y-auto">
+      @for (app of allWebApps(); track app.id) {
+        <button 
+          (click)="selectApp(app.id)"
+          class="w-full text-left p-3 rounded-lg flex items-center justify-between transition-colors duration-200"
+          [class]="selectedAppId() === app.id ? 'bg-blue-100 text-blue-800' : 'text-gray-600 hover:bg-gray-100'">
+          <span class="font-semibold">{{ app.name }}</span>
+          <span class="w-3 h-3 rounded-full" [class]="getHealthStatusClass(app.healthStatus)"></span>
+        </button>
+      }
+    </div>
+  </aside>
+
+  <!-- Main Content Area -->
+  <div class="w-3/4 overflow-y-auto p-6">
+    @if (selectedApp(); as app) {
+      <header class="mb-6">
+        <div class="flex items-center gap-4">
+          <h1 class="text-3xl font-extrabold text-gray-900">{{ app.name }}</h1>
+          <span class="text-xs font-semibold px-2.5 py-1 rounded-full text-white" [class]="getHealthStatusClass(app.healthStatus)">{{ app.healthStatus }}</span>
+        </div>
+      </header>
+      
+      <!-- Tabs -->
+      <div class="border-b border-gray-200 mb-6">
+        <nav class="-mb-px flex space-x-6">
+          <button (click)="selectSubView('dashboard')" [class]="activeSubView() === 'dashboard' ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700'" class="whitespace-nowrap py-3 px-1 border-b-2 font-medium text-sm">Dashboard</button>
+          <button (click)="selectSubView('error-budget')" [class]="activeSubView() === 'error-budget' ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700'" class="whitespace-nowrap py-3 px-1 border-b-2 font-medium text-sm">Error Budget</button>
+          <button (click)="selectSubView('deployments')" [class]="activeSubView() === 'deployments' ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700'" class="whitespace-nowrap py-3 px-1 border-b-2 font-medium text-sm">Deployments</button>
+          <button (click)="selectSubView('logs')" [class]="activeSubView() === 'logs' ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700'" class="whitespace-nowrap py-3 px-1 border-b-2 font-medium text-sm">Logs</button>
+        </nav>
+      </div>
+
+      @switch (activeSubView()) {
+        @case ('dashboard') {
+          <div class="space-y-6">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div class="bg-white p-4 rounded-lg shadow-sm border"><p class="text-sm text-gray-500">Apdex Score</p><p class="text-3xl font-bold">{{ app.apdex }}</p></div>
+              <div class="bg-white p-4 rounded-lg shadow-sm border"><p class="text-sm text-gray-500">Error Rate</p><p class="text-3xl font-bold">{{ app.errorRate }}%</p></div>
+              <div class="bg-white p-4 rounded-lg shadow-sm border"><p class="text-sm text-gray-500">P95 Latency</p><p class="text-3xl font-bold">{{ app.p95Latency }}ms</p></div>
+            </div>
+            
+            <div class="bg-blue-50/70 border border-blue-200 rounded-lg p-6">
+              <h3 class="font-bold text-blue-800 mb-2">Strider AI Insight</h3>
+              @if (isLoadingInsight()) {
+                 <p class="text-sm text-gray-500">Analyzing metrics...</p>
+              } @else if (aiInsight(); as insight) {
+                <p class="text-sm text-gray-700"><strong>{{ insight.title }}:</strong> {{ insight.description }}</p>
+              } @else {
+                 <button (click)="getAiInsight()" class="text-sm font-semibold text-blue-600">Get AI Insight</button>
+              }
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div class="bg-white p-4 rounded-lg shadow-sm border"><h4 class="font-semibold mb-2">CPU Utilization (%)</h4><app-sre-chart [data]="app.metrics.cpu" color="#8b5cf6" [height]="150"></app-sre-chart></div>
+              <div class="bg-white p-4 rounded-lg shadow-sm border"><h4 class="font-semibold mb-2">Memory Utilization (%)</h4><app-sre-chart [data]="app.metrics.memory" color="#ec4899" [height]="150"></app-sre-chart></div>
+              <div class="bg-white p-4 rounded-lg shadow-sm border md:col-span-2"><h4 class="font-semibold mb-2">P95 Latency (ms)</h4><app-sre-chart [data]="app.metrics.latency" color="#3b82f6" [height]="150"></app-sre-chart></div>
+            </div>
+          </div>
+        }
+        @case ('error-budget') {
+          @if(errorBudget(); as budget) {
+            <div class="bg-white p-6 rounded-lg shadow-md border">
+              <h3 class="text-xl font-bold text-gray-700 mb-4">Monthly Error Budget ({{ app.slo.availability }}% SLO)</h3>
+              <div class="space-y-4">
+                <div>
+                  <div class="flex justify-between text-sm mb-1">
+                    <span class="font-medium">Budget Consumed: {{ budget.consumedMinutes | number:'1.2-2' }} / {{ budget.budgetMinutes | number:'1.2-2' }} minutes</span>
+                    <span class="font-medium">Remaining: {{ budget.remainingMinutes | number:'1.2-2' }} minutes</span>
+                  </div>
+                  <div class="w-full bg-gray-200 rounded-full h-4">
+                    <div class="h-4 rounded-full" [class]="budget.consumedPercentage < 80 ? 'bg-blue-500' : 'bg-red-500'" [style.width.%]="budget.consumedPercentage"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          }
+        }
+        @case ('deployments') {
+           <div class="bg-white p-6 rounded-lg shadow-md border"><h3 class="text-xl font-bold text-gray-700 mb-4">Deployment History</h3></div>
+        }
+         @case ('logs') {
+           <div class="bg-white p-6 rounded-lg shadow-md border"><h3 class="text-xl font-bold text-gray-700 mb-4">Live Logs</h3></div>
+        }
+      }
+    } @else {
+       <p class="text-center text-gray-500">Select an application to view its SRE dashboard.</p>
+    }
+  </div>
+
+  <!-- Onboard New App Modal -->
+  @if(isModalOpen()) {
+    <div class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center" (click)="closeOnboardModal()">
+      <div class="bg-white rounded-lg shadow-xl p-6 w-full max-w-lg" (click)="$event.stopPropagation()">
+        <h2 class="text-xl font-bold text-gray-800 mb-4">Onboard New Application</h2>
+        <form [formGroup]="onboardingForm" (ngSubmit)="submitOnboardApp()">
+          <div class="space-y-4">
+            <div>
+              <label class="block text-sm font-medium text-gray-700">Application Name</label>
+              <input formControlName="appName" type="text" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm">
+            </div>
+             <div>
+              <label class="block text-sm font-medium text-gray-700">Availability SLO (%)</label>
+              <input formControlName="availabilitySlo" type="number" step="0.01" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm">
+            </div>
+             <div>
+              <label class="block text-sm font-medium text-gray-700">Latency SLO (ms)</label>
+              <input formControlName="latencySlo" type="number" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm">
+            </div>
+          </div>
+          <div class="mt-6 flex justify-end gap-3">
+            <button type="button" (click)="closeOnboardModal()" class="px-4 py-2 bg-gray-200 text-gray-800 rounded-md hover:bg-gray-300">Cancel</button>
+            <button type="submit" [disabled]="onboardingForm.invalid" class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:bg-gray-400">Onboard App</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  }
+</main>

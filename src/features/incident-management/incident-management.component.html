@@ -1,0 +1,149 @@
+<main class="container mx-auto p-4 sm:p-6 lg:p-8">
+  <!-- Header -->
+  <header class="mb-8">
+    <h1 class="text-3xl font-bold text-gray-800 flex items-center">
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 mr-3 text-blue-500" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
+      </svg>
+      Incident Management Hub
+    </h1>
+    <p class="mt-1 text-gray-500">A holistic view for trend analysis, knowledge reuse, and incident triage.</p>
+  </header>
+
+  <!-- Top KPIs -->
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+    @for (kpi of kpis(); track kpi.label) {
+      <div class="bg-white rounded-lg shadow-md p-5 border-l-4 border-blue-500">
+        <p class="text-sm font-semibold text-gray-500">{{ kpi.label }}</p>
+        <div class="flex items-baseline justify-between mt-1">
+          <p class="text-3xl font-bold text-gray-800">{{ kpi.value }}</p>
+          <div class="flex items-center text-sm font-semibold" [class]="kpi.trendDirection === 'down' ? 'text-green-600' : 'text-red-600'">
+            @if (kpi.trendDirection === 'down') {
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M19 14l-7 7m0 0l-7-7m7 7V3" /></svg>
+            } @else {
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M5 10l7-7m0 0l7 7m-7-7v18" /></svg>
+            }
+            <span>{{ kpi.trend }}</span>
+          </div>
+        </div>
+      </div>
+    }
+  </div>
+
+  <!-- Trends and Analysis -->
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
+    <div class="lg:col-span-2 bg-white rounded-lg shadow-md p-6">
+      <h2 class="text-xl font-bold text-gray-700 mb-4">Major Incident Trend (Last 30 Days)</h2>
+      <div #trendChartContainer class="w-full h-[200px]"></div>
+    </div>
+    <div class="bg-white rounded-lg shadow-md p-6">
+      <h2 class="text-xl font-bold text-gray-700 mb-4">Causal Analysis</h2>
+      <div class="space-y-3">
+        @for (item of causalAnalysis(); track item.cause) {
+          <div>
+            <div class="flex justify-between mb-1 text-sm font-medium text-gray-700">
+              <span>{{ item.cause }}</span>
+              <span>{{ item.percentage }}%</span>
+            </div>
+            <div class="w-full bg-gray-200 rounded-full h-2.5">
+              <div class="h-2.5 rounded-full" [style.width.%]="item.percentage" [style.background-color]="item.color"></div>
+            </div>
+          </div>
+        }
+      </div>
+    </div>
+  </div>
+
+  <!-- Knowledgebase -->
+  <div class="bg-white rounded-lg shadow-md mb-8">
+    <div class="p-6 border-b">
+      <h2 class="text-xl font-bold text-gray-700 mb-2">Major Incident Knowledgebase</h2>
+      <div class="relative">
+        <input [formControl]="kbSearchControl" type="text" placeholder="Search knowledgebase by title, cause, resolution, or tag..." class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md bg-white text-gray-900 focus:ring-blue-500 focus:border-blue-500">
+        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+          <svg class="h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd" /></svg>
+        </div>
+      </div>
+    </div>
+    <div class="p-6 max-h-96 overflow-y-auto">
+      <div class="space-y-4">
+        @for (entry of filteredKnowledgebase(); track entry.id) {
+          <div class="bg-gray-50 p-4 rounded-lg border">
+            <h3 class="font-bold text-blue-600">{{ entry.title }}</h3>
+            <p class="text-sm mt-1"><strong class="text-gray-600">Cause:</strong> {{ entry.cause }}</p>
+            <p class="text-sm mt-1"><strong class="text-gray-600">Resolution:</strong> {{ entry.resolution }}</p>
+            <div class="flex gap-2 mt-2">
+              @for (tag of entry.tags; track tag) {
+                <span class="text-xs font-semibold px-2 py-0.5 rounded-full bg-gray-200 text-gray-700">{{ tag }}</span>
+              }
+            </div>
+          </div>
+        } @empty {
+          <p class="text-center text-gray-500 py-8">No knowledgebase entries found for your search.</p>
+        }
+      </div>
+    </div>
+  </div>
+  
+  <!-- Triage Queue -->
+  <div class="bg-white rounded-lg shadow-md">
+    <div class="p-6 border-b">
+      <h2 class="text-xl font-bold text-gray-700">Triage Queue - Unclassified Incidents</h2>
+    </div>
+    <div class="overflow-x-auto">
+      <table class="w-full text-sm">
+        <thead class="text-xs text-gray-700 uppercase bg-gray-50">
+          <tr>
+            <th class="p-4 text-left w-2/5">Incident Details</th>
+            <th class="p-4 text-center">Impact</th>
+            <th class="p-4 text-center">Urgency</th>
+            <th class="p-4 text-center">Severity</th>
+            <th class="p-4 text-left">Category</th>
+            <th class="p-4 text-left">Assignee</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (item of triageQueue(); track item.id) {
+            <tr class="border-b hover:bg-gray-50">
+              <td class="p-4">
+                <p class="font-semibold text-gray-800">{{ item.title }}</p>
+                <p class="text-xs text-gray-500">{{ item.description }}</p>
+              </td>
+              <td class="p-4 align-top">
+                <select [value]="item.impact" (change)="onImpactChange(item.id, $event.target.value)" class="w-full border-gray-300 rounded-md shadow-sm text-sm bg-white text-gray-900">
+                  <option value="1">1 - Extensive</option>
+                  <option value="2">2 - Significant</option>
+                  <option value="3">3 - Moderate</option>
+                  <option value="4">4 - Minor</option>
+                </select>
+              </td>
+              <td class="p-4 align-top">
+                <select [value]="item.urgency" (change)="onUrgencyChange(item.id, $event.target.value)" class="w-full border-gray-300 rounded-md shadow-sm text-sm bg-white text-gray-900">
+                  <option value="1">1 - Critical</option>
+                  <option value="2">2 - High</option>
+                  <option value="3">3 - Medium</option>
+                  <option value="4">4 - Low</option>
+                </select>
+              </td>
+              <td class="p-4 align-top text-center">
+                <span class="font-bold text-lg px-3 py-1 rounded-md" [class]="getSeverityClass(item.severity)">{{ item.severity }}</span>
+              </td>
+              <td class="p-4 align-top">
+                 <select [value]="item.category" (change)="onFieldChange(item.id, 'category', $event.target.value)" class="w-full border-gray-300 rounded-md shadow-sm text-sm bg-white text-gray-900">
+                  @for (cat of categories; track cat) { <option [value]="cat">{{ cat }}</option> }
+                </select>
+              </td>
+              <td class="p-4 align-top">
+                 <select [value]="item.assignee" (change)="onFieldChange(item.id, 'assignee', $event.target.value)" class="w-full border-gray-300 rounded-md shadow-sm text-sm bg-white text-gray-900">
+                   @for (user of assignees; track user) { <option [value]="user">{{ user }}</option> }
+                </select>
+              </td>
+            </tr>
+          } @empty {
+            <tr><td colspan="6" class="p-8 text-center text-gray-500">Triage queue is clear!</td></tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  </div>
+</main>

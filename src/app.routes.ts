@@ -20,15 +20,23 @@ import { OnCallRosterComponent } from './features/on-call-roster/on-call-roster.
 import { JourneyBuilderComponent } from './features/observability/journey-builder/journey-builder.component';
 import { CommandCenterComponent } from './features/command-center/command-center.component';
 import { MyDashboardComponent } from './features/my-dashboard/my-dashboard.component';
+import { IncidentManagementComponent } from './features/incident-management/incident-management.component';
+import { ChangeManagementComponent } from './features/change-management/change-management.component';
+import { SreWorkbenchComponent } from './features/sre-workbench/sre-workbench.component';
 
 export const routes: Routes = [
   // Incident Feature Routes
   { path: '', component: DashboardComponent, title: 'SLA Watchtower' },
   { path: 'command-center', component: CommandCenterComponent, title: 'Operations Command Center' },
   { path: 'my-dashboard', component: MyDashboardComponent, title: 'My Dashboard' },
+  { path: 'incident-management', component: IncidentManagementComponent, title: 'Incident Management Hub' },
+  { path: 'change-management', component: ChangeManagementComponent, title: 'Change Management Hub' },
   { path: 'incident/:id', component: IncidentDetailsComponent, title: 'Incident Details' },
   { path: 'ai-roi', component: AiRoiDashboardComponent, title: 'AI ROI Dashboard' },
   
+  // SRE Workbench Route
+  { path: 'sre-workbench', component: SreWorkbenchComponent, title: 'SRE Workbench' },
+
   // Observability Feature Routes
   { path: 'observability', component: ObservabilityDashboardComponent, title: 'Observability Dashboard' },
   { path: 'observability/builder', component: JourneyBuilderComponent, title: 'Journey Builder' },
