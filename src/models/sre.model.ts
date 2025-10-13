@@ -35,6 +35,7 @@ export interface LogEntry {
 export interface WebApp {
   id: string;
   name: string;
+  businessCriticality: 'Tier 1' | 'Tier 2' | 'Tier 3';
   healthStatus: 'Healthy' | 'Warning' | 'Critical';
   apdex: number;
   errorRate: number;
@@ -48,6 +49,8 @@ export interface WebApp {
   slo: {
     availability: number;
     latency: number;
+    availabilityTrend: 'up' | 'down' | 'same';
+    latencyTrend: 'up' | 'down' | 'same';
   };
 }
 

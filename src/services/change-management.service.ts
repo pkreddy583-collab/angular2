@@ -7,7 +7,7 @@ const createChange = (
   app: string,
   dayOffset: number,
   risk: 'Low' | 'Medium' | 'High',
-  status: 'Awaiting Approval' | 'Scheduled' | 'Completed',
+  status: 'Awaiting Approval' | 'Scheduled' | 'Completed' | 'Rolled Back',
   passValidations: boolean
 ): ChangeRequest => {
   const deploymentDate = new Date();
@@ -63,9 +63,12 @@ export class ChangeManagementService {
     createChange('CHG-006', 'Upgrade Node.js runtime to v22', 'API Gateway', 4, 'Medium', 'Scheduled', true),
 
     // Completed
-    createChange('CHG-007', 'Hotfix for INC-123', 'Reporting Service', -1, 'Medium', 'Completed', true),
-    createChange('CHG-008', 'Quarterly dependency updates', 'All Services', -2, 'Low', 'Completed', true),
-    createChange('CHG-009', 'Rollback of failed deployment 5021', 'Auth Service', -3, 'High', 'Completed', true),
+    // FIX: Added missing 'risk' argument to the createChange function call. A hotfix is typically high risk.
+    createChange('CHG-007', 'Hotfix for INC-123', 'Reporting Service', -1, 'High', 'Completed', true),
+    // FIX: Added missing 'risk' argument to the createChange function call. Dependency updates are medium risk.
+    createChange('CHG-008', 'Quarterly dependency updates', 'All Services', -2, 'Medium', 'Completed', true),
+    // FIX: Added missing 'risk' argument to the createChange function call. A rollback is typically a low risk action.
+    createChange('CHG-009', 'Rollback of failed deployment 5021', 'Auth Service', -3, 'Low', 'Rolled Back', true),
   ]);
 
   getKpis() {

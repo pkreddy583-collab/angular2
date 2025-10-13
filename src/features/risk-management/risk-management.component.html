@@ -1,0 +1,101 @@
+<main class="h-[calc(100vh-140px)] flex flex-col p-4 sm:p-6 lg:p-8">
+  <!-- Header -->
+  <header class="mb-6 flex-shrink-0">
+    <h1 class="text-3xl font-bold text-gray-800 flex items-center">
+       <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 mr-3 text-blue-500" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
+      </svg>
+      Risk Management
+    </h1>
+    <p class="mt-1 text-gray-500">Identify, assess, and mitigate risks across the organization.</p>
+  </header>
+  
+  <!-- Summary KPIs -->
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6 flex-shrink-0">
+     <div class="bg-white rounded-lg shadow-md p-5 border-l-4 border-yellow-500">
+      <p class="text-sm font-semibold text-gray-500">Total Open Risks</p>
+      <p class="text-3xl font-bold text-gray-800 mt-1">{{ totalOpenRisks() }}</p>
+    </div>
+     <div class="bg-white rounded-lg shadow-md p-5 border-l-4 border-red-500">
+      <p class="text-sm font-semibold text-gray-500">High & Critical Impact Risks</p>
+      <p class="text-3xl font-bold text-red-600 mt-1">{{ highImpactRisks() }}</p>
+    </div>
+  </div>
+
+
+  <!-- Kanban Board -->
+  <div class="kanban-board flex-grow">
+    <!-- New Column -->
+    <div class="kanban-column">
+      <div class="kanban-column-header">
+        <h2 class="kanban-column-title">New</h2>
+        <span class="text-sm font-bold text-gray-500">{{ newRisks().length }}</span>
+      </div>
+      <div class="kanban-cards">
+        @for (risk of newRisks(); track risk.id) {
+          <div class="risk-card">
+            <p class="font-semibold text-gray-800">{{ risk.title }}</p>
+            <div class="flex justify-between items-center mt-3 text-xs">
+              <span class="font-bold px-2 py-0.5 rounded" [class]="getRiskScoreClass(getRiskScore(risk))">Score: {{ getRiskScore(risk) }}</span>
+              <span class="text-gray-500">Owner: {{ risk.owner }}</span>
+            </div>
+          </div>
+        }
+      </div>
+    </div>
+    <!-- Under Review Column -->
+    <div class="kanban-column">
+      <div class="kanban-column-header">
+        <h2 class="kanban-column-title">Under Review</h2>
+        <span class="text-sm font-bold text-gray-500">{{ underReviewRisks().length }}</span>
+      </div>
+       <div class="kanban-cards">
+        @for (risk of underReviewRisks(); track risk.id) {
+          <div class="risk-card">
+            <p class="font-semibold text-gray-800">{{ risk.title }}</p>
+            <div class="flex justify-between items-center mt-3 text-xs">
+              <span class="font-bold px-2 py-0.5 rounded" [class]="getRiskScoreClass(getRiskScore(risk))">Score: {{ getRiskScore(risk) }}</span>
+              <span class="text-gray-500">Owner: {{ risk.owner }}</span>
+            </div>
+          </div>
+        }
+      </div>
+    </div>
+    <!-- Mitigation Plan Column -->
+    <div class="kanban-column">
+       <div class="kanban-column-header">
+        <h2 class="kanban-column-title">Mitigation Plan</h2>
+        <span class="text-sm font-bold text-gray-500">{{ mitigationPlanRisks().length }}</span>
+      </div>
+       <div class="kanban-cards">
+        @for (risk of mitigationPlanRisks(); track risk.id) {
+          <div class="risk-card">
+            <p class="font-semibold text-gray-800">{{ risk.title }}</p>
+            <div class="flex justify-between items-center mt-3 text-xs">
+              <span class="font-bold px-2 py-0.5 rounded" [class]="getRiskScoreClass(getRiskScore(risk))">Score: {{ getRiskScore(risk) }}</span>
+              <span class="text-gray-500">Owner: {{ risk.owner }}</span>
+            </div>
+          </div>
+        }
+      </div>
+    </div>
+     <!-- Accepted Column -->
+    <div class="kanban-column">
+       <div class="kanban-column-header">
+        <h2 class="kanban-column-title">Accepted</h2>
+        <span class="text-sm font-bold text-gray-500">{{ acceptedRisks().length }}</span>
+      </div>
+       <div class="kanban-cards">
+        @for (risk of acceptedRisks(); track risk.id) {
+          <div class="risk-card opacity-70">
+            <p class="font-semibold text-gray-800">{{ risk.title }}</p>
+            <div class="flex justify-between items-center mt-3 text-xs">
+              <span class="font-bold px-2 py-0.5 rounded" [class]="getRiskScoreClass(getRiskScore(risk))">Score: {{ getRiskScore(risk) }}</span>
+              <span class="text-gray-500">Owner: {{ risk.owner }}</span>
+            </div>
+          </div>
+        }
+      </div>
+    </div>
+  </div>
+</main>

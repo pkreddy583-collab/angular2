@@ -1,13 +1,19 @@
 <main class="container mx-auto p-4 sm:p-6 lg:p-8">
   <!-- Header -->
-  <header class="mb-8">
-    <h1 class="text-3xl font-bold text-gray-800 flex items-center">
-      <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 mr-3 text-blue-500" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-        <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-      </svg>
-      Change Management Hub
-    </h1>
-    <p class="mt-1 text-gray-500">A central dashboard for change validation, approval, and timeline tracking.</p>
+  <header class="mb-8 flex justify-between items-center">
+    <div>
+      <h1 class="text-3xl font-bold text-gray-800 flex items-center">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 mr-3 text-blue-500" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+        Change Management Hub
+      </h1>
+      <p class="mt-1 text-gray-500">A central dashboard for change validation, approval, and timeline tracking.</p>
+    </div>
+    <button (click)="openCreateModal()" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-green-600 hover:bg-green-700">
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd" /></svg>
+      Create Change Request
+    </button>
   </header>
 
   <!-- Top KPIs -->
@@ -82,8 +88,8 @@
               <div class="timeline-changes">
                 @for (change of getChangesForDate(day); track change.id) {
                   <div (click)="selectChange(change, $event)" class="change-item" [class]="getRiskClass(change.risk)">
-                    <p class="font-semibold text-xs truncate">{{ change.title }}</p>
-                    <p class="text-xs opacity-80 truncate">{{ change.application }}</p>
+                    <p class="font-semibold text-xs">{{ change.title }}</p>
+                    <p class="text-xs opacity-80">{{ change.application }}</p>
                   </div>
                 }
               </div>
@@ -136,10 +142,19 @@
         @if (selectedChange(); as change) {
           <div class="mt-4 space-y-4">
             <h3 class="text-lg font-bold text-gray-900">{{ change.id }}: {{ change.title }}</h3>
-            <div class="text-sm space-y-2">
-              <p><strong class="text-gray-600">Application:</strong> {{ change.application }}</p>
-              <p><strong class="text-gray-600">Deployment:</strong> {{ change.deploymentDate | date:'fullDate' }} at 2:00 AM</p>
-              <p><strong class="text-gray-600">Risk:</strong> <span class="font-bold" [class]="getRiskClass(change.risk).split(' ')[1]">{{ change.risk }}</span></p>
+            <div class="grid grid-cols-[auto_1fr] gap-x-4 gap-y-2 text-sm items-center">
+                <p class="text-gray-500 font-medium text-right">Application</p>
+                <p class="font-semibold text-gray-800">{{ change.application }}</p>
+
+                <p class="text-gray-500 font-medium text-right">Deployment</p>
+                <p class="font-semibold text-gray-800">{{ change.deploymentDate | date:'fullDate' }} at 2:00 AM</p>
+
+                <p class="text-gray-500 font-medium text-right">Risk</p>
+                <p>
+                    <span class="text-xs font-bold px-2.5 py-1 rounded-full" [class]="getRiskClass(change.risk)">
+                        {{ change.risk }}
+                    </span>
+                </p>
             </div>
             
             <div class="border-t pt-4">
@@ -176,4 +191,51 @@
       </div>
     </div>
   </div>
+
+  <!-- Self-Service Create Change Modal -->
+  @if (isCreateModalOpen()) {
+    <div class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4" (click)="closeCreateModal()">
+      <div class="bg-white rounded-lg shadow-xl w-full max-w-lg" (click)="$event.stopPropagation()">
+        <form [formGroup]="changeRequestForm" (ngSubmit)="submitChangeRequest()">
+          <div class="p-6 border-b">
+            <h2 class="text-xl font-bold text-gray-800">Create Self-Service Change Request</h2>
+          </div>
+          <div class="p-6 space-y-4">
+            <div>
+              <label for="appName" class="block text-sm font-medium text-gray-700">Application</label>
+              <input type="text" id="appName" formControlName="application" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm">
+            </div>
+            <div>
+              <label for="title" class="block text-sm font-medium text-gray-700">Change Title</label>
+              <input type="text" id="title" formControlName="title" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm">
+            </div>
+             <div>
+              <label for="description" class="block text-sm font-medium text-gray-700">Description</label>
+              <textarea id="description" formControlName="description" rows="3" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm"></textarea>
+            </div>
+             <div>
+              <label for="deploymentDate" class="block text-sm font-medium text-gray-700">Desired Deployment Date</label>
+              <input type="date" id="deploymentDate" formControlName="deploymentDate" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm">
+            </div>
+
+            @if(aiRiskAssessment().show) {
+              <div class="border-t pt-4">
+                <h3 class="text-md font-bold text-gray-800 mb-2 flex items-center">AI Risk Assessment</h3>
+                <div class="p-3 rounded-md border" [class]="getRiskClass(aiRiskAssessment().risk)">
+                    <p class="font-bold">Risk Level: {{ aiRiskAssessment().risk }}</p>
+                    <p class="text-sm mt-1">{{ aiRiskAssessment().summary }}</p>
+                </div>
+              </div>
+            }
+          </div>
+          <div class="px-6 py-4 bg-gray-50 flex justify-end gap-3">
+            <button type="button" (click)="closeCreateModal()" class="px-4 py-2 bg-gray-200 text-gray-800 rounded-md hover:bg-gray-300">Cancel</button>
+            <button type="submit" [disabled]="changeRequestForm.invalid || isSubmitting()" class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:bg-gray-400">
+              {{ isSubmitting() ? 'Assessing Risk...' : 'Submit for AI Assessment' }}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  }
 </main>

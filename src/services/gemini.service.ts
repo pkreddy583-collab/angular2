@@ -8,6 +8,9 @@ import { PostmortemReport, TimelineEvent, ActionItem } from '../models/postmorte
 import { FinOpsApp, SavingsOpportunity } from '../models/finops.model';
 import { PredictionResult } from '../models/predictive.model';
 import { AiRoiSummary } from '../models/ai-roi.model';
+import { Problem } from '../models/problem.model';
+import { ConfigurationItem } from '../models/configuration-item.model';
+import { BusinessService } from '../models/business-user.model';
 
 @Injectable({
   providedIn: 'root',
@@ -87,6 +90,107 @@ export class GeminiService {
     } catch (error) {
       console.error('Error generating EOD summary:', error);
       return 'Error generating summary. Please try again.';
+    }
+  }
+
+  async generateRcaSummary(problem: Problem, incidents: Incident[]): Promise<string> {
+    if (!this.ai) {
+      return 'AI service is not initialized. Please check API key.';
+    }
+
+    const incidentDetails = incidents.map(inc => 
+      `- ${inc.id}: ${inc.title}\n  Description: ${inc.description}\n  Last Update: ${inc.lastUpdate}`
+    ).join('\n\n');
+
+    const prompt = `You are a Senior SRE performing a Root Cause Analysis (RCA).
+
+    Problem Title: "${problem.title}"
+    
+    Linked Incidents:
+    ${incidentDetails}
+    
+    Investigation Notes:
+    ${problem.investigationNotes?.map(n => `- ${n.timestamp.toISOString()}: ${n.note}`).join('\n') || 'No notes available.'}
+
+    Based on all the information above, write a concise but thorough Root Cause Analysis summary. Conclude with a clear statement of the root cause.`;
+
+    try {
+      const response: GenerateContentResponse = await this.ai.models.generateContent({
+        model: 'gemini-2.5-flash',
+        contents: prompt,
+      });
+      return response.text.trim();
+    } catch (error) {
+      console.error('Error generating RCA summary:', error);
+      return 'Error generating summary. Please try again.';
+    }
+  }
+
+  async generateCiImpactAnalysis(ci: ConfigurationItem, relatedCis: {item: ConfigurationItem, type: string}[]): Promise<string> {
+    if (!this.ai) {
+      return 'AI service is not initialized.';
+    }
+
+    const dependencies = relatedCis.filter(r => r.type === 'Depends on').map(r => `- ${r.item.name} (${r.item.type})`).join('\n');
+    const dependents = relatedCis.filter(r => r.type === 'Used by').map(r => `- ${r.item.name} (${r.item.type})`).join('\n');
+
+    const prompt = `You are an expert Site Reliability Engineer (SRE) performing an impact analysis.
+    
+    A critical alert has been received for the following Configuration Item (CI):
+    - Name: ${ci.name}
+    - Type: ${ci.type}
+    - Environment: ${ci.environment}
+    
+    This CI has the following relationships:
+    
+    Downstream Dependencies (what it depends on):
+    ${dependencies || '- None'}
+    
+    Upstream Dependents (what depends on it):
+    ${dependents || '- None'}
+    
+    Assuming the primary CI "${ci.name}" is completely offline, write a concise impact analysis. Identify the "blast radius" by listing which other applications or business processes would be directly impacted.`;
+
+    try {
+      const response: GenerateContentResponse = await this.ai.models.generateContent({
+        model: 'gemini-2.5-flash',
+        contents: prompt,
+      });
+      return response.text.trim();
+    } catch (error) {
+      console.error('Error generating CI impact analysis:', error);
+      return 'Error generating analysis. Please try again.';
+    }
+  }
+
+  async getAiConciergeResponse(query: string, userServices: BusinessService[]): Promise<string> {
+    if (!this.ai) {
+      return 'AI service is not initialized. Please check API key.';
+    }
+
+    const servicesContext = userServices.map(s => 
+      `- ${s.name}: Status is ${s.status}. ${s.businessImpact ? 'Current issue: ' + s.businessImpact : 'No known issues.'}`
+    ).join('\n');
+
+    const prompt = `You are "Strider AI," a friendly and helpful IT Concierge for business users at Humana. Your goal is to provide clear, simple, non-technical, and empathetic answers. Do not use technical jargon like "P1", "SLA", "MTTR", "backend", or "API".
+
+    Here is the current status of the services this user cares about:
+    ${servicesContext}
+
+    The user has asked the following question:
+    "${query}"
+
+    Based on the service status and the user's question, provide a concise and helpful response. If you don't have enough information, politely say so and suggest they report an issue.`;
+
+    try {
+      const response: GenerateContentResponse = await this.ai.models.generateContent({
+        model: 'gemini-2.5-flash',
+        contents: prompt,
+      });
+      return response.text.trim();
+    } catch (error) {
+      console.error('Error generating AI concierge response:', error);
+      return 'I am currently unable to process your request. Please try again in a moment.';
     }
   }
 
@@ -401,7 +505,7 @@ export class GeminiService {
   // --- AI ROI Summary ---
   async getAiRoiSummary(): Promise<AiRoiSummary> {
     if (!this.ai) {
-      throw new Error('AI service not initialized.');
+      throw new Error('AI service is not initialized.');
     }
     // In a real app, this would be an API call to a backend that runs the aggregation query.
     // For now, we simulate the result of that query.

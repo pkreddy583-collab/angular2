@@ -1,0 +1,87 @@
+<main class="container mx-auto p-4 sm:p-6 lg:p-8">
+  <header class="mb-8 text-center">
+    <h1 class="text-4xl font-extrabold text-gray-800">
+      IT Operations Command Deck
+    </h1>
+    <p class="mt-2 text-lg text-gray-500 max-w-2xl mx-auto">
+      A holistic, at-a-glance view of all critical operational modules.
+    </p>
+  </header>
+
+  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+    @for(module of modules(); track module.title) {
+      <a [routerLink]="module.link" class="block bg-white rounded-lg shadow-md border border-gray-200 hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
+        <div class="p-5 flex flex-col h-full">
+          <h2 class="text-lg font-bold text-gray-800">{{ module.title }}</h2>
+          <p class="text-xs text-gray-500 mt-1 min-h-[2rem] overflow-hidden">{{ module.description }}</p>
+          
+          <!-- Infographic -->
+          <div class="my-4 flex-grow flex flex-col items-center justify-center p-4 bg-slate-50 rounded-lg">
+            <div class="flex-grow flex items-center justify-center w-full">
+              @switch(module.infographic.type) {
+                @case('line') {
+                  <svg class="w-full h-20" viewBox="0 0 100 40">
+                    <path [attr.d]="generateSparklinePath(module.infographic.data)" fill="none" stroke="#3b82f6" stroke-width="2"/>
+                  </svg>
+                }
+                @case('bar') {
+                  <div class="flex w-full h-20 items-end gap-2 px-4">
+                    @for(bar of module.infographic.data; track bar.label) {
+                      <div class="flex-1 flex flex-col items-center">
+                        <div class="w-full rounded-t-sm" [style.height.%]="bar.value / 60 * 100" [style.background-color]="bar.color"></div>
+                        <span class="text-xs mt-1 text-gray-500">{{bar.label}}</span>
+                      </div>
+                    }
+                  </div>
+                }
+                @case('donut') {
+                  <svg class="w-20 h-20" viewBox="0 0 36 36">
+                      <circle cx="18" cy="18" r="15.9155" fill="none" class="stroke-gray-200" stroke-width="3"></circle>
+                      <circle cx="18" cy="18" r="15.9155" fill="none" stroke-width="3" [attr.stroke]="module.infographic.data > 95 ? '#22c55e' : '#f97316'" [attr.stroke-dasharray]="module.infographic.data + ' ' + (100 - module.infographic.data)" stroke-dashoffset="25" class="transform -rotate-90 origin-center"></circle>
+                      <text x="18" y="20.5" class="text-base font-bold fill-current text-gray-700" text-anchor="middle">{{module.infographic.data}}%</text>
+                  </svg>
+                }
+                @case('gauge') {
+                   <svg class="w-24 h-16" viewBox="0 0 100 50">
+                      <path d="M 10 50 A 40 40 0 0 1 90 50" fill="none" stroke="#e5e7eb" stroke-width="8" />
+                      <path d="M 10 50 A 40 40 0 0 1 90 50" fill="none" [attr.stroke]="module.infographic.data < 80 ? '#3b82f6' : '#ef4444'" stroke-width="8" [attr.stroke-dasharray]="(module.infographic.data/100 * 125.6) + ' 125.6'"/>
+                      <text x="50" y="45" class="text-lg font-bold fill-current text-gray-700" text-anchor="middle">{{module.infographic.data}}%</text>
+                   </svg>
+                }
+                @case('text') {
+                  <p class="text-6xl font-extrabold" [class]="(module.title === 'Certificate Management' || module.title === 'Risk Management') ? 'text-red-500' : 'text-blue-600'">{{module.infographic.data}}</p>
+                }
+                @case('status') {
+                   <div class="flex items-center justify-center gap-3">
+                    @for(item of module.infographic.data; track item.name) {
+                      <div class="flex flex-col items-center">
+                         <div class="w-4 h-4 rounded-full" [class]="item.status === 'healthy' ? 'bg-green-500' : item.status === 'warning' ? 'bg-yellow-500' : 'bg-red-500'"></div>
+                         <span class="text-xs mt-1 text-gray-500">{{item.name}}</span>
+                      </div>
+                    }
+                   </div>
+                }
+              }
+            </div>
+            <p class="text-xs font-semibold text-gray-500 mt-2 uppercase tracking-wider">{{module.infographic.label}}</p>
+          </div>
+          
+          <!-- Key Metrics -->
+          <div class="border-t pt-4 mt-4 space-y-2">
+            @for(metric of module.keyMetrics; track metric.label) {
+              <div class="flex justify-between items-center text-sm">
+                <span class="text-gray-600">{{metric.label}}</span>
+                <div class="flex items-center gap-2">
+                   @if (metric.trend) {
+                      <span class="text-xs font-semibold" [class]="metric.trendDirection === 'down' ? 'text-green-600' : 'text-red-600'">{{metric.trend}}</span>
+                   }
+                  <span class="font-bold text-gray-800">{{metric.value}}</span>
+                </div>
+              </div>
+            }
+          </div>
+        </div>
+      </a>
+    }
+  </div>
+</main>

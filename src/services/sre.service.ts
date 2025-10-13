@@ -63,13 +63,14 @@ const initialWebApps: WebApp[] = [
     {
         id: 'app-enrollment-hub',
         name: 'Enrollment Hub',
+        businessCriticality: 'Tier 1',
         healthStatus: 'Warning',
         apdex: 0.88,
         errorRate: 1.8,
         p95Latency: 1850,
         cpuUtilization: 75,
         memUtilization: 68,
-        slo: { availability: 99.95, latency: 2000 },
+        slo: { availability: 99.95, latency: 2000, availabilityTrend: 'same', latencyTrend: 'up' },
         metrics: {
             latency: generateMetricData(30, 800, 1200, 'up', 25),
             errorRate: generateMetricData(30, 0.5, 1.5, 'up'),
@@ -89,13 +90,14 @@ const initialWebApps: WebApp[] = [
     {
         id: 'app-public-site',
         name: 'Public Website',
+        businessCriticality: 'Tier 1',
         healthStatus: 'Critical',
         apdex: 0.75,
         errorRate: 5.4,
         p95Latency: 3200,
         cpuUtilization: 92,
         memUtilization: 85,
-        slo: { availability: 99.99, latency: 500 },
+        slo: { availability: 99.99, latency: 500, availabilityTrend: 'down', latencyTrend: 'up' },
         metrics: {
             latency: generateMetricData(30, 1000, 2000),
             errorRate: generateMetricData(30, 1, 3, 'up'),
@@ -110,6 +112,27 @@ const initialWebApps: WebApp[] = [
              { id: 8808, timestamp: new Date(now.getTime() - 3 * 24 * 3600000), author: 'D. White', status: 'Failed' },
         ],
         logs: generateLogs('Public Website', 5.4)
+    },
+    {
+        id: 'app-hr-portal',
+        name: 'HR Portal',
+        businessCriticality: 'Tier 2',
+        healthStatus: 'Healthy',
+        apdex: 0.98,
+        errorRate: 0.2,
+        p95Latency: 450,
+        cpuUtilization: 40,
+        memUtilization: 55,
+        slo: { availability: 99.9, latency: 1000, availabilityTrend: 'same', latencyTrend: 'down' },
+        metrics: {
+            latency: generateMetricData(30, 300, 500),
+            errorRate: generateMetricData(30, 0.1, 0.4),
+            cpu: generateMetricData(30, 30, 50),
+            memory: generateMetricData(30, 50, 60)
+        },
+        certificates: [],
+        deployments: [],
+        logs: generateLogs('HR Portal', 0.2)
     }
 ];
 
@@ -144,13 +167,14 @@ export class SreService {
     const newApp: WebApp = {
         id: `app-${appName.toLowerCase().replace(/\s/g, '-')}`,
         name: appName,
+        businessCriticality: 'Tier 3',
         healthStatus: 'Healthy',
         apdex: 0.99,
         errorRate: 0.1,
         p95Latency: 450,
         cpuUtilization: 30,
         memUtilization: 45,
-        slo: { availability: availabilitySlo, latency: latencySlo },
+        slo: { availability: availabilitySlo, latency: latencySlo, availabilityTrend: 'same', latencyTrend: 'same' },
         metrics: {
             latency: generateMetricData(30, 300, 500),
             errorRate: generateMetricData(30, 0, 0.5),

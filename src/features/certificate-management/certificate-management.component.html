@@ -1,0 +1,83 @@
+<main class="container mx-auto p-4 sm:p-6 lg:p-8">
+  <!-- Header -->
+  <header class="mb-8">
+    <h1 class="text-3xl font-bold text-gray-800 flex items-center">
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 mr-3 text-blue-500" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+      </svg>
+      Certificate Management Hub
+    </h1>
+    <p class="mt-1 text-gray-500">Proactively monitor SSL/TLS certificates to prevent outages and strengthen compliance.</p>
+  </header>
+
+  <!-- Summary KPIs -->
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+    <div class="bg-white rounded-lg shadow-md p-5 border-l-4 border-blue-500">
+      <p class="text-sm font-semibold text-gray-500">Total Monitored</p>
+      <p class="text-3xl font-bold text-gray-800 mt-1">{{ totalMonitored() }}</p>
+    </div>
+    <div class="bg-white rounded-lg shadow-md p-5 border-l-4 border-yellow-500">
+      <p class="text-sm font-semibold text-gray-500">Expiring in &lt; 30 Days</p>
+      <p class="text-3xl font-bold text-yellow-600 mt-1">{{ expiringSoon() }}</p>
+    </div>
+    <div class="bg-white rounded-lg shadow-md p-5 border-l-4 border-red-500">
+      <p class="text-sm font-semibold text-gray-500">Expired</p>
+      <p class="text-3xl font-bold text-red-600 mt-1">{{ expired() }}</p>
+    </div>
+  </div>
+
+  <!-- Certificate Table -->
+  <div class="bg-white rounded-lg shadow-md">
+    <div class="p-5 border-b grid grid-cols-1 md:grid-cols-3 gap-4">
+      <input [formControl]="searchControl" type="text" placeholder="Search by domain or service..." class="md:col-span-1 w-full text-sm border-gray-300 rounded-md shadow-sm">
+      <select [formControl]="lobFilterControl" class="w-full text-sm border-gray-300 rounded-md shadow-sm">
+        <option value="all">All Lines of Business</option>
+        <option value="Core Services">Core Services</option>
+        <option value="Finance & HR">Finance & HR</option>
+        <option value="Public Facing">Public Facing</option>
+      </select>
+      <select [formControl]="statusFilterControl" class="w-full text-sm border-gray-300 rounded-md shadow-sm">
+        <option value="all">All Statuses</option>
+        <option value="Valid">Valid</option>
+        <option value="Expires Soon">Expires Soon</option>
+        <option value="Expired">Expired</option>
+      </select>
+    </div>
+    <div class="overflow-x-auto">
+      <table class="w-full text-sm text-left">
+        <thead class="text-xs text-gray-700 uppercase bg-gray-50">
+          <tr>
+            <th class="px-6 py-3">Domain Name</th>
+            <th class="px-6 py-3">Line of Business</th>
+            <th class="px-6 py-3">Associated Services</th>
+            <th class="px-6 py-3 text-center">Status</th>
+            <th class="px-6 py-3 text-right">Expires In</th>
+            <th class="px-6 py-3 text-right">Expiry Date</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (cert of filteredCertificates(); track cert.id) {
+            <tr class="border-b hover:bg-gray-50" [class]="cert.status === 'Expired' ? '!bg-red-50' : cert.status === 'Expires Soon' ? '!bg-yellow-50' : ''">
+              <td class="px-6 py-4 font-semibold text-gray-800">{{ cert.domainName }}</td>
+              <td class="px-6 py-4 text-gray-600">{{ cert.lineOfBusiness }}</td>
+              <td class="px-6 py-4 text-gray-600">{{ cert.associatedServices.join(', ') }}</td>
+              <td class="px-6 py-4 text-center">
+                <span class="text-xs font-bold px-2.5 py-1 rounded-full border" [class]="getStatusClass(cert.status).bg + ' ' + getStatusClass(cert.status).text + ' ' + getStatusClass(cert.status).border">
+                  {{ cert.status }}
+                </span>
+              </td>
+              <td class="px-6 py-4 text-right font-semibold" [class]="getStatusClass(cert.status).text">
+                {{ cert.daysRemaining > 0 ? cert.daysRemaining + ' days' : 'Expired' }}
+              </td>
+              <td class="px-6 py-4 text-right text-gray-500">{{ cert.expiryDate | date:'mediumDate' }}</td>
+            </tr>
+          } @empty {
+            <tr>
+              <td colspan="6" class="p-8 text-center text-gray-500">No certificates found matching your criteria.</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  </div>
+</main>

@@ -24,6 +24,17 @@ export class SreWorkbenchComponent {
   allWebApps = this.sreService.getWebApps();
   selectedAppId = signal<string>(this.allWebApps()[0].id);
   activeSubView = signal<SreSubView>('dashboard');
+  
+  // --- Filtering ---
+  tierFilter = signal<'all' | 'Tier 1' | 'Tier 2' | 'Tier 3'>('all');
+
+  filteredWebApps = computed(() => {
+    const apps = this.allWebApps();
+    const filter = this.tierFilter();
+    if (filter === 'all') return apps;
+    return apps.filter(app => app.businessCriticality === filter);
+  });
+
 
   // --- Modal & Form State ---
   isModalOpen = signal(false);
@@ -68,6 +79,10 @@ export class SreWorkbenchComponent {
   selectApp(id: string): void {
     this.selectedAppId.set(id);
     this.aiInsight.set(null); // Clear insight when app changes
+  }
+  
+  setTierFilter(tier: 'all' | 'Tier 1' | 'Tier 2' | 'Tier 3'): void {
+    this.tierFilter.set(tier);
   }
 
   selectSubView(view: SreSubView): void {

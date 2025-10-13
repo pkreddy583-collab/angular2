@@ -1,6 +1,7 @@
-import { Component, ChangeDetectionStrategy, signal, QueryList, ViewChildren, ElementRef } from '@angular/core';
+import { Component, ChangeDetectionStrategy, signal, QueryList, ViewChildren, ElementRef, inject } from '@angular/core';
 import { CommonModule, DatePipe } from '@angular/common';
 import { RouterLink } from '@angular/router';
+import { ObservabilityDataService } from '../../../services/observability-data.service';
 
 @Component({
   selector: 'app-observability-dashboard',
@@ -10,6 +11,7 @@ import { RouterLink } from '@angular/router';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ObservabilityDashboardComponent {
+  private dataService = inject(ObservabilityDataService);
   @ViewChildren('stepRow') stepRows!: QueryList<ElementRef<HTMLDivElement>>;
 
   selectedStep = signal<number | null>(null);
@@ -28,10 +30,16 @@ export class ObservabilityDashboardComponent {
     }
   }
 
-  // Mock data for the dashboard.
-  // In a real app, this would come from a service.
-
   lastUpdated = new Date();
+  
+  vmUtilization = this.dataService.getVmUtilization();
+  
+  corePlatformHealth = [
+    { name: 'PCF Microservices', status: 'healthy' as const },
+    { name: 'APIM Datapower', status: 'healthy' as const },
+    { name: 'Gemfire Cluster', status: 'warning' as const },
+    { name: 'Eureka Service Health', status: 'critical' as const },
+  ];
 
   businessMetrics = [
     { label: 'Active Users', value: '1.2K', trend: '+5.2%', trendDirection: 'up' as const },

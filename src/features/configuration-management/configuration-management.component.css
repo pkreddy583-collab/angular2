@@ -1,0 +1,15 @@
+.relationship-graph .ci-node {
+  @apply bg-white p-3 rounded-md border-2 text-center shadow-sm;
+}
+
+.relationship-graph .ci-node.target {
+  @apply border-blue-500 ring-2 ring-blue-200;
+}
+
+.relationship-graph .ci-node.dependency {
+  @apply border-gray-300;
+}
+
+.relationship-graph .ci-node.dependent {
+  @apply border-gray-300;
+}

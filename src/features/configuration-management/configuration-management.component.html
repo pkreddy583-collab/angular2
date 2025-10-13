@@ -1,0 +1,147 @@
+<main class="h-[calc(100vh-140px)] flex">
+  <!-- Left Sidebar: Filterable List -->
+  <aside class="w-1/3 bg-white border-r border-gray-200 flex flex-col">
+    <div class="p-4 border-b">
+      <h2 class="text-lg font-bold text-gray-800">Configuration Items</h2>
+      <div class="mt-2">
+        <input [formControl]="searchControl" type="text" placeholder="Search by name or ID..." class="w-full text-sm border-gray-300 rounded-md shadow-sm">
+      </div>
+      <div class="mt-2 grid grid-cols-2 gap-2">
+        <select [formControl]="typeFilterControl" class="w-full text-sm border-gray-300 rounded-md shadow-sm">
+          <option value="all">All Types</option>
+          @for (type of ciTypes; track type) {
+            <option [value]="type">{{ type }}</option>
+          }
+        </select>
+        <select [formControl]="envFilterControl" class="w-full text-sm border-gray-300 rounded-md shadow-sm">
+          <option value="all">All Environments</option>
+           @for (env of environments; track env) {
+            <option [value]="env">{{ env }}</option>
+          }
+        </select>
+      </div>
+    </div>
+    <div class="flex-grow overflow-y-auto">
+      @for (item of filteredCiItems(); track item.id) {
+        <button (click)="selectCi(item)" class="w-full text-left p-4 border-b hover:bg-gray-50" [class]="selectedCi()?.id === item.id ? 'bg-blue-50 border-l-4 border-blue-500' : 'border-l-4 border-transparent'">
+          <div class="flex items-center justify-between">
+            <p class="font-semibold text-gray-900 truncate">{{ item.name }}</p>
+            <span class="w-2.5 h-2.5 rounded-full flex-shrink-0" [class]="getStatusClass(item.status)"></span>
+          </div>
+          <p class="text-sm text-gray-500">{{ item.type }} &bull; {{ item.environment }}</p>
+        </button>
+      } @empty {
+        <p class="p-4 text-sm text-gray-500">No items match your filters.</p>
+      }
+    </div>
+  </aside>
+
+  <!-- Right Panel: CI Details -->
+  <div class="w-2/3 bg-gray-50 overflow-y-auto p-6">
+    @if (selectedCi(); as ci) {
+      <div class="max-w-4xl mx-auto">
+        <header class="mb-4">
+          <h1 class="text-2xl font-bold text-gray-900">{{ ci.name }}</h1>
+          <p class="text-sm text-gray-500">{{ ci.id }}</p>
+        </header>
+
+        <!-- Tabs -->
+        <div class="border-b border-gray-200">
+          <nav class="-mb-px flex space-x-6">
+            <button (click)="selectTab('overview')" [class]="activeTab() === 'overview' ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700'" class="whitespace-nowrap py-3 px-1 border-b-2 font-medium text-sm">Overview</button>
+            <button (click)="selectTab('relationships')" [class]="activeTab() === 'relationships' ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700'" class="whitespace-nowrap py-3 px-1 border-b-2 font-medium text-sm">Relationships</button>
+            <button (click)="selectTab('activity')" [class]="activeTab() === 'activity' ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700'" class="whitespace-nowrap py-3 px-1 border-b-2 font-medium text-sm">Activity</button>
+            <button (click)="selectTab('ai')" [class]="activeTab() === 'ai' ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700'" class="whitespace-nowrap py-3 px-1 border-b-2 font-medium text-sm">AI Impact Analysis</button>
+          </nav>
+        </div>
+
+        <!-- Tab Content -->
+        <div class="mt-6">
+          @switch (activeTab()) {
+            @case ('overview') {
+              <div class="bg-white p-6 rounded-lg shadow-sm border space-y-4">
+                <h3 class="font-semibold text-lg">Properties</h3>
+                <div class="space-y-3 text-sm">
+                  @for (prop of (ci.properties | keyvalue); track prop.key) {
+                    <div class="flex justify-between items-center border-b border-gray-100 py-2">
+                      <p class="text-gray-500">{{ prop.key }}</p>
+                      <p class="font-medium text-gray-800 text-right">{{ prop.value }}</p>
+                    </div>
+                  }
+                  <div class="flex justify-between items-center border-b border-gray-100 py-2">
+                    <p class="text-gray-500">Owner</p>
+                    <p class="font-medium text-gray-800 text-right">{{ ci.owner }}</p>
+                  </div>
+                </div>
+              </div>
+            }
+            @case ('relationships') {
+              <div class="bg-white p-6 rounded-lg shadow-sm border relationship-graph">
+                 <div class="grid grid-cols-3 gap-8 items-center text-center">
+                    <!-- Upstream Dependents -->
+                    <div>
+                      <h4 class="font-semibold mb-4">Used By</h4>
+                      <div class="space-y-4">
+                        @for (rel of upstreamDependents(); track rel.item.id) {
+                          <div class="ci-node dependent">{{ rel.item.name }} <span class="text-xs text-gray-500">({{rel.item.type}})</span></div>
+                        } @empty { <p class="text-sm text-gray-400">Nothing</p> }
+                      </div>
+                    </div>
+                    <!-- Target CI -->
+                    <div class="ci-node target">
+                      <p class="font-bold text-lg">{{ ci.name }}</p>
+                      <p class="text-sm text-gray-600">({{ci.type}})</p>
+                    </div>
+                    <!-- Downstream Dependencies -->
+                    <div>
+                       <h4 class="font-semibold mb-4">Depends On</h4>
+                       <div class="space-y-4">
+                        @for (rel of downstreamDependencies(); track rel.item.id) {
+                          <div class="ci-node dependency">{{ rel.item.name }} <span class="text-xs text-gray-500">({{rel.item.type}})</span></div>
+                        } @empty { <p class="text-sm text-gray-400">Nothing</p> }
+                      </div>
+                    </div>
+                 </div>
+              </div>
+            }
+            @case ('activity') {
+               <div class="grid grid-cols-2 gap-6">
+                  <div class="bg-white p-4 rounded-lg shadow-sm border"><h3 class="font-semibold mb-2">Related Incidents</h3>
+                    <div class="space-y-2">
+                      @for (id of ci.relatedIncidents; track id) { <div class="text-sm p-2 bg-red-50 border-l-2 border-red-400">{{id}}</div> }
+                      @empty { <p class="text-sm text-gray-400">None</p> }
+                    </div>
+                  </div>
+                  <div class="bg-white p-4 rounded-lg shadow-sm border"><h3 class="font-semibold mb-2">Related Changes</h3>
+                    <div class="space-y-2">
+                       @for (id of ci.relatedChanges; track id) { <div class="text-sm p-2 bg-blue-50 border-l-2 border-blue-400">{{id}}</div> }
+                       @empty { <p class="text-sm text-gray-400">None</p> }
+                    </div>
+                  </div>
+               </div>
+            }
+            @case ('ai') {
+              <div class="bg-blue-50/70 border border-blue-200 rounded-lg p-6">
+                <h3 class="font-bold text-blue-800 mb-2">AI Impact Analysis</h3>
+                 @if (aiAnalysisResult()) {
+                  <p class="text-sm text-gray-700 whitespace-pre-wrap">{{ aiAnalysisResult() }}</p>
+                } @else {
+                  <p class="text-sm text-gray-600 mb-3">Predict the "blast radius" if this CI were to experience an outage.</p>
+                   <button (click)="runImpactAnalysis()" [disabled]="isGeneratingAnalysis()" class="px-4 py-2 bg-blue-600 text-white font-semibold text-sm rounded-md">
+                     {{ isGeneratingAnalysis() ? 'Analyzing...' : 'Run Analysis' }}
+                   </button>
+                }
+              </div>
+            }
+          }
+        </div>
+      </div>
+    } @else {
+      <div class="text-center py-20 flex flex-col items-center justify-center h-full">
+         <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M3 10h18M3 14h18m-9-4v8m-7 0h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg>
+        <h3 class="text-xl font-semibold text-gray-700 mt-4">Select an Item</h3>
+        <p class="text-gray-500 mt-1">Choose a Configuration Item from the list to see its details.</p>
+      </div>
+    }
+  </div>
+</main>

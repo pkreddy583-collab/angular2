@@ -23,22 +23,40 @@ import { MyDashboardComponent } from './features/my-dashboard/my-dashboard.compo
 import { IncidentManagementComponent } from './features/incident-management/incident-management.component';
 import { ChangeManagementComponent } from './features/change-management/change-management.component';
 import { SreWorkbenchComponent } from './features/sre-workbench/sre-workbench.component';
+import { ProblemManagementComponent } from './features/problem-management/problem-management.component';
+import { ConfigurationManagementComponent } from './features/configuration-management/configuration-management.component';
+import { HomeComponent } from './features/home/home.component';
+import { CertificateManagementComponent } from './features/certificate-management/certificate-management.component';
+import { RiskManagementComponent } from './features/risk-management/risk-management.component';
+import { BusinessUserHubComponent } from './features/business-user-hub/business-user-hub.component';
 
 export const routes: Routes = [
+  // New Home Route
+  { path: 'home', component: HomeComponent, title: 'IT Operations Hub' },
+  { path: 'sla-watchtower', component: DashboardComponent, title: 'SLA Watchtower' },
+  
   // Incident Feature Routes
-  { path: '', component: DashboardComponent, title: 'SLA Watchtower' },
   { path: 'command-center', component: CommandCenterComponent, title: 'Operations Command Center' },
   { path: 'my-dashboard', component: MyDashboardComponent, title: 'My Dashboard' },
   { path: 'incident-management', component: IncidentManagementComponent, title: 'Incident Management Hub' },
+  { path: 'problem-management', component: ProblemManagementComponent, title: 'Problem Management Hub' },
   { path: 'change-management', component: ChangeManagementComponent, title: 'Change Management Hub' },
+  { path: 'configuration-management', component: ConfigurationManagementComponent, title: 'Configuration Management Hub' },
   { path: 'incident/:id', component: IncidentDetailsComponent, title: 'Incident Details' },
   { path: 'ai-roi', component: AiRoiDashboardComponent, title: 'AI ROI Dashboard' },
+  
+  // New detailed pages
+  { path: 'certificate-management', component: CertificateManagementComponent, title: 'Certificate Management' },
+  { path: 'risk-management', component: RiskManagementComponent, title: 'Risk Management' },
   
   // SRE Workbench Route
   { path: 'sre-workbench', component: SreWorkbenchComponent, title: 'SRE Workbench' },
 
-  // Observability Feature Routes
-  { path: 'observability', component: ObservabilityDashboardComponent, title: 'Observability Dashboard' },
+  // Business User Hub
+  { path: 'business-user-hub', component: BusinessUserHubComponent, title: 'Business User Hub' },
+
+  // Observability Feature Routes (Platform Management)
+  { path: 'observability', component: ObservabilityDashboardComponent, title: 'Platform Management & Observability' },
   { path: 'observability/builder', component: JourneyBuilderComponent, title: 'Journey Builder' },
   { path: 'observability/journey-detail', component: ServiceJourneyDetailComponent, title: 'Service Journey Details' },
   { path: 'observability/sla-detail', component: SlaComplianceDetailComponent, title: 'SLA Compliance Details' },
@@ -71,6 +89,7 @@ export const routes: Routes = [
   // Admin Route
   { path: 'admin', component: AdminComponent, title: 'Admin Panel' },
 
-  // Wildcard route to redirect to the main dashboard
-  { path: '**', redirectTo: '', pathMatch: 'full' },
+  // Wildcard route to redirect to the new home page
+  { path: '', redirectTo: 'home', pathMatch: 'full' },
+  { path: '**', redirectTo: 'home', pathMatch: 'full' },
 ];

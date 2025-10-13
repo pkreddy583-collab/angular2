@@ -1,0 +1,11 @@
+.chat-bubble {
+  @apply p-3 rounded-lg max-w-lg;
+}
+
+.chat-bubble-user {
+  @apply bg-blue-500 text-white rounded-br-none self-end;
+}
+
+.chat-bubble-ai {
+  @apply bg-gray-200 text-gray-800 rounded-bl-none self-start;
+}

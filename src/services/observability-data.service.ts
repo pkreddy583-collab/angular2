@@ -1,6 +1,13 @@
 import { Injectable, signal } from '@angular/core';
 import { ServiceJourneyStep, SlaComplianceDetail } from '../models/observability.model';
 
+export interface VmUtilization {
+  name: string;
+  cpu: number;
+  memory: number;
+  disk: number;
+}
+
 @Injectable({
   providedIn: 'root',
 })
@@ -177,16 +184,24 @@ export class ObservabilityDataService {
       aiInsight: 'Excellent and stable performance. No immediate concerns.'
     },
   ]);
+  
+  private vmUtilization = signal<VmUtilization[]>([
+    { name: 'ESX Host 1', cpu: 78, memory: 65, disk: 85 },
+    { name: 'ESX Host 2', cpu: 45, memory: 88, disk: 70 },
+    { name: 'ESX Host 3', cpu: 92, memory: 95, disk: 60 },
+    { name: 'Diego Cell 1', cpu: 60, memory: 70, disk: 55 },
+    { name: 'Diego Cell 2', cpu: 55, memory: 68, disk: 50 },
+  ]);
 
   getServiceJourneyDetails() {
-    // In a real app, you would make an API call here to fetch data.
-    // The API endpoint would execute the SQL query defined in DataConfigService.
     return this.journeySteps.asReadonly();
   }
 
   getSlaComplianceDetails() {
-    // In a real app, you would make an API call here to fetch data.
-    // The API endpoint would execute the SQL query defined in DataConfigService.
     return this.slaDetails.asReadonly();
+  }
+  
+  getVmUtilization() {
+    return this.vmUtilization.asReadonly();
   }
 }

@@ -1,6 +1,6 @@
 import { Component, ChangeDetectionStrategy, inject, signal, computed } from '@angular/core';
 import { CommonModule, DatePipe } from '@angular/common';
-import { ReactiveFormsModule, FormControl } from '@angular/forms';
+import { ReactiveFormsModule, FormControl, FormGroup, Validators } from '@angular/forms';
 import { toSignal } from '@angular/core/rxjs-interop';
 
 import { ChangeManagementService } from '../../services/change-management.service';
@@ -40,8 +40,20 @@ export class ChangeManagementComponent {
     );
   });
 
+  // --- Self-Service Modal ---
+  isCreateModalOpen = signal(false);
+  changeRequestForm: FormGroup;
+  aiRiskAssessment = signal<{ risk: 'Low' | 'Medium' | 'High', summary: string, show: boolean }>({ risk: 'Low', summary: '', show: false });
+  isSubmitting = signal(false);
+
   constructor() {
     this.generateTimelineDays();
+    this.changeRequestForm = new FormGroup({
+      application: new FormControl('', Validators.required),
+      title: new FormControl('', Validators.required),
+      description: new FormControl('', Validators.required),
+      deploymentDate: new FormControl('', Validators.required),
+    });
   }
 
   private generateTimelineDays(): void {
@@ -67,6 +79,34 @@ export class ChangeManagementComponent {
   selectChange(change: ChangeRequest, event: MouseEvent): void {
     event.stopPropagation();
     this.selectedChange.set(change);
+  }
+
+  openCreateModal(): void {
+    this.isCreateModalOpen.set(true);
+    this.aiRiskAssessment.set({ risk: 'Low', summary: '', show: false });
+    this.changeRequestForm.reset();
+  }
+
+  closeCreateModal(): void {
+    this.isCreateModalOpen.set(false);
+  }
+
+  submitChangeRequest(): void {
+    if (this.changeRequestForm.invalid) return;
+
+    this.isSubmitting.set(true);
+    // Simulate AI risk assessment
+    setTimeout(() => {
+      const { title } = this.changeRequestForm.value;
+      const isHighRisk = /database|migration|gateway|production/i.test(title);
+      const risk = isHighRisk ? 'High' : 'Low';
+      const summary = isHighRisk 
+        ? 'AI analysis detected keywords related to critical infrastructure. This change involves high-risk components and requires manual review by the Change Approval Board.'
+        : 'AI analysis indicates this is a low-risk change with minimal impact on critical services. Auto-approval is recommended.';
+
+      this.aiRiskAssessment.set({ risk, summary, show: true });
+      this.isSubmitting.set(false);
+    }, 1500);
   }
 
   getRiskClass(risk: 'Low' | 'Medium' | 'High'): string {
