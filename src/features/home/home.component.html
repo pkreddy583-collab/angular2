@@ -17,7 +17,7 @@
           
           <!-- Infographic -->
           <div class="my-4 flex-grow flex flex-col items-center justify-center p-4 bg-slate-50 rounded-lg">
-            <div class="flex-grow flex items-center justify-center w-full">
+            <div class="text-center">
               @switch(module.infographic.type) {
                 @case('line') {
                   <svg class="w-full h-20" viewBox="0 0 100 40">
@@ -35,18 +35,26 @@
                   </div>
                 }
                 @case('donut') {
-                  <svg class="w-20 h-20" viewBox="0 0 36 36">
-                      <circle cx="18" cy="18" r="15.9155" fill="none" class="stroke-gray-200" stroke-width="3"></circle>
-                      <circle cx="18" cy="18" r="15.9155" fill="none" stroke-width="3" [attr.stroke]="module.infographic.data > 95 ? '#22c55e' : '#f97316'" [attr.stroke-dasharray]="module.infographic.data + ' ' + (100 - module.infographic.data)" stroke-dashoffset="25" class="transform -rotate-90 origin-center"></circle>
-                      <text x="18" y="20.5" class="text-base font-bold fill-current text-gray-700" text-anchor="middle">{{module.infographic.data}}%</text>
-                  </svg>
+                  <div class="relative w-20 h-20">
+                    <svg class="w-full h-full" viewBox="0 0 36 36">
+                        <circle cx="18" cy="18" r="15.9155" fill="none" class="stroke-gray-200" stroke-width="3"></circle>
+                        <circle cx="18" cy="18" r="15.9155" fill="none" stroke-width="3" [attr.stroke]="module.infographic.data > 95 ? '#22c55e' : '#f97316'" [attr.stroke-dasharray]="module.infographic.data + ' ' + (100 - module.infographic.data)" stroke-dashoffset="25" class="transform -rotate-90 origin-center"></circle>
+                    </svg>
+                    <div class="absolute inset-0 flex items-center justify-center">
+                      <span class="text-xl font-bold text-gray-700 whitespace-nowrap">{{module.infographic.data}}%</span>
+                    </div>
+                  </div>
                 }
                 @case('gauge') {
-                   <svg class="w-24 h-16" viewBox="0 0 100 50">
-                      <path d="M 10 50 A 40 40 0 0 1 90 50" fill="none" stroke="#e5e7eb" stroke-width="8" />
-                      <path d="M 10 50 A 40 40 0 0 1 90 50" fill="none" [attr.stroke]="module.infographic.data < 80 ? '#3b82f6' : '#ef4444'" stroke-width="8" [attr.stroke-dasharray]="(module.infographic.data/100 * 125.6) + ' 125.6'"/>
-                      <text x="50" y="45" class="text-lg font-bold fill-current text-gray-700" text-anchor="middle">{{module.infographic.data}}%</text>
-                   </svg>
+                   <div class="relative w-24 h-16">
+                     <svg class="w-full h-full" viewBox="0 0 100 50">
+                        <path d="M 10 50 A 40 40 0 0 1 90 50" fill="none" stroke="#e5e7eb" stroke-width="8" />
+                        <path d="M 10 50 A 40 40 0 0 1 90 50" fill="none" [attr.stroke]="module.infographic.data < 80 ? '#3b82f6' : '#ef4444'" stroke-width="8" [attr.stroke-dasharray]="(module.infographic.data/100 * 125.6) + ' 125.6'"/>
+                     </svg>
+                     <div class="absolute inset-0 flex items-start justify-center pt-3">
+                        <span class="text-xl font-bold text-gray-700">{{module.infographic.data}}%</span>
+                     </div>
+                   </div>
                 }
                 @case('text') {
                   <p class="text-6xl font-extrabold" [class]="(module.title === 'Certificate Management' || module.title === 'Risk Management') ? 'text-red-500' : 'text-blue-600'">{{module.infographic.data}}</p>
@@ -62,8 +70,8 @@
                    </div>
                 }
               }
+              <p class="text-xs font-semibold text-gray-500 mt-2 uppercase tracking-wider">{{module.infographic.label}}</p>
             </div>
-            <p class="text-xs font-semibold text-gray-500 mt-2 uppercase tracking-wider">{{module.infographic.label}}</p>
           </div>
           
           <!-- Key Metrics -->

@@ -11,6 +11,7 @@ import { AiRoiSummary } from '../models/ai-roi.model';
 import { Problem } from '../models/problem.model';
 import { ConfigurationItem } from '../models/configuration-item.model';
 import { BusinessService } from '../models/business-user.model';
+import { L1TriageResult } from '../models/l1-workbench.model';
 
 @Injectable({
   providedIn: 'root',
@@ -191,6 +192,79 @@ export class GeminiService {
     } catch (error) {
       console.error('Error generating AI concierge response:', error);
       return 'I am currently unable to process your request. Please try again in a moment.';
+    }
+  }
+
+  async getL1Triage(problemDescription: string): Promise<L1TriageResult> {
+    if (!this.ai) {
+      throw new Error('AI service is not initialized.');
+    }
+  
+    const prompt = `You are Strider AI, an expert SRE co-pilot assisting a Level 1 support agent. The agent has provided a user's problem description. Your task is to analyze it and provide a structured plan for the L1 agent.
+  
+    Problem Description: "${problemDescription}"
+  
+    Based on this description, perform the following:
+    1.  **Summarize:** Write a one-sentence technical summary of the likely issue.
+    2.  **Suggest Actions:** Provide a list of 3-5 simple, concrete, step-by-step actions an L1 agent can perform to diagnose or resolve the issue. These should be things like checking user accounts, asking the user to perform an action, or checking a system's status.
+    3.  **Find Knowledge:** Suggest 1-2 potentially relevant knowledge base articles or past incident titles. Use placeholders like "KB00123: Resetting User Passwords".
+    4.  **Escalate if Necessary:** If the issue sounds complex (e.g., requires code changes, database access, or involves a major outage), specify the appropriate L2/L3 team to escalate to. Otherwise, this should be null.
+    5.  **Identify Need for Change:** Determine if a formal change request is likely required to resolve this (e.g., deploying a patch, restarting a production service).
+    6.  **Draft Change Details:** If a change is required, draft a preliminary title, description, and risk assessment for the change request.
+  
+    Return the result as a JSON object.`;
+  
+    try {
+      const response = await this.ai.models.generateContent({
+        model: 'gemini-2.5-flash',
+        contents: prompt,
+        config: {
+          responseMimeType: 'application/json',
+          responseSchema: {
+            type: Type.OBJECT,
+            properties: {
+              summary: { type: Type.STRING },
+              suggestedActions: {
+                type: Type.ARRAY,
+                items: {
+                  type: Type.OBJECT,
+                  properties: {
+                    text: { type: Type.STRING },
+                    done: { type: Type.BOOLEAN, description: "Default to false" },
+                  },
+                },
+              },
+              relevantKnowledge: {
+                type: Type.ARRAY,
+                items: {
+                  type: Type.OBJECT,
+                  properties: {
+                    id: { type: Type.STRING },
+                    title: { type: Type.STRING },
+                  },
+                },
+              },
+              escalationPath: { type: Type.STRING, nullable: true },
+              requiresChange: { type: Type.BOOLEAN },
+              changeRequestDetails: {
+                type: Type.OBJECT,
+                nullable: true,
+                properties: {
+                  title: { type: Type.STRING },
+                  description: { type: Type.STRING },
+                  risk: { type: Type.STRING, enum: ['Low', 'Medium', 'High'] },
+                }
+              }
+            },
+          },
+        },
+      });
+  
+      const json = JSON.parse(response.text);
+      return json as L1TriageResult;
+    } catch (error) {
+      console.error('Error generating L1 triage:', error);
+      throw new Error('Failed to get AI analysis. Please try again.');
     }
   }
 

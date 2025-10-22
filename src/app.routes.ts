@@ -29,6 +29,7 @@ import { HomeComponent } from './features/home/home.component';
 import { CertificateManagementComponent } from './features/certificate-management/certificate-management.component';
 import { RiskManagementComponent } from './features/risk-management/risk-management.component';
 import { BusinessUserHubComponent } from './features/business-user-hub/business-user-hub.component';
+import { L1WorkbenchComponent } from './features/l1-workbench/l1-workbench.component';
 
 export const routes: Routes = [
   // New Home Route
@@ -51,6 +52,9 @@ export const routes: Routes = [
   
   // SRE Workbench Route
   { path: 'sre-workbench', component: SreWorkbenchComponent, title: 'SRE Workbench' },
+
+  // L1 Workbench Route
+  { path: 'l1-workbench', component: L1WorkbenchComponent, title: 'L1 AI Workbench' },
 
   // Business User Hub
   { path: 'business-user-hub', component: BusinessUserHubComponent, title: 'Business User Hub' },
