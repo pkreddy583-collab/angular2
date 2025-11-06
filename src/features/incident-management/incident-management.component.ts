@@ -7,6 +7,8 @@ import * as d3 from 'd3';
 import { IncidentManagementService } from '../../services/incident-management.service';
 // FIX: Import IncidentTrendData to resolve 'Cannot find name' error.
 import { KnowledgebaseEntry, UnassessedIncident, IncidentTrendData } from '../../models/incident-management.model';
+import { Problem } from '../../models/problem.model';
+import { Incident } from '../../models/incident.model';
 
 interface TriageState extends UnassessedIncident {
   impact: number;

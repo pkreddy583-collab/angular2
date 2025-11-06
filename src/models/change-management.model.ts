@@ -14,6 +14,7 @@ export interface ValidationCheck {
 export interface ChangeRequest {
   id: string;
   title: string;
+  description: string;
   status: 'Awaiting Approval' | 'Scheduled' | 'Completed' | 'Rolled Back';
   risk: 'Low' | 'Medium' | 'High';
   requestedBy: string;

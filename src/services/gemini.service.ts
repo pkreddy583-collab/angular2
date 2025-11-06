@@ -126,6 +126,53 @@ export class GeminiService {
       return 'Error generating summary. Please try again.';
     }
   }
+  
+  async generateChangeRiskAssessment(changeDetails: { title: string, description: string, application: string }): Promise<{ risk: 'Low' | 'Medium' | 'High', summary: string }> {
+    if (!this.ai) {
+      throw new Error('AI service is not initialized.');
+    }
+
+    const prompt = `You are an expert Site Reliability Engineer (SRE) and a member of a Change Approval Board (CAB). Your task is to analyze a new change request and provide a risk assessment.
+
+    Analyze the following change request details:
+    - Application: "${changeDetails.application}"
+    - Title: "${changeDetails.title}"
+    - Description: "${changeDetails.description}"
+
+    Based on the information, determine the risk level ('Low', 'Medium', or 'High') and write a brief summary justifying your assessment. Consider keywords like "database", "production", "migration", "certificate", "gateway", "firewall", "hotfix" which often indicate higher risk. Simple UI changes are usually low risk.
+    
+    Return a JSON object with your assessment.`;
+
+    try {
+      const response = await this.ai.models.generateContent({
+        model: 'gemini-2.5-flash',
+        contents: prompt,
+        config: {
+          responseMimeType: 'application/json',
+          responseSchema: {
+            type: Type.OBJECT,
+            properties: {
+              risk: {
+                type: Type.STRING,
+                enum: ['Low', 'Medium', 'High'],
+              },
+              summary: {
+                type: Type.STRING,
+              },
+            },
+            required: ['risk', 'summary'],
+          },
+        },
+      });
+
+      const json = JSON.parse(response.text);
+      return json as { risk: 'Low' | 'Medium' | 'High', summary: string };
+    } catch (error) {
+      console.error('Error generating change risk assessment:', error);
+      throw new Error('Failed to get AI risk assessment.');
+    }
+  }
+
 
   async generateCiImpactAnalysis(ci: ConfigurationItem, relatedCis: {item: ConfigurationItem, type: string}[]): Promise<string> {
     if (!this.ai) {

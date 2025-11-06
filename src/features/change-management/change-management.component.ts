@@ -3,8 +3,8 @@ import { CommonModule, DatePipe } from '@angular/common';
 import { ReactiveFormsModule, FormControl, FormGroup, Validators } from '@angular/forms';
 import { toSignal } from '@angular/core/rxjs-interop';
 
-import { ChangeManagementService } from '../../services/change-management.service';
-import { ChangeRequest } from '../../models/change-management.model';
+import { ChangeManagementService, ChangeRequest } from '../../services/change-management.service';
+import { GeminiService } from '../../services/gemini.service';
 
 @Component({
   selector: 'app-change-management',
@@ -16,6 +16,7 @@ import { ChangeRequest } from '../../models/change-management.model';
 })
 export class ChangeManagementComponent {
   private changeService = inject(ChangeManagementService);
+  private geminiService = inject(GeminiService);
 
   kpis = this.changeService.getKpis();
   awaitingApproval = this.changeService.getChangesAwaitingApproval();
@@ -52,8 +53,14 @@ export class ChangeManagementComponent {
       application: new FormControl('', Validators.required),
       title: new FormControl('', Validators.required),
       description: new FormControl('', Validators.required),
-      deploymentDate: new FormControl('', Validators.required),
+      deploymentDate: new FormControl(this.getTomorrowDateString(), Validators.required),
     });
+  }
+
+  private getTomorrowDateString(): string {
+    const tomorrow = new Date();
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    return tomorrow.toISOString().split('T')[0];
   }
 
   private generateTimelineDays(): void {
@@ -84,29 +91,35 @@ export class ChangeManagementComponent {
   openCreateModal(): void {
     this.isCreateModalOpen.set(true);
     this.aiRiskAssessment.set({ risk: 'Low', summary: '', show: false });
-    this.changeRequestForm.reset();
+    this.changeRequestForm.reset({
+        deploymentDate: this.getTomorrowDateString()
+    });
   }
 
   closeCreateModal(): void {
     this.isCreateModalOpen.set(false);
   }
 
-  submitChangeRequest(): void {
+  async submitChangeRequest(): Promise<void> {
     if (this.changeRequestForm.invalid) return;
 
     this.isSubmitting.set(true);
-    // Simulate AI risk assessment
-    setTimeout(() => {
-      const { title } = this.changeRequestForm.value;
-      const isHighRisk = /database|migration|gateway|production/i.test(title);
-      const risk = isHighRisk ? 'High' : 'Low';
-      const summary = isHighRisk 
-        ? 'AI analysis detected keywords related to critical infrastructure. This change involves high-risk components and requires manual review by the Change Approval Board.'
-        : 'AI analysis indicates this is a low-risk change with minimal impact on critical services. Auto-approval is recommended.';
-
-      this.aiRiskAssessment.set({ risk, summary, show: true });
+    this.aiRiskAssessment.update(v => ({...v, show: false}));
+    
+    try {
+      const result = await this.geminiService.generateChangeRiskAssessment(this.changeRequestForm.value);
+      this.aiRiskAssessment.set({ ...result, show: true });
+    } catch(e) {
+      console.error(e);
+      // Fallback in case of AI error
+      this.aiRiskAssessment.set({ 
+        risk: 'Medium', 
+        summary: 'AI analysis could not be performed. Please assess risk manually. Defaulting to Medium.', 
+        show: true 
+      });
+    } finally {
       this.isSubmitting.set(false);
-    }, 1500);
+    }
   }
 
   getRiskClass(risk: 'Low' | 'Medium' | 'High'): string {
@@ -114,6 +127,14 @@ export class ChangeManagementComponent {
       case 'Low': return 'bg-green-100 text-green-800 border-green-300';
       case 'Medium': return 'bg-yellow-100 text-yellow-800 border-yellow-300';
       case 'High': return 'bg-red-100 text-red-800 border-red-300';
+    }
+  }
+
+  getTypeClass(type: 'Standard' | 'Normal' | 'Emergency'): string {
+    switch (type) {
+      case 'Standard': return 'bg-blue-100 text-blue-800 border-blue-300';
+      case 'Normal': return 'bg-yellow-100 text-yellow-800 border-yellow-300';
+      case 'Emergency': return 'bg-red-100 text-red-800 border-red-300';
     }
   }
 
